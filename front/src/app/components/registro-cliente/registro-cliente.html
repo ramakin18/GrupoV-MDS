@@ -1,0 +1,78 @@
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<div class="main-container">
+  <div class="card">
+    <h2>Registro de Nuevo Cliente</h2>
+
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+
+      <div class="row">
+        <div class="field">
+          <label>Nombre *</label>
+          <input type="text" formControlName="nombre">
+        </div>
+        <div class="field">
+          <label>Apellido *</label>
+          <input type="text" formControlName="apellido">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Email *</label>
+          <input type="email" formControlName="email">
+        </div>
+        <div class="field">
+          <label>Contraseña *</label>
+          <input type="password" formControlName="password">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>País *</label>
+          <input type="text" formControlName="pais">
+        </div>
+        <div class="field">
+          <label>Provincia *</label>
+          <input type="text" formControlName="provincia">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Localidad *</label>
+          <input type="text" formControlName="localidad">
+        </div>
+        <div class="row">
+          <div class="field" style="flex: 3;"> <label>Calle *</label>
+            <input type="text" formControlName="calle">
+          </div>
+          <div class="field" style="flex: 1;"> <label>Número *</label>
+            <input type="text" formControlName="altura">
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="field">
+          <label>Piso (Opcional)</label>
+          <input type="text" formControlName="piso">
+        </div>
+        <div class="field">
+          <label>Departamento (Opcional)</label>
+          <input type="text" formControlName="departamento">
+        </div>
+      </div>
+
+      <div *ngIf="registrado" class="mensaje-exito">
+        Registro completado correctamente
+      </div>
+
+      <button type="submit" [disabled]="registroForm.invalid">
+        Finalizar Registro
+      </button>
+    </form>
+  </div>
+</div>
