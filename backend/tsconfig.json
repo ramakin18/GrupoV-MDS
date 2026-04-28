@@ -35,7 +35,8 @@
     "esModuleInterop": true,
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
+    // Se cambio de el default "verbatimModuleSyntax": true a false por comodidad de desarrollo.
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
