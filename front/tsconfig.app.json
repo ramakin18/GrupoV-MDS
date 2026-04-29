@@ -4,6 +4,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
+    "rootDir": "./src",
+    // config añadida para aclarar la posicion del directorio raiz.
     "types": []
   },
   "include": [
