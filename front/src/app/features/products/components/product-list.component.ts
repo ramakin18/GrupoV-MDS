@@ -2,8 +2,8 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { PRODUCT_SERVICE_TOKEN, IProductService } from '../../../core/services/product.service.interface';
-import { Product, ProductCreateDto } from '../../../core/models/product.model';
+import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
+import { Product, ProductCreateDto } from '@core/models/product.model';
 
 @Component({
   selector: 'app-product-list',
