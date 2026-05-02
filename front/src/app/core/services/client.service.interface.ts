@@ -1,0 +1,10 @@
+import { Observable } from 'rxjs';
+import { Client, ClientCreateDto } from '../models/client.model';
+
+export interface IClientService {
+  register(client: ClientCreateDto): Observable<Client>;
+  getAll(): Observable<Client[]>;
+  getById(id: number): Observable<Client>;
+  update(id: number, client: Partial<ClientCreateDto>): Observable<Client>;
+  delete(id: number): Observable<void>;
+}

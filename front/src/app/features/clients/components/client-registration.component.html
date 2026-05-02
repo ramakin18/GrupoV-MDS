@@ -1,0 +1,107 @@
+<div class="registration-container">
+  <h2>Registro de Cliente</h2>
+
+  @if (isRegistered) {
+    <div class="alert alert-success">
+      ¡Registro exitoso! Puedes iniciar sesión ahora.
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="registration-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" formControlName="nombre" placeholder="Ingrese nombre" />
+        @if (hasFieldError('nombre')) {
+          <small class="error">{{ getFieldError('nombre') }}</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="apellido">Apellido</label>
+        <input id="apellido" formControlName="apellido" placeholder="Ingrese apellido" />
+        @if (hasFieldError('apellido')) {
+          <small class="error">{{ getFieldError('apellido') }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="ejemplo@email.com" />
+      @if (hasFieldError('email')) {
+        <small class="error">{{ getFieldError('email') }}</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="password">Contraseña</label>
+      <input id="password" type="password" formControlName="password" placeholder="Mínimo 8 caracteres" />
+      @if (hasFieldError('password')) {
+        <small class="error">{{ getFieldError('password') }}</small>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="pais">País</label>
+        <input id="pais" formControlName="pais" placeholder="Ingrese país" />
+        @if (hasFieldError('pais')) {
+          <small class="error">{{ getFieldError('pais') }}</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="provincia">Provincia</label>
+        <input id="provincia" formControlName="provincia" placeholder="Ingrese provincia" />
+        @if (hasFieldError('provincia')) {
+          <small class="error">{{ getFieldError('provincia') }}</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="localidad">Localidad</label>
+        <input id="localidad" formControlName="localidad" placeholder="Ingrese localidad" />
+        @if (hasFieldError('localidad')) {
+          <small class="error">{{ getFieldError('localidad') }}</small>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="calle">Calle</label>
+        <input id="calle" formControlName="calle" placeholder="Ingrese calle" />
+        @if (hasFieldError('calle')) {
+          <small class="error">{{ getFieldError('calle') }}</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="altura">Altura</label>
+        <input id="altura" formControlName="altura" placeholder="Número" />
+        @if (hasFieldError('altura')) {
+          <small class="error">{{ getFieldError('altura') }}</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="piso">Piso (opcional)</label>
+        <input id="piso" formControlName="piso" placeholder="Opcional" />
+      </div>
+
+      <div class="form-group">
+        <label for="departamento">Departamento (opcional)</label>
+        <input id="departamento" formControlName="departamento" placeholder="Opcional" />
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="registrationForm.invalid || isLoading">
+      {{ isLoading ? 'Registrando...' : 'Registrar Cliente' }}
+    </button>
+  </form>
+</div>

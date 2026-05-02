@@ -1,0 +1,79 @@
+<div class="product-container">
+  <h2>Gestión de Productos</h2>
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+    <div class="form-group">
+      <label for="sku">SKU</label>
+      <input id="sku" formControlName="sku" placeholder="Ingrese SKU" />
+      @if (productForm.get('sku')?.invalid && productForm.get('sku')?.touched) {
+        <small class="error">SKU es requerido (mín. 3 caracteres)</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="description">Descripción</label>
+      <input id="description" formControlName="description" placeholder="Ingrese descripción" />
+      @if (productForm.get('description')?.invalid && productForm.get('description')?.touched) {
+        <small class="error">Descripción es requerida (mín. 5 caracteres)</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="price">Precio</label>
+      <input id="price" type="number" formControlName="price" placeholder="0.00" />
+      @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
+        <small class="error">Precio debe ser mayor a 0</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="stock">Stock</label>
+      <input id="stock" type="number" formControlName="stock" placeholder="0" />
+      @if (productForm.get('stock')?.invalid && productForm.get('stock')?.touched) {
+        <small class="error">Stock debe ser mayor o igual a 0</small>
+      }
+    </div>
+
+    <button type="submit" [disabled]="productForm.invalid || isLoading">
+      {{ isLoading ? 'Guardando...' : 'Crear Producto' }}
+    </button>
+  </form>
+
+  <div class="product-list">
+    <h3>Lista de Productos</h3>
+    @if (isLoading) {
+      <p>Cargando...</p>
+    } @else if (products$ | async; as products) {
+      @if (products.length === 0) {
+        <p>No hay productos registrados</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>SKU</th>
+              <th>Descripción</th>
+              <th>Precio</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products; track product.id) {
+              <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.sku }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.price | number:'1.2-2' }}</td>
+                <td>{{ product.stock }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </div>
+</div>
