@@ -9,7 +9,6 @@
   "projects": {
     "front": {
       "projectType": "application",
-      "schematics": {},
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -50,11 +49,13 @@
               "extractLicenses": false,
               "sourceMap": true
             }
-          },
-          "defaultConfiguration": "production"
+          }
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "front:build"
+          },
           "configurations": {
             "production": {
               "buildTarget": "front:build:production"
@@ -62,17 +63,7 @@
             "development": {
               "buildTarget": "front:build:development"
             }
-          },
-          "defaultConfiguration": "development"
-        },
-            "development": {
-              "buildTarget": "front:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test"
+          }
         }
       }
     }

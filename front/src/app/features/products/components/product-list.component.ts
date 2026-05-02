@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
 import { Product, ProductCreateDto } from '@core/models/product.model';
@@ -8,7 +9,7 @@ import { Product, ProductCreateDto } from '@core/models/product.model';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
@@ -20,7 +21,8 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly router: Router
   ) {
     this.productForm = this.fb.group({
       sku: ['', [Validators.required, Validators.minLength(3)]],
@@ -68,5 +70,9 @@ export class ProductListComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  goHome(): void {
+    this.router.navigate(['/']);
   }
 }

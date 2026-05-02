@@ -1,13 +1,14 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { CLIENT_SERVICE_TOKEN, IClientService } from '@core/services/client.service.interface';
 import { Client, ClientCreateDto } from '@core/models/client.model';
 
 @Component({
   selector: 'app-client-registration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './client-registration.component.html',
   styleUrls: ['./client-registration.component.css']
 })
@@ -19,7 +20,8 @@ export class ClientRegistrationComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    @Inject(CLIENT_SERVICE_TOKEN) private readonly clientService: IClientService
+    @Inject(CLIENT_SERVICE_TOKEN) private readonly clientService: IClientService,
+    private readonly router: Router
   ) {
     this.registrationForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
@@ -61,6 +63,10 @@ export class ClientRegistrationComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  goHome(): void {
+    this.router.navigate(['/']);
   }
 
   hasFieldError(fieldName: string): boolean {

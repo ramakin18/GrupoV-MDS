@@ -1,26 +1,19 @@
-package backend.features.models;
+package backend.features.dtos.request;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "clientes")
-@Getter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
-public class Cliente {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class ClienteCreateRequestDto {
+    
     @NotBlank(message = "El nombre es obligatorio")
     @Size(min = 2, max = 50)
     private String nombre;
@@ -57,12 +50,4 @@ public class Cliente {
 
     @NotBlank(message = "El rol es obligatorio")
     private String rol;
-
-    public void updatePassword(String encodedPassword) {
-        this.contrasena = encodedPassword;
-    }
-
-    public boolean validatePassword(String rawPassword) {
-        return contrasena.equals(rawPassword);
-    }
 }

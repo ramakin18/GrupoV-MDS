@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 
 public record ProductoResponseDto(
 
-        Long id,
+        Long idProducto,
 
-        String nombre,
+        String nombreProducto,
 
         String descripcion,
 
@@ -15,6 +15,4 @@ public record ProductoResponseDto(
         Integer stockDisponible
 
 ) {
-
-
 }

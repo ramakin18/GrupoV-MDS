@@ -17,15 +17,13 @@ import java.util.List;
 public class ProductoListService implements IProductoListService {
 
     private final IProductoRepository productoRepository;
+    private final ProductoMapper productoMapper;
 
     @Override
     public List<ProductoResponseDto> execute(String nombre, BigDecimal precio, Integer stock) {
-        // Usamos la especificación con los parámetros recibidos
         List<Producto> productos = productoRepository.findAll(
                 ProductoSpecifications.filtrarProductos(nombre, precio, stock)
         );
-
-        // Convertimos a DTO usando tu mapper
-        return ProductoMapper.toResponseDtoList(productos);
+        return productoMapper.toResponseDtoList(productos);
     }
 }
