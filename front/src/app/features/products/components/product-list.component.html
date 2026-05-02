@@ -1,79 +1,129 @@
-<div class="product-container">
-  <h2>Gestión de Productos</h2>
+<div class="page-container">
+  <header class="page-header">
+    <h1>Productos</h1>
+    <p class="subtitle">Gestiona el inventario de productos</p>
+  </header>
 
   @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+    <div class="alert alert-error" role="alert">
+      <span class="alert-icon">⚠</span>
+      <span>{{ errorMessage }}</span>
+    </div>
   }
 
-  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
-    <div class="form-group">
-      <label for="sku">SKU</label>
-      <input id="sku" formControlName="sku" placeholder="Ingrese SKU" />
-      @if (productForm.get('sku')?.invalid && productForm.get('sku')?.touched) {
-        <small class="error">SKU es requerido (mín. 3 caracteres)</small>
-      }
-    </div>
+  <section class="form-section">
+    <h2 class="section-title">Nuevo Producto</h2>
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="sku">SKU</label>
+          <input 
+            id="sku" 
+            type="text" 
+            formControlName="sku" 
+            placeholder="Ej. PROD-001"
+            [class.invalid]="productForm.get('sku')?.invalid && productForm.get('sku')?.touched">
+          @if (productForm.get('sku')?.invalid && productForm.get('sku')?.touched) {
+            <small class="field-error">SKU es requerido (mínimo 3 caracteres)</small>
+          }
+        </div>
 
-    <div class="form-group">
-      <label for="description">Descripción</label>
-      <input id="description" formControlName="description" placeholder="Ingrese descripción" />
-      @if (productForm.get('description')?.invalid && productForm.get('description')?.touched) {
-        <small class="error">Descripción es requerida (mín. 5 caracteres)</small>
-      }
-    </div>
+        <div class="form-field">
+          <label for="description">Descripción</label>
+          <input 
+            id="description" 
+            type="text" 
+            formControlName="description" 
+            placeholder="Descripción del producto"
+            [class.invalid]="productForm.get('description')?.invalid && productForm.get('description')?.touched">
+          @if (productForm.get('description')?.invalid && productForm.get('description')?.touched) {
+            <small class="field-error">Descripción es requerida (mínimo 5 caracteres)</small>
+          }
+        </div>
 
-    <div class="form-group">
-      <label for="price">Precio</label>
-      <input id="price" type="number" formControlName="price" placeholder="0.00" />
-      @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
-        <small class="error">Precio debe ser mayor a 0</small>
-      }
-    </div>
+        <div class="form-field">
+          <label for="price">Precio</label>
+          <input 
+            id="price" 
+            type="number" 
+            formControlName="price" 
+            placeholder="0.00"
+            step="0.01"
+            [class.invalid]="productForm.get('price')?.invalid && productForm.get('price')?.touched">
+          @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
+            <small class="field-error">Precio debe ser mayor a 0</small>
+          }
+        </div>
 
-    <div class="form-group">
-      <label for="stock">Stock</label>
-      <input id="stock" type="number" formControlName="stock" placeholder="0" />
-      @if (productForm.get('stock')?.invalid && productForm.get('stock')?.touched) {
-        <small class="error">Stock debe ser mayor o igual a 0</small>
-      }
-    </div>
+        <div class="form-field">
+          <label for="stock">Stock</label>
+          <input 
+            id="stock" 
+            type="number" 
+            formControlName="stock" 
+            placeholder="0"
+            [class.invalid]="productForm.get('stock')?.invalid && productForm.get('stock')?.touched">
+          @if (productForm.get('stock')?.invalid && productForm.get('stock')?.touched) {
+            <small class="field-error">Stock debe ser mayor o igual a 0</small>
+          }
+        </div>
+      </div>
 
-    <button type="submit" [disabled]="productForm.invalid || isLoading">
-      {{ isLoading ? 'Guardando...' : 'Crear Producto' }}
-    </button>
-  </form>
+      <button type="submit" [disabled]="productForm.invalid || isLoading" class="btn-primary">
+        @if (isLoading) {
+          <span class="spinner"></span>
+          <span>Guardando...</span>
+        } @else {
+          <span>Crear Producto</span>
+        }
+      </button>
+    </form>
+  </section>
 
-  <div class="product-list">
-    <h3>Lista de Productos</h3>
-    @if (isLoading) {
-      <p>Cargando...</p>
+  <section class="table-section">
+    <h2 class="section-title">Lista de Productos</h2>
+    
+    @if (isLoading && !(products$ | async)) {
+      <div class="loading-state" aria-live="polite">
+        <div class="spinner spinner-lg"></div>
+        <p>Cargando productos...</p>
+      </div>
     } @else if (products$ | async; as products) {
       @if (products.length === 0) {
-        <p>No hay productos registrados</p>
+        <div class="empty-state">
+          <p class="empty-message">No hay productos registrados</p>
+          <p class="empty-hint">Usa el formulario de arriba para agregar tu primer producto</p>
+        </div>
       } @else {
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>SKU</th>
-              <th>Descripción</th>
-              <th>Precio</th>
-              <th>Stock</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (product of products; track product.id) {
+        <div class="table-wrapper">
+          <table>
+            <thead>
               <tr>
-                <td>{{ product.id }}</td>
-                <td>{{ product.sku }}</td>
-                <td>{{ product.description }}</td>
-                <td>{{ product.price | number:'1.2-2' }}</td>
-                <td>{{ product.stock }}</td>
+                <th scope="col">ID</th>
+                <th scope="col">SKU</th>
+                <th scope="col">Descripción</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Stock</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (product of products; track product.id) {
+                <tr>
+                  <td class="text-muted">{{ product.id }}</td>
+                  <td><strong>{{ product.sku }}</strong></td>
+                  <td>{{ product.description }}</td>
+                  <td class="text-numeric">{{ product.price | number:'1.2-2' }} €</td>
+                  <td class="text-numeric">
+                    <span class="badge" [class.badge-warning]="product.stock < 10">
+                      {{ product.stock }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     }
-  </div>
+  </section>
 </div>

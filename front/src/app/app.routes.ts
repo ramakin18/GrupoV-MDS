@@ -3,7 +3,8 @@ import { ProductListComponent } from './features/products/components/product-lis
 import { ClientRegistrationComponent } from './features/clients/components/client-registration.component';
 
 export const routes: Routes = [
+  { path: '', component: ProductListComponent, pathMatch: 'full' },
   { path: 'products', component: ProductListComponent },
   { path: 'register', component: ClientRegistrationComponent },
-  { path: '', redirectTo: '/products', pathMatch: 'full' }
+  { path: '**', redirectTo: '' }
 ];
