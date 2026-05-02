@@ -1,6 +1,5 @@
 package backend.features.controllers;
 
-import backend.configs.BaseResponse;
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.services.interfaces.domain.IProductoService;
@@ -15,62 +14,41 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/productos")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class ProductoController {
 
     private final IProductoService productoService;
 
     @PostMapping
-    public ResponseEntity<BaseResponse<ProductoResponseDto>> create(
+    public ResponseEntity<ProductoResponseDto> create(
             @Valid @RequestBody ProductoCreateReqDto request
     ) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(
-                        productoService.create(request),
-                        "Producto creado correctamente"
-                )
-        );
+        return ResponseEntity.ok(productoService.create(request));
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<ProductoResponseDto>>> getAll(
+    public ResponseEntity<List<ProductoResponseDto>> getAll(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) BigDecimal precio,
             @RequestParam(required = false) Integer stock) {
 
-        return ResponseEntity.ok(
-                BaseResponse.ok(
-                        productoService.getAll(nombre, precio, stock),
-                        "Productos listados correctamente"
-                )
-        );
+        return ResponseEntity.ok(productoService.getAll(nombre, precio, stock));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<ProductoResponseDto>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(
-                        productoService.getById(id),
-                        "Producto encontrado"
-                )
-        );
+    public ResponseEntity<ProductoResponseDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.getById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse<ProductoResponseDto>> update(
+    public ResponseEntity<ProductoResponseDto> update(
             @PathVariable Long id,
             @Valid @RequestBody ProductoCreateReqDto request) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(
-                        productoService.update(id, request),
-                        "Producto actualizado correctamente"
-                )
-        );
+        return ResponseEntity.ok(productoService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         productoService.delete(id);
-        return ResponseEntity.ok(BaseResponse.ok(null, "Producto eliminado correctamente"));
+        return ResponseEntity.ok().build();
     }
 }

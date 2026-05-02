@@ -1,6 +1,5 @@
 package backend.features.controllers;
 
-import backend.configs.BaseResponse;
 import backend.features.dtos.request.ClienteCreateRequestDto;
 import backend.features.dtos.request.ClienteLoginRequestDto;
 import backend.features.dtos.response.ClienteResponseDto;
@@ -15,44 +14,43 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/clientes")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class ClienteController {
 
     private final IClienteService clienteService;
 
     @PostMapping("/registrar")
-    public ResponseEntity<BaseResponse<ClienteResponseDto>> registrar(@Valid @RequestBody ClienteCreateRequestDto request) {
+    public ResponseEntity<ClienteResponseDto> registrar(@Valid @RequestBody ClienteCreateRequestDto request) {
         ClienteResponseDto response = clienteService.register(request);
-        return ResponseEntity.ok(BaseResponse.ok(response, "Cliente registrado correctamente"));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<BaseResponse<ClienteResponseDto>> login(@Valid @RequestBody ClienteLoginRequestDto request) {
+    public ResponseEntity<ClienteResponseDto> login(@Valid @RequestBody ClienteLoginRequestDto request) {
         ClienteResponseDto response = clienteService.login(request);
-        return ResponseEntity.ok(BaseResponse.ok(response, "Login exitoso"));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<ClienteResponseDto>>> getAll() {
+    public ResponseEntity<List<ClienteResponseDto>> getAll() {
         List<ClienteResponseDto> clientes = clienteService.getAll();
-        return ResponseEntity.ok(BaseResponse.ok(clientes, "Clientes listados correctamente"));
+        return ResponseEntity.ok(clientes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<ClienteResponseDto>> getById(@PathVariable Long id) {
+    public ResponseEntity<ClienteResponseDto> getById(@PathVariable Long id) {
         ClienteResponseDto cliente = clienteService.getById(id);
-        return ResponseEntity.ok(BaseResponse.ok(cliente, "Cliente encontrado"));
+        return ResponseEntity.ok(cliente);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse<ClienteResponseDto>> update(@PathVariable Long id, @Valid @RequestBody ClienteCreateRequestDto request) {
+    public ResponseEntity<ClienteResponseDto> update(@PathVariable Long id, @Valid @RequestBody ClienteCreateRequestDto request) {
         ClienteResponseDto cliente = clienteService.update(id, request);
-        return ResponseEntity.ok(BaseResponse.ok(cliente, "Cliente actualizado correctamente"));
+        return ResponseEntity.ok(cliente);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         clienteService.delete(id);
-        return ResponseEntity.ok(BaseResponse.ok(null, "Cliente eliminado correctamente"));
+        return ResponseEntity.ok().build();
     }
 }
