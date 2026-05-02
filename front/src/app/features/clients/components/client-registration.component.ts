@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IClientService } from '../../../core/services/client.service.interface';
-import { Client, ClientCreateDto } from '../../../core/models/client.model';
+import { CLIENT_SERVICE_TOKEN, IClientService } from '../../core/services/client.service.interface';
+import { Client, ClientCreateDto } from '../../core/models/client.model';
 
 @Component({
   selector: 'app-client-registration',
@@ -19,7 +19,7 @@ export class ClientRegistrationComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly clientService: IClientService
+    @Inject(CLIENT_SERVICE_TOKEN) private readonly clientService: IClientService
   ) {
     this.registrationForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],

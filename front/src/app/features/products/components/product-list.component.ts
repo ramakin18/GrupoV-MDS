@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { IProductService } from '../../core/services/product.service.interface';
+import { PRODUCT_SERVICE_TOKEN, IProductService } from '../../core/services/product.service.interface';
 import { Product, ProductCreateDto } from '../../core/models/product.model';
 
 @Component({
@@ -19,7 +19,7 @@ export class ProductListComponent implements OnInit {
   errorMessage = '';
 
   constructor(
-    private readonly productService: IProductService,
+    @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
     private readonly fb: FormBuilder
   ) {
     this.productForm = this.fb.group({

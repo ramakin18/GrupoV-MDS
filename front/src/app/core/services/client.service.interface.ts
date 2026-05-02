@@ -1,5 +1,6 @@
-import { Observable } from 'rxjs';
+import { InjectionToken } from '@angular/core';
 import { Client, ClientCreateDto } from '../models/client.model';
+import { Observable } from 'rxjs';
 
 export interface IClientService {
   register(client: ClientCreateDto): Observable<Client>;
@@ -8,3 +9,5 @@ export interface IClientService {
   update(id: number, client: Partial<ClientCreateDto>): Observable<Client>;
   delete(id: number): Observable<void>;
 }
+
+export const CLIENT_SERVICE_TOKEN = new InjectionToken<IClientService>('ClientService');
