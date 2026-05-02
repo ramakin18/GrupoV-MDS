@@ -10,7 +10,7 @@ import { Product, ProductCreateDto } from '@core/models/product.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './product-list.component.html',
-  styleUrl: './product-list.component.css'
+  styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent implements OnInit {
   products$: Observable<Product[]> | null = null;

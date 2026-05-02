@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "frontend": {
+    "front": {
       "projectType": "application",
       "schematics": {},
       "root": "",

@@ -9,7 +9,7 @@ import { Client, ClientCreateDto } from '@core/models/client.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './client-registration.component.html',
-  styleUrl: './client-registration.component.css'
+  styleUrls: ['./client-registration.component.css']
 })
 export class ClientRegistrationComponent implements OnInit {
   registrationForm: FormGroup;
