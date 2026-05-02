@@ -1,0 +1,32 @@
+<div style="padding: 2rem; font-family: sans-serif;">
+  <h2>Panel de Prueba de Productos</h2>
+  
+  <div style="margin-bottom: 1.5rem; display: flex; gap: 10px;">
+    <input [(ngModel)]="nuevo.sku" placeholder="SKU (ej: PRD-001)">
+    <input [(ngModel)]="nuevo.description" placeholder="Descripción">
+    <input type="number" [(ngModel)]="nuevo.price" placeholder="Precio">
+    <input type="number" [(ngModel)]="nuevo.stock" placeholder="Stock">
+    <button (click)="enviar()">Guardar Producto</button>
+  </div>
+
+  <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="background-color: #f4f4f4;">
+        <th style="padding: 8px;">SKU</th>
+        <th style="padding: 8px;">Descripción</th>
+        <th style="padding: 8px;">Precio</th>
+        <th style="padding: 8px;">Stock</th>
+        <th style="padding: 8px;">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of lista">
+        <td style="padding: 8px;">{{p.sku}}</td>
+        <td style="padding: 8px;">{{p.description}}</td>
+        <td style="padding: 8px;">${{p.price}}</td>
+        <td style="padding: 8px;">{{p.stock}}</td>
+        <td style="padding: 8px;">{{p.status ? 'Activo' : 'Inactivo'}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
