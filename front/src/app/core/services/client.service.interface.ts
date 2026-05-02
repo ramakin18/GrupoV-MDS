@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
-import { Client, ClientCreateDto } from '../models/client.model';
 import { Observable } from 'rxjs';
+import { Client, ClientCreateDto } from '../models/client.model';
 
 export interface IClientService {
   register(client: ClientCreateDto): Observable<Client>;

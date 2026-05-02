@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Client, ClientCreateDto } from '../models/client.model';
-import { IClientService } from '../services/client.service.interface';
+import { Client, ClientCreateDto } from '../../../core/models/client.model';
+import { IClientService } from '../../../core/services/client.service.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ClientApiService implements IClientService {

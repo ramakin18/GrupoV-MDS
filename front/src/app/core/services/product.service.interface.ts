@@ -1,4 +1,5 @@
 import { InjectionToken } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Product, ProductCreateDto } from '../models/product.model';
 
 export interface IProductService {

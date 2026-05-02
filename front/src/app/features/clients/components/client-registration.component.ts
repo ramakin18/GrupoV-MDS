@@ -1,8 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CLIENT_SERVICE_TOKEN, IClientService } from '../../core/services/client.service.interface';
-import { Client, ClientCreateDto } from '../../core/models/client.model';
+import { CLIENT_SERVICE_TOKEN, IClientService } from '../../../core/services/client.service.interface';
+import { Client, ClientCreateDto } from '../../../core/models/client.model';
 
 @Component({
   selector: 'app-client-registration',
@@ -55,7 +55,7 @@ export class ClientRegistrationComponent implements OnInit {
         this.isLoading = false;
         this.registrationForm.reset();
       },
-      error: (error) => {
+      error: (error: any) => {
         this.errorMessage = error?.error?.message || 'Error al registrar cliente';
         console.error('Registration error:', error);
         this.isLoading = false;

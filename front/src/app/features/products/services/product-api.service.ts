@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Product, ProductCreateDto } from '../models/product.model';
-import { IProductService } from '../services/product.service.interface';
+import { Product, ProductCreateDto } from '../../../core/models/product.model';
+import { IProductService } from '../../../core/services/product.service.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ProductApiService implements IProductService {

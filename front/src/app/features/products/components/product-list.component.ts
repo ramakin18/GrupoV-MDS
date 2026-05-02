@@ -2,8 +2,8 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { PRODUCT_SERVICE_TOKEN, IProductService } from '../../core/services/product.service.interface';
-import { Product, ProductCreateDto } from '../../core/models/product.model';
+import { PRODUCT_SERVICE_TOKEN, IProductService } from '../../../core/services/product.service.interface';
+import { Product, ProductCreateDto } from '../../../core/models/product.model';
 
 @Component({
   selector: 'app-product-list',
@@ -38,7 +38,7 @@ export class ProductListComponent implements OnInit {
     this.isLoading = true;
     this.products$ = this.productService.getAll();
     this.products$.subscribe({
-      error: (error) => {
+      error: (error: any) => {
         this.errorMessage = 'Error al cargar productos';
         console.error('Error loading products:', error);
         this.isLoading = false;
@@ -54,6 +54,7 @@ export class ProductListComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.errorMessage = '';
     const productData: ProductCreateDto = this.productForm.value;
 
     this.productService.create(productData).subscribe({
@@ -61,7 +62,7 @@ export class ProductListComponent implements OnInit {
         this.productForm.reset({ sku: '', description: '', price: 0, stock: 0 });
         this.loadProducts();
       },
-      error: (error) => {
+      error: (error: any) => {
         this.errorMessage = error?.error?.message || 'Error al crear producto';
         console.error('Error creating product:', error);
         this.isLoading = false;
