@@ -27,14 +27,15 @@ export class ClientRegistrationComponent implements OnInit {
       nombre: ['', [Validators.required, Validators.minLength(2)]],
       apellido: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      contrasena: ['', [Validators.required, Validators.minLength(8)]],
       pais: ['', Validators.required],
       provincia: ['', Validators.required],
       localidad: ['', Validators.required],
       calle: ['', Validators.required],
-      altura: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+      numero: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       piso: [''],
-      departamento: ['']
+      departamento: [''],
+      rol: ['CLIENTE']
     });
   }
 

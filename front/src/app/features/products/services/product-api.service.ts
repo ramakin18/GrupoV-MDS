@@ -6,7 +6,7 @@ import { IProductService } from '@core/services/product.service.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ProductApiService implements IProductService {
-  private readonly apiUrl = 'http://localhost:8080/api/productos';
+  private readonly apiUrl = 'http://localhost:8081/api/productos';
 
   constructor(private readonly http: HttpClient) {}
 

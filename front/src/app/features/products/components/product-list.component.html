@@ -33,57 +33,57 @@
     <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
       <div class="form-grid">
         <div class="form-field">
-          <label for="sku">SKU</label>
+          <label for="nombreProducto">Nombre del Producto</label>
           <input 
-            id="sku" 
+            id="nombreProducto" 
             type="text" 
-            formControlName="sku" 
+            formControlName="nombreProducto" 
             placeholder="Ej. PROD-001"
-            [class.invalid]="productForm.get('sku')?.invalid && productForm.get('sku')?.touched">
-          @if (productForm.get('sku')?.invalid && productForm.get('sku')?.touched) {
-            <small class="field-error">SKU es requerido (mínimo 3 caracteres)</small>
+            [class.invalid]="productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched">
+          @if (productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched) {
+            <small class="field-error">Nombre es requerido (mínimo 3 caracteres)</small>
           }
         </div>
 
         <div class="form-field">
-          <label for="description">Descripción</label>
+          <label for="descripcion">Descripción</label>
           <input 
-            id="description" 
+            id="descripcion" 
             type="text" 
-            formControlName="description" 
+            formControlName="descripcion" 
             placeholder="Descripción del producto"
-            [class.invalid]="productForm.get('description')?.invalid && productForm.get('description')?.touched">
-          @if (productForm.get('description')?.invalid && productForm.get('description')?.touched) {
+            [class.invalid]="productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched">
+          @if (productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched) {
             <small class="field-error">Descripción es requerida (mínimo 5 caracteres)</small>
           }
         </div>
 
         <div class="form-field">
-          <label for="price">Precio</label>
+          <label for="precio">Precio</label>
           <div class="input-with-prefix">
             <span class="input-prefix">$</span>
             <input 
-              id="price" 
+              id="precio" 
               type="number" 
-              formControlName="price" 
+              formControlName="precio" 
               placeholder="0.00"
               step="0.01"
-              [class.invalid]="productForm.get('price')?.invalid && productForm.get('price')?.touched">
+              [class.invalid]="productForm.get('precio')?.invalid && productForm.get('precio')?.touched">
           </div>
-          @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
+          @if (productForm.get('precio')?.invalid && productForm.get('precio')?.touched) {
             <small class="field-error">Precio debe ser mayor a 0</small>
           }
         </div>
 
         <div class="form-field">
-          <label for="stock">Stock</label>
+          <label for="stockDisponible">Stock</label>
           <input 
-            id="stock" 
+            id="stockDisponible" 
             type="number" 
-            formControlName="stock" 
+            formControlName="stockDisponible" 
             placeholder="0"
-            [class.invalid]="productForm.get('stock')?.invalid && productForm.get('stock')?.touched">
-          @if (productForm.get('stock')?.invalid && productForm.get('stock')?.touched) {
+            [class.invalid]="productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched">
+          @if (productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched) {
             <small class="field-error">Stock debe ser mayor o igual a 0</small>
           }
         </div>
@@ -142,12 +142,12 @@
               @for (product of products; track product.id) {
                 <tr>
                   <td class="text-muted">{{ product.id }}</td>
-                  <td><strong>{{ product.sku }}</strong></td>
-                  <td>{{ product.description }}</td>
-                  <td class="text-numeric">{{ product.price | number:'1.2-2' }}</td>
+                  <td><strong>{{ product.nombreProducto }}</strong></td>
+                  <td>{{ product.descripcion }}</td>
+                  <td class="text-numeric">{{ product.precio | number:'1.2-2' }}</td>
                   <td class="text-numeric">
-                    <span class="badge" [class.badge-warning]="product.stock < 10">
-                      {{ product.stock }}
+                    <span class="badge" [class.badge-warning]="product.stockDisponible < 10">
+                      {{ product.stockDisponible }}
                     </span>
                   </td>
                 </tr>

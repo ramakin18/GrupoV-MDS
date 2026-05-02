@@ -6,7 +6,7 @@ import { IClientService } from '@core/services/client.service.interface';
 
 @Injectable({ providedIn: 'root' })
 export class ClientApiService implements IClientService {
-  private readonly apiUrl = 'http://localhost:8080/api/clientes';
+  private readonly apiUrl = 'http://localhost:8081/api/clientes';
 
   constructor(private readonly http: HttpClient) {}
 

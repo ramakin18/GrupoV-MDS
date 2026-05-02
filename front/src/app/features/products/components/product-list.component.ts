@@ -25,10 +25,10 @@ export class ProductListComponent implements OnInit {
     private readonly router: Router
   ) {
     this.productForm = this.fb.group({
-      sku: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(5)]],
-      price: [0, [Validators.required, Validators.min(0.01)]],
-      stock: [0, [Validators.required, Validators.min(0)]]
+      nombreProducto: ['', [Validators.required, Validators.minLength(3)]],
+      descripcion: ['', [Validators.required, Validators.minLength(5)]],
+      precio: [0, [Validators.required, Validators.min(0.01)]],
+      stockDisponible: [0, [Validators.required, Validators.min(0)]]
     });
   }
 

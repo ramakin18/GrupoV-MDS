@@ -83,7 +83,7 @@ public class ClienteServiceImpl implements IClienteService {
         cliente.setProvincia(request.getProvincia());
         cliente.setLocalidad(request.getLocalidad());
         cliente.setCalle(request.getCalle());
-        cliente.setAltura(request.getAltura());
+        cliente.setNumero(request.getNumero());
         cliente.setPiso(request.getPiso());
         cliente.setDepartamento(request.getDepartamento());
 

@@ -4,6 +4,8 @@ import backend.features.dtos.request.ClienteCreateRequestDto;
 import backend.features.dtos.request.ClienteLoginRequestDto;
 import backend.features.dtos.response.ClienteResponseDto;
 
+import java.util.List;
+
 public interface IClienteService {
     ClienteResponseDto register(ClienteCreateRequestDto request);
     ClienteResponseDto login(ClienteLoginRequestDto request);

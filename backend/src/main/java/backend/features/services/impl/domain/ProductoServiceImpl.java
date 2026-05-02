@@ -6,6 +6,7 @@ import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.mappers.ProductoMapper;
 import backend.features.models.Producto;
 import backend.features.repositories.IProductoRepository;
+import backend.features.repositories.specs.ProductoSpecifications;
 import backend.features.services.interfaces.domain.IProductoService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

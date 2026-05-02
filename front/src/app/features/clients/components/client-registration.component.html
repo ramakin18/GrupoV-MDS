@@ -83,15 +83,15 @@
       </div>
 
       <div class="form-field full-width">
-        <label for="password">Contraseña</label>
+        <label for="contrasena">Contraseña</label>
         <input 
-          id="password" 
+          id="contrasena" 
           type="password" 
-          formControlName="password" 
+          formControlName="contrasena" 
           placeholder="Mínimo 8 caracteres"
-          [class.invalid]="hasFieldError('password')">
-        @if (hasFieldError('password')) {
-          <small class="field-error">{{ getFieldError('password') }}</small>
+          [class.invalid]="hasFieldError('contrasena')">
+        @if (hasFieldError('contrasena')) {
+          <small class="field-error">{{ getFieldError('contrasena') }}</small>
         }
       </div>
 
@@ -151,18 +151,18 @@
         }
       </div>
 
-      <div class="form-field">
-        <label for="altura">Altura</label>
-        <input 
-          id="altura" 
-          type="text" 
-          formControlName="altura" 
-          placeholder="Número"
-          [class.invalid]="hasFieldError('altura')">
-        @if (hasFieldError('altura')) {
-          <small class="field-error">{{ getFieldError('altura') }}</small>
-        }
-      </div>
+       <div class="form-field">
+         <label for="numero">Número</label>
+         <input 
+           id="numero" 
+           type="text" 
+           formControlName="numero" 
+           placeholder="Número"
+           [class.invalid]="hasFieldError('numero')">
+         @if (hasFieldError('numero')) {
+           <small class="field-error">{{ getFieldError('numero') }}</small>
+         }
+       </div>
 
       <div class="form-field">
         <label for="piso">Piso (opcional)</label>
