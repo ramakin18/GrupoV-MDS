@@ -3,7 +3,7 @@ export interface Client {
   nombre: string;
   apellido: string;
   email: string;
-  contrasena: string;
+  contrasena?: string;
   pais: string;
   provincia: string;
   localidad: string;

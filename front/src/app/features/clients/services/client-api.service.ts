@@ -11,7 +11,7 @@ export class ClientApiService implements IClientService {
   constructor(private readonly http: HttpClient) {}
 
   register(client: ClientCreateDto): Observable<Client> {
-    return this.http.post<Client>(this.apiUrl, client);
+    return this.http.post<Client>(`${this.apiUrl}/registrar`, client);
   }
 
   getAll(): Observable<Client[]> {

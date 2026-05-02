@@ -139,9 +139,9 @@
               </tr>
             </thead>
             <tbody>
-              @for (product of products; track product.id) {
+              @for (product of products; track product.idProducto) {
                 <tr>
-                  <td class="text-muted">{{ product.id }}</td>
+                  <td class="text-muted">{{ product.idProducto }}</td>
                   <td><strong>{{ product.nombreProducto }}</strong></td>
                   <td>{{ product.descripcion }}</td>
                   <td class="text-numeric">{{ product.precio | number:'1.2-2' }}</td>

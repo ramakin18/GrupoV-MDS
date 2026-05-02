@@ -50,7 +50,11 @@ export class ClientRegistrationComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    const clientData: ClientCreateDto = this.registrationForm.value;
+    const formValue = this.registrationForm.value;
+    const clientData: ClientCreateDto = {
+      ...formValue,
+      contrasena: formValue.contrasena || formValue.password
+    };
 
     this.clientService.register(clientData).subscribe({
       next: () => {
