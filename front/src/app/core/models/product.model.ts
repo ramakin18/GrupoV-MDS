@@ -1,9 +1,9 @@
 export interface Product {
   id?: number;
-  sku: string;
-  description: string;
-  price: number;
-  stock: number;
+  nombreProducto: string;
+  descripcion: string;
+  precio: number;
+  stockDisponible: number;
 }
 
 export type ProductCreateDto = Omit<Product, 'id'>;

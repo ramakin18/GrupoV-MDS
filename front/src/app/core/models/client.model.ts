@@ -3,14 +3,15 @@ export interface Client {
   nombre: string;
   apellido: string;
   email: string;
-  password: string;
+  contrasena: string;
   pais: string;
   provincia: string;
   localidad: string;
   calle: string;
-  altura: string;
+  numero: string;
   piso?: string;
   departamento?: string;
+  rol?: string;
 }
 
 export type ClientCreateDto = Omit<Client, 'id'>;
