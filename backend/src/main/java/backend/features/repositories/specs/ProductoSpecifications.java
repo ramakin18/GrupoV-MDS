@@ -10,10 +10,18 @@ import java.util.List;
 
 public class ProductoSpecifications {
 
-    public static Specification<Producto> filtrarProductos(String nombre, BigDecimal precio, Integer stock) {
+    public static Specification<Producto> filtrarProductos(
+            String nombre,
+            BigDecimal precio,
+            Integer stock,
+            boolean incluirBorrados
+    ) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            if (!incluirBorrados) {
+                predicates.add(criteriaBuilder.isFalse(root.get("borrado")));
+            }
             if (nombre != null && !nombre.isBlank()) {
                 predicates.add(
                     criteriaBuilder.like(

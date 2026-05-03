@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -33,9 +34,10 @@ public class Producto {
     private BigDecimal precio;
 
     @NotNull(message = "Debe ingresar un stock valido")
-    @Positive(message = "El stock debe ser mayor a 0")
+    @PositiveOrZero(message = "El stock debe ser mayor o igual a 0")
     private Integer stockDisponible;
 
+    @Builder.Default
     private boolean borrado = false;
 
     public void markAsDeleted() {

@@ -10,10 +10,10 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
-  title = 'Sistema de Gestión';
-  
+  title = 'Sistema de Gestion';
+
   constructor(private router: Router) {}
-  
+
   navigateTo(path: string): void {
     this.router.navigate([path]);
   }

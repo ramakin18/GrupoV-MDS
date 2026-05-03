@@ -1,9 +1,9 @@
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Product, ProductCreateDto } from '../models/product.model';
+import { Product, ProductCreateDto, ProductFilters, ProductViewRole } from '../models/product.model';
 
 export interface IProductService {
-  getAll(): Observable<Product[]>;
+  getAll(role?: ProductViewRole, filters?: ProductFilters): Observable<Product[]>;
   create(product: ProductCreateDto): Observable<Product>;
   getById(id: number): Observable<Product>;
   update(id: number, product: Partial<ProductCreateDto>): Observable<Product>;

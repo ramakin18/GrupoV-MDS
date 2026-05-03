@@ -12,7 +12,9 @@ public record ProductoResponseDto(
 
         BigDecimal precio,
 
-        Integer stockDisponible
+        Integer stockDisponible,
+
+        boolean borrado
 
 ) {
 }

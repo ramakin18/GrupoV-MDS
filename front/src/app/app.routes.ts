@@ -5,7 +5,8 @@ import { ClientRegistrationComponent } from './features/clients/components/clien
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
-  { path: 'products', component: ProductListComponent },
+  { path: 'products', redirectTo: 'products/usuario', pathMatch: 'full' },
+  { path: 'products/:role', component: ProductListComponent },
   { path: 'register', component: ClientRegistrationComponent },
   { path: '**', redirectTo: '' }
 ];

@@ -2,6 +2,7 @@ package backend.features.controllers;
 
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
+import backend.features.models.ProductoViewRole;
 import backend.features.services.interfaces.domain.IProductoService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -29,9 +30,11 @@ public class ProductoController {
     public ResponseEntity<List<ProductoResponseDto>> getAll(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) BigDecimal precio,
-            @RequestParam(required = false) Integer stock) {
+            @RequestParam(required = false) Integer stock,
+            @RequestParam(required = false) String rol) {
 
-        return ResponseEntity.ok(productoService.getAll(nombre, precio, stock));
+        ProductoViewRole viewRole = ProductoViewRole.from(rol);
+        return ResponseEntity.ok(productoService.getAll(nombre, precio, stock, viewRole));
     }
 
     @GetMapping("/{id}")

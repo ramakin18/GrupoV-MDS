@@ -5,6 +5,7 @@ import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.mappers.ProductoMapper;
 import backend.features.models.Producto;
+import backend.features.models.ProductoViewRole;
 import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.specs.ProductoSpecifications;
 import backend.features.services.interfaces.domain.IProductoService;
@@ -29,9 +30,9 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
-    public List<ProductoResponseDto> getAll(String nombre, BigDecimal precio, Integer stock) {
+    public List<ProductoResponseDto> getAll(String nombre, BigDecimal precio, Integer stock, ProductoViewRole role) {
         List<Producto> productos = productoRepository.findAll(
-                ProductoSpecifications.filtrarProductos(nombre, precio, stock)
+                ProductoSpecifications.filtrarProductos(nombre, precio, stock, role.canViewDeletedProducts())
         );
         return productoMapper.toResponseDtoList(productos);
     }

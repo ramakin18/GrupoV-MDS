@@ -25,7 +25,8 @@ public class ProductoMapper {
                 model.getNombreProducto(),
                 model.getDescripcion(),
                 model.getPrecio(),
-                model.getStockDisponible()
+                model.getStockDisponible(),
+                model.isBorrado()
         );
     }
 

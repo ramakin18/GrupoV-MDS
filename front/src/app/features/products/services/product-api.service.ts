@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Product, ProductCreateDto } from '@core/models/product.model';
+import { Product, ProductCreateDto, ProductFilters, ProductViewRole } from '@core/models/product.model';
 import { IProductService } from '@core/services/product.service.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -10,8 +10,22 @@ export class ProductApiService implements IProductService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getAll(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl);
+  getAll(role: ProductViewRole = 'USUARIO', filters: ProductFilters = {}): Observable<Product[]> {
+    const params: Record<string, string> = { rol: role };
+
+    if (filters.nombre?.trim()) {
+      params['nombre'] = filters.nombre.trim();
+    }
+    if (filters.precio !== null && filters.precio !== undefined) {
+      params['precio'] = String(filters.precio);
+    }
+    if (filters.stock !== null && filters.stock !== undefined) {
+      params['stock'] = String(filters.stock);
+    }
+
+    return this.http.get<Product[]>(this.apiUrl, {
+      params
+    });
   }
 
   create(product: ProductCreateDto): Observable<Product> {
