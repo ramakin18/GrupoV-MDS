@@ -1,0 +1,205 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Registro de Cliente</h1>
+      <p class="subtitle">Crea una nueva cuenta con domicilio de envío</p>
+    </div>
+    <a routerLink="/" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Volver al inicio
+    </a>
+  </header>
+
+  @if (isRegistered) {
+    <div class="alert alert-success" role="status">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <div>
+        <strong>¡Registro exitoso!</strong>
+        <p class="alert-detail">Puedes iniciar sesión ahora.</p>
+      </div>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <section class="form-section">
+    <div class="section-header">
+      <h2 class="section-title">Datos Personales</h2>
+    </div>
+    
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="form-grid">
+      <div class="form-field">
+        <label for="nombre">Nombre</label>
+        <input 
+          id="nombre" 
+          type="text" 
+          formControlName="nombre" 
+          placeholder="Ingrese nombre"
+          [class.invalid]="hasFieldError('nombre')">
+        @if (hasFieldError('nombre')) {
+          <small class="field-error">{{ getFieldError('nombre') }}</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="apellido">Apellido</label>
+        <input 
+          id="apellido" 
+          type="text" 
+          formControlName="apellido" 
+          placeholder="Ingrese apellido"
+          [class.invalid]="hasFieldError('apellido')">
+        @if (hasFieldError('apellido')) {
+          <small class="field-error">{{ getFieldError('apellido') }}</small>
+        }
+      </div>
+
+      <div class="form-field full-width">
+        <label for="email">Email</label>
+        <input 
+          id="email" 
+          type="email" 
+          formControlName="email" 
+          placeholder="ejemplo@email.com"
+          [class.invalid]="hasFieldError('email')">
+        @if (hasFieldError('email')) {
+          <small class="field-error">{{ getFieldError('email') }}</small>
+        }
+      </div>
+
+      <div class="form-field full-width">
+        <label for="contrasena">Contraseña</label>
+        <input 
+          id="contrasena" 
+          type="password" 
+          formControlName="contrasena" 
+          placeholder="Mínimo 8 caracteres"
+          [class.invalid]="hasFieldError('contrasena')">
+        @if (hasFieldError('contrasena')) {
+          <small class="field-error">{{ getFieldError('contrasena') }}</small>
+        }
+      </div>
+
+      <div class="section-header" style="margin-top: var(--spacing-lg);">
+        <h2 class="section-title">Domicilio de envío</h2>
+      </div>
+
+      <ng-container formGroupName="domicilio">
+      <div class="form-field">
+        <label for="pais">País</label>
+        <input 
+          id="pais" 
+          type="text" 
+          formControlName="pais" 
+          placeholder="Ingrese país"
+          [class.invalid]="hasFieldError('domicilio.pais')">
+        @if (hasFieldError('domicilio.pais')) {
+          <small class="field-error">{{ getFieldError('domicilio.pais') }}</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="provincia">Provincia</label>
+        <input 
+          id="provincia" 
+          type="text" 
+          formControlName="provincia" 
+          placeholder="Ingrese provincia"
+          [class.invalid]="hasFieldError('domicilio.provincia')">
+        @if (hasFieldError('domicilio.provincia')) {
+          <small class="field-error">{{ getFieldError('domicilio.provincia') }}</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="localidad">Localidad</label>
+        <input 
+          id="localidad" 
+          type="text" 
+          formControlName="localidad" 
+          placeholder="Ingrese localidad"
+          [class.invalid]="hasFieldError('domicilio.localidad')">
+        @if (hasFieldError('domicilio.localidad')) {
+          <small class="field-error">{{ getFieldError('domicilio.localidad') }}</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="calle">Calle</label>
+        <input 
+          id="calle" 
+          type="text" 
+          formControlName="calle" 
+          placeholder="Ingrese calle"
+          [class.invalid]="hasFieldError('domicilio.calle')">
+        @if (hasFieldError('domicilio.calle')) {
+          <small class="field-error">{{ getFieldError('domicilio.calle') }}</small>
+        }
+      </div>
+
+       <div class="form-field">
+         <label for="numero">Número</label>
+         <input 
+           id="numero" 
+           type="text" 
+           formControlName="numero" 
+           placeholder="Número"
+           [class.invalid]="hasFieldError('domicilio.numero')">
+         @if (hasFieldError('domicilio.numero')) {
+           <small class="field-error">{{ getFieldError('domicilio.numero') }}</small>
+         }
+       </div>
+
+      <div class="form-field">
+        <label for="piso">Piso (opcional)</label>
+        <input 
+          id="piso" 
+          type="text" 
+          formControlName="piso" 
+          placeholder="Opcional">
+      </div>
+
+      <div class="form-field">
+        <label for="departamento">Departamento (opcional)</label>
+        <input 
+          id="departamento" 
+          type="text" 
+          formControlName="departamento" 
+          placeholder="Opcional">
+      </div>
+      </ng-container>
+
+      <div class="form-actions full-width">
+        <button type="submit" [disabled]="registrationForm.invalid || isLoading" class="btn-primary">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Registrando...</span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+              <line x1="20" y1="8" x2="20" y2="14"/>
+              <line x1="23" y1="11" x2="17" y2="11"/>
+            </svg>
+            <span>Registrar Cliente</span>
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
