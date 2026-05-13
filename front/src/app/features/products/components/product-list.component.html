@@ -1,0 +1,246 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>{{ pageTitle }}</h1>
+      <p class="subtitle">{{ pageSubtitle }}</p>
+    </div>
+    <a routerLink="/" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Volver al inicio
+    </a>
+  </header>
+
+  <nav class="role-switch" aria-label="Cambiar rol de visualizacion">
+    <a routerLink="/products/admin" class="role-button" [class.active]="isAdmin">ADMIN</a>
+    <a routerLink="/products/usuario" class="role-button" [class.active]="!isAdmin">USUARIO</a>
+  </nav>
+
+  @if (errorMessage) {
+    <div class="alert alert-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (isAdmin) {
+    <section class="form-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Nuevo Producto</h2>
+          <p class="section-description">Completa los campos para agregar un producto al inventario</p>
+        </div>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="product-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="nombreProducto">Nombre del Producto</label>
+            <input
+              id="nombreProducto"
+              type="text"
+              formControlName="nombreProducto"
+              placeholder="Ej. PROD-001"
+              [class.invalid]="productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched">
+            @if (productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched) {
+              <small class="field-error">Nombre requerido, minimo 4 caracteres</small>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="descripcion">Descripcion</label>
+            <input
+              id="descripcion"
+              type="text"
+              formControlName="descripcion"
+              placeholder="Descripcion del producto"
+              [class.invalid]="productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched">
+            @if (productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched) {
+              <small class="field-error">Descripcion requerida, minimo 5 caracteres</small>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="precio">Precio</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                id="precio"
+                type="number"
+                formControlName="precio"
+                placeholder="0.00"
+                step="0.01"
+                [class.invalid]="productForm.get('precio')?.invalid && productForm.get('precio')?.touched">
+            </div>
+            @if (productForm.get('precio')?.invalid && productForm.get('precio')?.touched) {
+              <small class="field-error">Precio debe ser mayor a 0</small>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="stockDisponible">Stock</label>
+            <input
+              id="stockDisponible"
+              type="number"
+              formControlName="stockDisponible"
+              placeholder="0"
+              [class.invalid]="productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched">
+            @if (productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched) {
+              <small class="field-error">Stock debe ser mayor o igual a 0</small>
+            }
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="productForm.invalid || isLoading" class="btn-primary">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Guardando...</span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Crear Producto</span>
+          }
+        </button>
+      </form>
+    </section>
+  }
+
+  <section class="filters-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Filtros</h2>
+        <p class="section-description">Busca productos por nombre, precio minimo o stock minimo</p>
+      </div>
+    </div>
+
+    <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filter-form">
+      <div class="form-grid filter-grid">
+        <div class="form-field">
+          <label for="filterNombre">Nombre</label>
+          <input
+            id="filterNombre"
+            type="text"
+            formControlName="nombre"
+            placeholder="Nombre del producto">
+        </div>
+
+        <div class="form-field">
+          <label for="filterPrecio">Precio minimo</label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">$</span>
+            <input
+              id="filterPrecio"
+              type="number"
+              formControlName="precio"
+              placeholder="0.00"
+              step="0.01"
+              [class.invalid]="filterForm.get('precio')?.invalid && filterForm.get('precio')?.touched">
+          </div>
+          @if (filterForm.get('precio')?.invalid && filterForm.get('precio')?.touched) {
+            <small class="field-error">El precio minimo no puede ser negativo</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="filterStock">Stock minimo</label>
+          <input
+            id="filterStock"
+            type="number"
+            formControlName="stock"
+            placeholder="0"
+            [class.invalid]="filterForm.get('stock')?.invalid && filterForm.get('stock')?.touched">
+          @if (filterForm.get('stock')?.invalid && filterForm.get('stock')?.touched) {
+            <small class="field-error">El stock minimo no puede ser negativo</small>
+          }
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" [disabled]="filterForm.invalid || isLoading" class="btn-primary">
+          Aplicar filtros
+        </button>
+        <button type="button" [disabled]="isLoading" class="btn-secondary" (click)="clearFilters()">
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="table-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Lista de Productos</h2>
+        <p class="section-description">
+          {{ isAdmin ? 'Incluye productos activos y borrados' : 'Solo muestra productos activos' }}
+        </p>
+      </div>
+      <span class="product-count" *ngIf="products$ | async as products">{{ products.length }} productos</span>
+    </div>
+
+    @if (isLoading) {
+      <div class="loading-state" aria-live="polite">
+        <div class="spinner spinner-lg"></div>
+        <p>Cargando productos...</p>
+      </div>
+    } @else if (products$ | async; as products) {
+      @if (products.length === 0) {
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+          <p class="empty-message">{{ emptyMessage }}</p>
+          <p class="empty-hint">{{ emptyHint }}</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Descripcion</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Stock</th>
+                @if (isAdmin) {
+                  <th scope="col">Estado</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (product of products; track product.idProducto) {
+                <tr [class.deleted-row]="product.borrado">
+                  <td class="text-muted">{{ product.idProducto }}</td>
+                  <td><strong>{{ product.nombreProducto }}</strong></td>
+                  <td>{{ product.descripcion }}</td>
+                  <td class="text-numeric">{{ product.precio | number:'1.2-2' }}</td>
+                  <td class="text-numeric">
+                    <span class="badge" [class.badge-warning]="product.stockDisponible < 10">
+                      {{ product.stockDisponible }}
+                    </span>
+                  </td>
+                  @if (isAdmin) {
+                    <td>
+                      <span class="badge" [class.badge-danger]="product.borrado" [class.badge-success]="!product.borrado">
+                        {{ product.borrado ? 'Borrado' : 'Activo' }}
+                      </span>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+</div>

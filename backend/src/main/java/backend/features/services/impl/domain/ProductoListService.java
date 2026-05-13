@@ -3,6 +3,7 @@ package backend.features.services.impl.domain;
 import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.mappers.ProductoMapper;
 import backend.features.models.Producto;
+import backend.features.models.ProductoViewRole;
 import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.specs.ProductoSpecifications;
 import backend.features.services.interfaces.domain.IProductoListService;
@@ -17,15 +18,13 @@ import java.util.List;
 public class ProductoListService implements IProductoListService {
 
     private final IProductoRepository productoRepository;
+    private final ProductoMapper productoMapper;
 
     @Override
-    public List<ProductoResponseDto> execute(String nombre, BigDecimal precio, Integer stock) {
-        // Usamos la especificación con los parámetros recibidos
+    public List<ProductoResponseDto> execute(String nombre, BigDecimal precio, Integer stock, ProductoViewRole role) {
         List<Producto> productos = productoRepository.findAll(
-                ProductoSpecifications.filtrarProductos(nombre, precio, stock)
+                ProductoSpecifications.filtrarProductos(nombre, precio, stock, role.canViewDeletedProducts())
         );
-
-        // Convertimos a DTO usando tu mapper
-        return ProductoMapper.toResponseDtoList(productos);
+        return productoMapper.toResponseDtoList(productos);
     }
 }

@@ -10,18 +10,31 @@ import java.util.List;
 
 public class ProductoSpecifications {
 
-    public static Specification<Producto> filtrarProductos(String nombre, BigDecimal precioMin, Integer stockMin) {
+    public static Specification<Producto> filtrarProductos(
+            String nombre,
+            BigDecimal precio,
+            Integer stock,
+            boolean incluirBorrados
+    ) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (nombre != null && !nombre.isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("nombreProducto")), "%" + nombre.toLowerCase() + "%"));
+            if (!incluirBorrados) {
+                predicates.add(criteriaBuilder.isFalse(root.get("borrado")));
             }
-            if (precioMin != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("precio"), precioMin));
+            if (nombre != null && !nombre.isBlank()) {
+                predicates.add(
+                    criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("nombreProducto")),
+                        "%" + nombre.toLowerCase() + "%"
+                    )
+                );
             }
-            if (stockMin != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("stockDisponible"), stockMin));
+            if (precio != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("precio"), precio));
+            }
+            if (stock != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("stockDisponible"), stock));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

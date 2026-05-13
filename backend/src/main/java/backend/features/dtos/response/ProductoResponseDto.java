@@ -4,17 +4,17 @@ import java.math.BigDecimal;
 
 public record ProductoResponseDto(
 
-        Long id,
+        Long idProducto,
 
-        String nombre,
+        String nombreProducto,
 
         String descripcion,
 
         BigDecimal precio,
 
-        Integer stockDisponible
+        Integer stockDisponible,
+
+        boolean borrado
 
 ) {
-
-
 }

@@ -1,10 +1,9 @@
 package backend.features.controllers;
 
-import backend.configs.BaseResponse;
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
-import backend.features.services.interfaces.domain.IProductoCreateService;
-import backend.features.services.interfaces.domain.IProductoListService;
+import backend.features.models.ProductoViewRole;
+import backend.features.services.interfaces.domain.IProductoService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,32 +17,41 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductoController {
 
-    private final IProductoCreateService productoCreateService;
-    private final IProductoListService productoListService;
+    private final IProductoService productoService;
 
     @PostMapping
-    public ResponseEntity<BaseResponse<ProductoResponseDto>> createProducto(
+    public ResponseEntity<ProductoResponseDto> create(
             @Valid @RequestBody ProductoCreateReqDto request
     ) {
-        return ResponseEntity.ok(
-                BaseResponse.ok(
-                        productoCreateService.execute(request),
-                        "Clase creada correctamente"
-                )
-        );
-
+        return ResponseEntity.ok(productoService.create(request));
     }
+
     @GetMapping
-    public ResponseEntity<BaseResponse<List<ProductoResponseDto>>> listProducto(
+    public ResponseEntity<List<ProductoResponseDto>> getAll(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) BigDecimal precio,
-            @RequestParam(required = false) Integer stock) {
+            @RequestParam(required = false) Integer stock,
+            @RequestParam(required = false) String rol) {
 
-        return ResponseEntity.ok(
-                BaseResponse.ok(
-                        productoListService.execute(nombre, precio, stock),
-                        "Productos listados correctamente"
-                )
-        );
+        ProductoViewRole viewRole = ProductoViewRole.from(rol);
+        return ResponseEntity.ok(productoService.getAll(nombre, precio, stock, viewRole));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductoResponseDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.getById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductoResponseDto> update(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductoCreateReqDto request) {
+        return ResponseEntity.ok(productoService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        productoService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }

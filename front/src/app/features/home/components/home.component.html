@@ -1,0 +1,48 @@
+<div class="home-container">
+  <header class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">{{ title }}</h1>
+      <p class="hero-subtitle">Selecciona como queres visualizar los productos existentes</p>
+    </div>
+  </header>
+
+  <nav class="menu-grid">
+    <a routerLink="/products/admin" class="menu-card role-card admin-card">
+      <div class="card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+      <h2 class="card-title">ADMIN</h2>
+      <p class="card-description">Visualiza todos los productos de la base de datos y administra el inventario.</p>
+      <span class="card-action">Entrar como ADMIN</span>
+    </a>
+
+    <a routerLink="/products/usuario" class="menu-card role-card user-card">
+      <div class="card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <h2 class="card-title">USUARIO</h2>
+      <p class="card-description">Consulta los productos activos disponibles para visualizar como cliente.</p>
+      <span class="card-action">Entrar como USUARIO</span>
+    </a>
+
+    <a routerLink="/register" class="menu-card">
+      <div class="card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <line x1="20" y1="8" x2="20" y2="14"/>
+          <line x1="23" y1="11" x2="17" y2="11"/>
+        </svg>
+      </div>
+      <h2 class="card-title">Clientes</h2>
+      <p class="card-description">Registro de nuevos clientes en el sistema</p>
+    </a>
+  </nav>
+</div>

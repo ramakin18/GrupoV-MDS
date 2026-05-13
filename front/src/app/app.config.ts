@@ -1,11 +1,17 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
+import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
+import { ProductApiService } from './features/products/services/product-api.service';
+import { ClientApiService } from './features/clients/services/client-api.service';
+import { PRODUCT_SERVICE_TOKEN } from './core/services/product.service.interface';
+import { CLIENT_SERVICE_TOKEN } from './core/services/client.service.interface';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+    provideRouter(routes),
+    provideHttpClient(),
+    { provide: PRODUCT_SERVICE_TOKEN, useClass: ProductApiService },
+    { provide: CLIENT_SERVICE_TOKEN, useClass: ClientApiService }
   ]
 };
