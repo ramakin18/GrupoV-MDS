@@ -485,13 +485,14 @@ tbody tr:hover {
   .page-container {
     padding: var(--spacing-md) var(--spacing-sm);
   }
-  
+  }
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -504,18 +505,126 @@ tbody tr:hover {
   .btn-secondary {
     width: 100%;
   }
-  
+
   .form-section,
   .filters-section,
   .table-section {
     padding: var(--spacing-md);
   }
-  
+
   table {
     font-size: var(--font-size-sm);
   }
-  
+
   th, td {
     padding: var(--spacing-sm);
+  }
+  /* === VISTA DE CATÁLOGO (CARDS) === */
+
+  /* Contenedor principal de las tarjetas */
+  .product-grid {
+    display: grid;
+    /* Esto crea columnas automáticas de mínimo 280px */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) 0;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  /* Estilo de cada tarjeta individual */
+  .product-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary-light);
+  }
+
+  /* Estilo del precio resaltado */
+  .price-tag {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    color: var(--color-primary-light);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .product-card h3 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .product-card p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    flex-grow: 1; /* Esto empuja el botón siempre al fondo */
+  }
+
+  /* Línea divisoria y pie de la tarjeta */
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .card-footer small {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+  .cart-floating-button {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899); /* Violeta a Rosa */
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .cart-floating-button:hover {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ef4444;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border: 2px solid #0f172a;
   }
 }
