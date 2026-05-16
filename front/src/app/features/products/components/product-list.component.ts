@@ -1,10 +1,23 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable, catchError, finalize, of, shareReplay } from 'rxjs';
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
-import { Product, ProductCreateDto, ProductFilters, ProductViewRole } from '@core/models/product.model';
+import {
+  Product,
+  ProductCreateDto,
+  ProductFilters,
+  ProductStatusFilter,
+  ProductViewRole
+} from '@core/models/product.model';
 
 @Component({
   selector: 'app-product-list',
@@ -36,8 +49,10 @@ export class ProductListComponent implements OnInit {
     this.filterForm = this.fb.group({
       nombre: [''],
       precio: [null, [Validators.min(0)]],
-      stock: [null, [Validators.min(0)]]
-    });
+      stockMin: [null, [Validators.min(0)]],
+      stockMax: [null, [Validators.min(0)]],
+      estado: ['TODOS' as ProductStatusFilter]
+    }, { validators: this.stockRangeValidator });
   }
 
   ngOnInit(): void {
@@ -71,6 +86,17 @@ export class ProductListComponent implements OnInit {
       : 'Cuando el administrador registre productos activos, apareceran aca';
   }
 
+  get listDescription(): string {
+    if (!this.isAdmin) {
+      return 'Solo muestra productos activos';
+    }
+
+    const estado = this.filterForm.get('estado')?.value as ProductStatusFilter;
+    if (estado === 'ACTIVO') return 'Muestra productos activos';
+    if (estado === 'INACTIVO') return 'Muestra productos inactivos';
+    return 'Incluye productos activos e inactivos';
+  }
+
   loadProducts(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -100,7 +126,9 @@ export class ProductListComponent implements OnInit {
     this.filterForm.reset({
       nombre: '',
       precio: null,
-      stock: null
+      stockMin: null,
+      stockMax: null,
+      estado: 'TODOS'
     });
     this.loadProducts();
   }
@@ -151,7 +179,20 @@ export class ProductListComponent implements OnInit {
     return {
       nombre: rawFilters.nombre,
       precio: rawFilters.precio,
-      stock: rawFilters.stock
+      stockMin: rawFilters.stockMin,
+      stockMax: rawFilters.stockMax,
+      estado: this.isAdmin ? rawFilters.estado : null
     };
+  }
+
+  private stockRangeValidator(control: AbstractControl): ValidationErrors | null {
+    const stockMin = control.get('stockMin')?.value;
+    const stockMax = control.get('stockMax')?.value;
+
+    if (stockMin === null || stockMin === '' || stockMax === null || stockMax === '') {
+      return null;
+    }
+
+    return Number(stockMin) <= Number(stockMax) ? null : { stockRange: true };
   }
 }
