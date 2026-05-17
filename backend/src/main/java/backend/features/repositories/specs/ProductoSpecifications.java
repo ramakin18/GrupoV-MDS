@@ -13,17 +13,17 @@ public class ProductoSpecifications {
 
     public static Specification<Producto> hasNombre(String nombre) {
         return (root, query, cb) -> (nombre == null || nombre.isEmpty())
-                ? null : cb.like(cb.lower(root.get("nombre")), "%" + nombre.toLowerCase() + "%");
+                ? null : cb.like(cb.lower(root.get("nombreProducto")), "%" + nombre.toLowerCase() + "%");
     }
 
-    public static Specification<Producto> hasPrecioMax(Double precio) {
+    public static Specification<Producto> hasPrecioMax(BigDecimal precio) {
         return (root, query, cb) -> precio == null
                 ? null : cb.lessThanOrEqualTo(root.get("precio"), precio);
     }
 
     public static Specification<Producto> hasStockMin(Integer stock) {
         return (root, query, cb) -> stock == null
-                ? null : cb.greaterThanOrEqualTo(root.get("stock"), stock);
+                ? null : cb.greaterThanOrEqualTo(root.get("stockDisponible"), stock);
     }
     public static Specification<Producto> filtrarProductos(
             String nombre,
@@ -36,35 +36,35 @@ public class ProductoSpecifications {
             List<Predicate> predicates = new ArrayList<>();
 
             if (estado == ProductoEstadoFiltro.ACTIVO) {
-                predicates.add(criteriaBuilder.isFalse(root.get("borrado")));
+                predicates.add(cb.isFalse(root.get("borrado")));
             }
             if (estado == ProductoEstadoFiltro.INACTIVO) {
-                predicates.add(criteriaBuilder.isTrue(root.get("borrado")));
+                predicates.add(cb.isTrue(root.get("borrado")));
             }
             if (nombre != null && !nombre.isBlank()) {
                 predicates.add(
-                    criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("nombreProducto")),
+                    cb.like(
+                        cb.lower(root.get("nombreProducto")),
                         "%" + nombre.toLowerCase() + "%"
                     )
                 );
             }
             if (precio != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("precio"), precio));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("precio"), precio));
             }
             if (stockMin != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("stockDisponible"), stockMin));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("stockDisponible"), stockMin));
             }
             if (stockMax != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("stockDisponible"), stockMax));
+                predicates.add(cb.lessThanOrEqualTo(root.get("stockDisponible"), stockMax));
             }
 
             query.orderBy(
-                    criteriaBuilder.asc(root.get("stockDisponible")),
-                    criteriaBuilder.asc(root.get("nombreProducto"))
+                    cb.asc(root.get("stockDisponible")),
+                    cb.asc(root.get("nombreProducto"))
             );
 
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
