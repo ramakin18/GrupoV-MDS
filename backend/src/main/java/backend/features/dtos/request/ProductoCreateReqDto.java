@@ -1,6 +1,6 @@
 package backend.features.dtos.request;
 
-import java.math.BigDecimal; 
+import java.math.BigDecimal;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +30,6 @@ public record ProductoCreateReqDto(
         @NotNull
         @PositiveOrZero
         Integer stockMinimo,
-
-        Boolean borrado 
-) {
+        Boolean borrado
+) {        
 }

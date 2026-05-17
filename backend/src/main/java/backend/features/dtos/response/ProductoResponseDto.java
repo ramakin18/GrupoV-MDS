@@ -14,9 +14,9 @@ public record ProductoResponseDto(
 
         Integer stockDisponible,
 
-        Integer stockMinimo, 
+        Integer stockMinimo,
 
-        boolean borrado
+        boolean borrado,
 
-) {
-}
+        String imagenUrl
+) {}

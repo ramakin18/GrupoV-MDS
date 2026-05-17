@@ -1,7 +1,7 @@
 package backend.features.models;
 
 import java.math.BigDecimal;
- 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -49,6 +49,8 @@ public class Producto {
     @NotNull(message = "Debe ingresar un stock mínimo valido")
     @PositiveOrZero(message = "El stock mínimo debe ser mayor o igual a 0")
     private Integer stockMinimo;
+
+    private String imagenUrl;
 
     @Builder.Default
     private boolean borrado = false;

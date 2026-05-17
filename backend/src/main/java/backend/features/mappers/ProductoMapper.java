@@ -17,8 +17,8 @@ public class ProductoMapper {
                 .descripcion(request.descripcion())
                 .precio(request.precio())
                 .stockDisponible(request.stockDisponible())
-                .stockMinimo(request.stockMinimo()) 
-                .borrado(request.borrado() != null ? request.borrado() : false) 
+                .stockMinimo(request.stockMinimo())
+                .borrado(request.borrado() != null ? request.borrado() : false)
                 .build();
     }
 
@@ -29,14 +29,13 @@ public class ProductoMapper {
                 model.getDescripcion(),
                 model.getPrecio(),
                 model.getStockDisponible(),
-                model.getStockMinimo(), 
-                model.isBorrado()
+                model.getStockMinimo(),
+                model.isBorrado(),
+                model.getImagenUrl()
         );
     }
 
     public List<ProductoResponseDto> toResponseDtoList(List<Producto> models) {
-        return models.stream()
-                .map(this::toResponseDto)
-                .toList();
+        return models.stream().map(this::toResponseDto).toList();
     }
 }
