@@ -1,0 +1,68 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Iniciar Sesión</h1>
+      <p class="subtitle">Ingresa con tu email y contraseña</p>
+    </div>
+    <a routerLink="/" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Volver al inicio
+    </a>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <section class="form-section">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-grid">
+      <div class="form-field full-width">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="ejemplo@email.com"
+          [class.invalid]="hasFieldError('email')">
+        @if (hasFieldError('email')) {
+          <small class="field-error">{{ getFieldError('email') }}</small>
+        }
+      </div>
+
+      <div class="form-field full-width">
+        <label for="contrasena">Contraseña</label>
+        <input id="contrasena" type="password" formControlName="contrasena" placeholder="Ingrese su contraseña"
+          [class.invalid]="hasFieldError('contrasena')">
+        @if (hasFieldError('contrasena')) {
+          <small class="field-error">{{ getFieldError('contrasena') }}</small>
+        }
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" [disabled]="loginForm.invalid || isLoading" class="btn-primary">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            <span>Ingresando...</span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            <span>Ingresar</span>
+          }
+        </button>
+      </div>
+
+      <div class="form-footer full-width">
+        <p>¿No tenés cuenta? <a routerLink="/register">Registrate acá</a></p>
+      </div>
+    </form>
+  </section>
+</div>

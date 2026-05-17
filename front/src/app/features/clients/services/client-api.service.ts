@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Client, ClientCreateDto } from '@core/models/client.model';
+import { Client, ClientCreateDto, ClientLoginDto } from '@core/models/client.model';
 import { IClientService } from '@core/services/client.service.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +12,10 @@ export class ClientApiService implements IClientService {
 
   register(client: ClientCreateDto): Observable<Client> {
     return this.http.post<Client>(`${this.apiUrl}/registrar`, client);
+  }
+
+  login(credentials: ClientLoginDto): Observable<Client> {
+    return this.http.post<Client>(`${this.apiUrl}/login`, credentials);
   }
 
   getAll(): Observable<Client[]> {

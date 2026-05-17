@@ -21,3 +21,8 @@ export interface ClientCreateDto extends Omit<Client, 'id'> {
   contrasena: string;
   rol: string;
 }
+
+export interface ClientLoginDto {
+  email: string;
+  contrasena: string;
+}

@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +25,38 @@ public class KitProductoServiceImpl implements IKitProductoService {
 
     private final KitProductoRepository kitProductoRepository;
     private final IProductoRepository productoRepository;
+
+    private KitProductoResponseDto toResponseDto(KitProducto kit) {
+        return new KitProductoResponseDto(
+                kit.getIdKit(),
+                kit.getNombre(),
+                kit.getDescripcion(),
+                kit.getPrecio(),
+                kit.getStock(),
+                kit.getEstado(),
+                kit.getProductos().stream()
+                        .map(detalle -> new KitProductoDetalleResponseDto(
+                                detalle.getProducto().getIdProducto(),
+                                detalle.getProducto().getNombreProducto(),
+                                detalle.getCantidad()
+                        ))
+                        .toList()
+        );
+    }
+
+    @Override
+    public List<KitProductoResponseDto> getAll() {
+        return kitProductoRepository.findAll().stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public KitProductoResponseDto getById(Long id) {
+        KitProducto kit = kitProductoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Kit no encontrado con id: " + id));
+        return toResponseDto(kit);
+    }
 
     @Override
     public KitProductoResponseDto create(KitProductoCreateReqDto request) {
@@ -76,20 +109,6 @@ public class KitProductoServiceImpl implements IKitProductoService {
 
         KitProducto kitGuardado = kitProductoRepository.save(kit);
 
-        return new KitProductoResponseDto(
-                kitGuardado.getIdKit(),
-                kitGuardado.getNombre(),
-                kitGuardado.getDescripcion(),
-                kitGuardado.getPrecio(),
-                kitGuardado.getStock(),
-                kitGuardado.getEstado(),
-                kitGuardado.getProductos().stream()
-                        .map(detalle -> new KitProductoDetalleResponseDto(
-                                detalle.getProducto().getIdProducto(),
-                                detalle.getProducto().getNombreProducto(),
-                                detalle.getCantidad()
-                        ))
-                        .toList()
-        );
+        return toResponseDto(kitGuardado);
     }
 }

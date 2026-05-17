@@ -3,6 +3,7 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ModalCarritoComponent } from '../../modal-carrito/modal-carrito';
 import { CartService } from '../../../core/services/cart.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +18,8 @@ export class HomeComponent {
 
   constructor(
     private router: Router,
-    private readonly cartService: CartService
+    private readonly cartService: CartService,
+    readonly authService: AuthService
   ) {}
 
   get cartQuantity(): number {
@@ -34,5 +36,10 @@ export class HomeComponent {
 
   cerrarModalCarrito(): void {
     this.mostrarModalCarrito = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

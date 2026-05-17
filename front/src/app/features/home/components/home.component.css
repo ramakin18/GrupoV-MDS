@@ -23,6 +23,53 @@
   background: linear-gradient(135deg, var(--color-surface) 0%, rgba(99, 102, 241, 0.1) 100%);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+  position: relative;
+}
+
+.header-actions {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+.btn-login, .btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.btn-login {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-login:hover { opacity: 0.9; }
+
+.btn-logout {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-logout:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.user-greeting {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-base);
+  color: var(--color-primary-light);
+  font-weight: 600;
 }
 
 .hero-title {
