@@ -2,6 +2,7 @@ package backend.features.models;
 
 import java.math.BigDecimal;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,7 +50,9 @@ public class Producto {
 
     @NotNull(message = "Debe ingresar un stock mínimo valido")
     @PositiveOrZero(message = "El stock mínimo debe ser mayor o igual a 0")
-    private Integer stockMinimo;
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer stockMinimo = 0;
 
     private String imagenUrl;
 
