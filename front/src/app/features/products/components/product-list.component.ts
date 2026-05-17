@@ -305,63 +305,6 @@ export class ProductListComponent implements OnInit {
     this.isCartOpen = false;
   }
 
-  private normalizeRole(role: string | null): ProductViewRole {
-    return role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USUARIO';
-  }
-
-    if (this.productForm.invalid) {
-      this.productForm.markAllAsTouched();
-      return;
-    }
-
-    this.isLoading = true;
-    const formData = new FormData();
-    const productoBlob = new Blob([JSON.stringify(this.productForm.value)], {
-      type: 'application/json'
-    });
-    
-    formData.append('producto', productoBlob);
-    formData.append('imagen', this.selectedFile as Blob);
-
-    this.productService.create(formData).subscribe({
-      next: () => {
-        this.productForm.reset({ precio: 0, stockDisponible: 0, stockMinimo: 0 });
-        this.selectedFile = null;
-        const fileInput = document.getElementById('imagenProducto') as HTMLInputElement;
-        if(fileInput) fileInput.value = '';
-        this.loadProducts();
-      },
-      error: (error) => {
-        this.errorMessage = error?.error?.message || 'Error al crear producto';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  private normalizeRole(role: string | null): ProductViewRole {
-    return role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USUARIO';
-=======
-  // Recibe el producto del catalogo y delega la validacion/agregado al CartService.
-  addToCart(product: Product): void {
-    const result = this.cartService.addProduct(product);
-
-    if (!result.success) {
-      this.errorMessage = result.message || 'No se pudo agregar el producto al carrito.';
-      return;
-    }
-
-    this.errorMessage = '';
-  }
-
-  // Abre el modal del carrito.
-  openCart(): void {
-    this.isCartOpen = true;
-  }
-
-  // Cierra el modal cuando el componente hijo emite el evento cerrar.
-  closeCart(): void {
-    this.isCartOpen = false;
->>>>>>> origin/quintero
   }
 
   private getFilters(): ProductFilters {
