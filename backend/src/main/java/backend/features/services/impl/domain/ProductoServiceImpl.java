@@ -1,9 +1,10 @@
 package backend.features.services.impl.domain;
 
-import java.math.BigDecimal; // NUEVO: Importación
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import backend.exceptions.DuplicateResourceException;
 import backend.exceptions.ResourceNotFoundException;
@@ -23,15 +24,25 @@ public class ProductoServiceImpl implements IProductoService {
 
     private final IProductoRepository productoRepository;
     private final ProductoMapper productoMapper;
+    private final CloudinaryServiceImpl cloudinaryService;
 
     @Override
-    public ProductoResponseDto create(ProductoCreateReqDto request) {
-        
+    public ProductoResponseDto create(ProductoCreateReqDto request, MultipartFile imagen) {
         if (productoRepository.existsByNombreProductoIgnoreCase(request.nombreProducto())) {
             throw new DuplicateResourceException("Ya existe un producto con ese nombre.");
         }
 
         Producto entity = productoMapper.toModel(request);
+
+        try {
+            if (imagen != null && !imagen.isEmpty()) {
+                String imageUrl = cloudinaryService.uploadImage(imagen);
+                entity.setImagenUrl(imageUrl);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al subir la imagen a Cloudinary");
+        }
+
         Producto saved = productoRepository.save(entity);
         return productoMapper.toResponseDto(saved);
     }
@@ -53,11 +64,9 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public ProductoResponseDto update(Long id, ProductoCreateReqDto request) {
-        
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con id: " + id));
 
-        
         if (productoRepository.existsByNombreProductoIgnoreCaseAndIdProductoNot(request.nombreProducto(), id)) {
             throw new DuplicateResourceException("El nombre ya está en uso por otro producto.");
         }
@@ -66,9 +75,9 @@ public class ProductoServiceImpl implements IProductoService {
         producto.setDescripcion(request.descripcion());
         producto.setPrecio(request.precio());
         producto.setStockDisponible(request.stockDisponible());
-        producto.setStockMinimo(request.stockMinimo()); 
+        producto.setStockMinimo(request.stockMinimo());
         
-        if (request.borrado() != null) { 
+        if (request.borrado() != null) {
             producto.setBorrado(request.borrado());
         }
 
