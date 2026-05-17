@@ -1,12 +1,13 @@
 package backend.features.repositories;
 
-import backend.features.models.Producto;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import backend.features.models.Producto;
 
 @Repository
 public interface IProductoRepository extends JpaRepository<Producto, Long>, JpaSpecificationExecutor<Producto> {
@@ -14,4 +15,7 @@ public interface IProductoRepository extends JpaRepository<Producto, Long>, JpaS
     List<Producto> findByBorradoFalse();
     Optional<Producto> findByIdProductoAndBorradoFalse(Long id);
 
+    boolean existsByNombreProductoIgnoreCase(String nombreProducto);
+
+    boolean existsByNombreProductoIgnoreCaseAndIdProductoNot(String nombreProducto, Long idProducto);
 }
