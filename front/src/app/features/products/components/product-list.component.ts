@@ -2,9 +2,9 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms'; 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, finalize, of, shareReplay } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
-import { Product, ProductCreateDto, ProductFilters, ProductViewRole, ProductRow } from '@core/models/product.model'; 
+import { Product, ProductCreateDto, ProductFilters, ProductViewRole, ProductRow } from '@core/models/product.model';
 
 @Component({
   selector: 'app-product-list',
@@ -22,8 +22,7 @@ export class ProductListComponent implements OnInit {
   errorMessage = '';
 
   mostrarEscasos = false; 
-
-  
+  selectedFile: File | null = null;
   productToConfirm: ProductRow | null = null;
   pendingChanges: any = null;
 
@@ -56,12 +55,10 @@ export class ProductListComponent implements OnInit {
 
   get isAdmin(): boolean { return this.role === 'ADMIN'; }
   
-  
   get hayProductosEscasos(): boolean { 
     return this.products.some(p => p.stockDisponible <= p.stockMinimo && !p.borrado); 
   }
 
-  
   get displayedProducts(): ProductRow[] {
     if (!this.mostrarEscasos) return this.products;
     return this.products
@@ -86,12 +83,18 @@ export class ProductListComponent implements OnInit {
   get emptyHint(): string {
     return this.isAdmin
       ? 'Usa el formulario de arriba para agregar tu primer producto'
-      : 'Cuando el administrador registre productos activos, apareceran aca';
+      : 'Cuando el administrador registre productos activos, aparecerán acá';
   }
 
-  
   toggleEscasos(): void {
     this.mostrarEscasos = !this.mostrarEscasos;
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
   }
 
   loadProducts(): void {
@@ -104,7 +107,6 @@ export class ProductListComponent implements OnInit {
       }),
       finalize(() => this.isLoading = false)
     ).subscribe(data => {
-      
       this.products = data.map(p => ({
         ...p,
         original: { ...p },
@@ -114,7 +116,6 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  
   adjustStock(row: ProductRow, delta: number): void {
     const newVal = (row.stockDelta || 0) + delta;
     if (row.original.stockDisponible + newVal < 0) return;
@@ -123,32 +124,27 @@ export class ProductListComponent implements OnInit {
     this.markAsEdited(row);
   }
 
-  
   validatePrice(row: ProductRow): void {
     if (row.precio < 0) row.precio = row.original.precio;
     row.precio = parseFloat(row.precio.toFixed(2));
     this.markAsEdited(row);
   }
 
-  
   validateStockMinimo(row: ProductRow): void {
     const parsed = Math.floor(Number(row.stockMinimo));
     row.stockMinimo = parsed < 0 ? row.original.stockMinimo : parsed;
     this.markAsEdited(row);
   }
 
-  
   markAsEdited(row: ProductRow): void {
     row.isEditing = true;
   }
 
-  
   toggleStatus(row: ProductRow): void {
     row.borrado = !row.borrado;
     this.markAsEdited(row);
   }
 
-  
   requestSave(row: ProductRow): void {
     if (row.nombreProducto.trim() === '') {
       this.errorMessage = 'El nombre no puede estar vacío';
@@ -167,7 +163,6 @@ export class ProductListComponent implements OnInit {
     this.productToConfirm = row;
   }
 
-  
   cancelSave(): void {
     if (this.productToConfirm) {
       Object.assign(this.productToConfirm, { ...this.productToConfirm.original, stockDelta: 0, isEditing: false });
@@ -176,7 +171,6 @@ export class ProductListComponent implements OnInit {
     this.pendingChanges = null;
   }
 
-  
   confirmSave(): void {
     if (!this.productToConfirm || !this.productToConfirm.idProducto) return;
     
@@ -218,14 +212,32 @@ export class ProductListComponent implements OnInit {
 
   onSubmit(): void {
     if (!this.isAdmin) return;
+    
+    if (!this.selectedFile) {
+      this.errorMessage = 'Debes seleccionar una imagen para el nuevo producto';
+      return;
+    }
+
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
       return;
     }
+
     this.isLoading = true;
-    this.productService.create(this.productForm.value).subscribe({
+    const formData = new FormData();
+    const productoBlob = new Blob([JSON.stringify(this.productForm.value)], {
+      type: 'application/json'
+    });
+    
+    formData.append('producto', productoBlob);
+    formData.append('imagen', this.selectedFile as Blob);
+
+    this.productService.create(formData).subscribe({
       next: () => {
-        this.productForm.reset({ precio: 0, stockDisponible: 0, stockMinimo: 0 }); 
+        this.productForm.reset({ precio: 0, stockDisponible: 0, stockMinimo: 0 });
+        this.selectedFile = null;
+        const fileInput = document.getElementById('imagenProducto') as HTMLInputElement;
+        if(fileInput) fileInput.value = '';
         this.loadProducts();
       },
       error: (error) => {

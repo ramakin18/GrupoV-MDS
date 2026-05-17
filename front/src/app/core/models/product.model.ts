@@ -6,8 +6,9 @@ export interface Product {
   descripcion: string;
   precio: number;
   stockDisponible: number;
-  stockMinimo: number; 
+  stockMinimo: number;
   borrado?: boolean;
+  imagenUrl?: string;
 }
 
 export type ProductCreateDto = Omit<Product, 'idProducto'>;
