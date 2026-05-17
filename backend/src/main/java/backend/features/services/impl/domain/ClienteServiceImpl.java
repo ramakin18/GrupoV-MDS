@@ -79,13 +79,13 @@ public class ClienteServiceImpl implements IClienteService {
         if (request.getContrasena() != null && !request.getContrasena().isEmpty()) {
             cliente.setContrasena(request.getContrasena());
         }
-        cliente.setPais(request.getPais());
-        cliente.setProvincia(request.getProvincia());
-        cliente.setLocalidad(request.getLocalidad());
-        cliente.setCalle(request.getCalle());
-        cliente.setNumero(request.getNumero());
-        cliente.setPiso(request.getPiso());
-        cliente.setDepartamento(request.getDepartamento());
+        cliente.setPais(request.getDomicilio().getPais());
+        cliente.setProvincia(request.getDomicilio().getProvincia());
+        cliente.setLocalidad(request.getDomicilio().getLocalidad());
+        cliente.setCalle(request.getDomicilio().getCalle());
+        cliente.setNumero(request.getDomicilio().getNumero());
+        cliente.setPiso(request.getDomicilio().getPiso());
+        cliente.setDepartamento(request.getDomicilio().getDepartamento());
 
         Cliente updatedCliente = clienteRepository.save(cliente);
         return clienteMapper.toResponseDto(updatedCliente);

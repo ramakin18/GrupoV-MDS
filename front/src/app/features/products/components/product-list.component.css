@@ -139,7 +139,7 @@
 }
 
 .filter-grid {
-  grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(180px, 1fr));
+  grid-template-columns: minmax(220px, 2fr) repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .filter-actions {
@@ -169,7 +169,8 @@
   margin-bottom: var(--spacing-xs);
 }
 
-.form-field input {
+.form-field input,
+.form-field select {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-base);
   border: 2px solid var(--color-border);
@@ -182,18 +183,26 @@
   color: var(--color-text);
 }
 
-.form-field input:focus {
+.form-field select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.form-field input:focus,
+.form-field select:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
   background: var(--color-surface);
 }
 
-.form-field input.invalid {
+.form-field input.invalid,
+.form-field select.invalid {
   border-color: var(--color-error);
 }
 
-.form-field input.invalid:focus {
+.form-field input.invalid:focus,
+.form-field select.invalid:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 

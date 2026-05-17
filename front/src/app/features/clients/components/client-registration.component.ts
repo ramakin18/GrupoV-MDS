@@ -28,13 +28,15 @@ export class ClientRegistrationComponent implements OnInit {
       apellido: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       contrasena: ['', [Validators.required, Validators.minLength(8)]],
-      pais: ['', Validators.required],
-      provincia: ['', Validators.required],
-      localidad: ['', Validators.required],
-      calle: ['', Validators.required],
-      numero: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-      piso: [''],
-      departamento: [''],
+      domicilio: this.fb.group({
+        pais: ['', Validators.required],
+        provincia: ['', Validators.required],
+        localidad: ['', Validators.required],
+        calle: ['', Validators.required],
+        numero: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+        piso: [''],
+        departamento: [''],
+      }),
       rol: ['CLIENTE']
     });
   }
@@ -52,15 +54,30 @@ export class ClientRegistrationComponent implements OnInit {
     
     const formValue = this.registrationForm.value;
     const clientData: ClientCreateDto = {
-      ...formValue,
-      contrasena: formValue.contrasena || formValue.password
+      nombre: formValue.nombre,
+      apellido: formValue.apellido,
+      email: formValue.email,
+      contrasena: formValue.contrasena,
+      domicilio: formValue.domicilio,
+      rol: formValue.rol
     };
 
     this.clientService.register(clientData).subscribe({
       next: () => {
         this.isRegistered = true;
         this.isLoading = false;
-        this.registrationForm.reset();
+        this.registrationForm.reset({
+          rol: 'CLIENTE',
+          domicilio: {
+            pais: '',
+            provincia: '',
+            localidad: '',
+            calle: '',
+            numero: '',
+            piso: '',
+            departamento: '',
+          }
+        });
       },
       error: (error: any) => {
         this.errorMessage = error?.error?.message || 'Error al registrar cliente';

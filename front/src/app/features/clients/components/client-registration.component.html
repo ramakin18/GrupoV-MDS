@@ -2,7 +2,7 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Registro de Cliente</h1>
-      <p class="subtitle">Crea una nueva cuenta en el sistema</p>
+      <p class="subtitle">Crea una nueva cuenta con domicilio de envío</p>
     </div>
     <a routerLink="/" class="btn-back">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -96,9 +96,10 @@
       </div>
 
       <div class="section-header" style="margin-top: var(--spacing-lg);">
-        <h2 class="section-title">Dirección</h2>
+        <h2 class="section-title">Domicilio de envío</h2>
       </div>
 
+      <ng-container formGroupName="domicilio">
       <div class="form-field">
         <label for="pais">País</label>
         <input 
@@ -106,9 +107,9 @@
           type="text" 
           formControlName="pais" 
           placeholder="Ingrese país"
-          [class.invalid]="hasFieldError('pais')">
-        @if (hasFieldError('pais')) {
-          <small class="field-error">{{ getFieldError('pais') }}</small>
+          [class.invalid]="hasFieldError('domicilio.pais')">
+        @if (hasFieldError('domicilio.pais')) {
+          <small class="field-error">{{ getFieldError('domicilio.pais') }}</small>
         }
       </div>
 
@@ -119,9 +120,9 @@
           type="text" 
           formControlName="provincia" 
           placeholder="Ingrese provincia"
-          [class.invalid]="hasFieldError('provincia')">
-        @if (hasFieldError('provincia')) {
-          <small class="field-error">{{ getFieldError('provincia') }}</small>
+          [class.invalid]="hasFieldError('domicilio.provincia')">
+        @if (hasFieldError('domicilio.provincia')) {
+          <small class="field-error">{{ getFieldError('domicilio.provincia') }}</small>
         }
       </div>
 
@@ -132,9 +133,9 @@
           type="text" 
           formControlName="localidad" 
           placeholder="Ingrese localidad"
-          [class.invalid]="hasFieldError('localidad')">
-        @if (hasFieldError('localidad')) {
-          <small class="field-error">{{ getFieldError('localidad') }}</small>
+          [class.invalid]="hasFieldError('domicilio.localidad')">
+        @if (hasFieldError('domicilio.localidad')) {
+          <small class="field-error">{{ getFieldError('domicilio.localidad') }}</small>
         }
       </div>
 
@@ -145,9 +146,9 @@
           type="text" 
           formControlName="calle" 
           placeholder="Ingrese calle"
-          [class.invalid]="hasFieldError('calle')">
-        @if (hasFieldError('calle')) {
-          <small class="field-error">{{ getFieldError('calle') }}</small>
+          [class.invalid]="hasFieldError('domicilio.calle')">
+        @if (hasFieldError('domicilio.calle')) {
+          <small class="field-error">{{ getFieldError('domicilio.calle') }}</small>
         }
       </div>
 
@@ -158,9 +159,9 @@
            type="text" 
            formControlName="numero" 
            placeholder="Número"
-           [class.invalid]="hasFieldError('numero')">
-         @if (hasFieldError('numero')) {
-           <small class="field-error">{{ getFieldError('numero') }}</small>
+           [class.invalid]="hasFieldError('domicilio.numero')">
+         @if (hasFieldError('domicilio.numero')) {
+           <small class="field-error">{{ getFieldError('domicilio.numero') }}</small>
          }
        </div>
 
@@ -181,6 +182,7 @@
           formControlName="departamento" 
           placeholder="Opcional">
       </div>
+      </ng-container>
 
       <div class="form-actions full-width">
         <button type="submit" [disabled]="registrationForm.invalid || isLoading" class="btn-primary">

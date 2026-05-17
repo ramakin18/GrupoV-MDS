@@ -117,7 +117,7 @@
     <div class="section-header">
       <div>
         <h2 class="section-title">Filtros</h2>
-        <p class="section-description">Busca productos por nombre, precio minimo o stock minimo</p>
+        <p class="section-description">Busca productos por nombre, precio minimo o rango de stock</p>
       </div>
     </div>
 
@@ -150,17 +150,44 @@
         </div>
 
         <div class="form-field">
-          <label for="filterStock">Stock minimo</label>
+          <label for="filterStockMin">Stock minimo</label>
           <input
-            id="filterStock"
+            id="filterStockMin"
             type="number"
-            formControlName="stock"
+            formControlName="stockMin"
             placeholder="0"
-            [class.invalid]="filterForm.get('stock')?.invalid && filterForm.get('stock')?.touched">
-          @if (filterForm.get('stock')?.invalid && filterForm.get('stock')?.touched) {
+            [class.invalid]="filterForm.get('stockMin')?.invalid && filterForm.get('stockMin')?.touched">
+          @if (filterForm.get('stockMin')?.invalid && filterForm.get('stockMin')?.touched) {
             <small class="field-error">El stock minimo no puede ser negativo</small>
           }
         </div>
+
+        <div class="form-field">
+          <label for="filterStockMax">Stock maximo</label>
+          <input
+            id="filterStockMax"
+            type="number"
+            formControlName="stockMax"
+            placeholder="Sin maximo"
+            [class.invalid]="filterForm.get('stockMax')?.invalid && filterForm.get('stockMax')?.touched || filterForm.hasError('stockRange')">
+          @if (filterForm.get('stockMax')?.invalid && filterForm.get('stockMax')?.touched) {
+            <small class="field-error">El stock maximo no puede ser negativo</small>
+          }
+          @if (filterForm.hasError('stockRange')) {
+            <small class="field-error">El stock minimo no puede superar al maximo</small>
+          }
+        </div>
+
+        @if (isAdmin) {
+          <div class="form-field">
+            <label for="filterEstado">Estado</label>
+            <select id="filterEstado" formControlName="estado">
+              <option value="TODOS">Todos</option>
+              <option value="ACTIVO">Activos</option>
+              <option value="INACTIVO">Inactivos</option>
+            </select>
+          </div>
+        }
       </div>
 
       <div class="filter-actions">
@@ -178,9 +205,7 @@
     <div class="section-header">
       <div>
         <h2 class="section-title">Lista de Productos</h2>
-        <p class="section-description">
-          {{ isAdmin ? 'Incluye productos activos y borrados' : 'Solo muestra productos activos' }}
-        </p>
+        <p class="section-description">{{ listDescription }}</p>
       </div>
       <span class="product-count" *ngIf="products$ | async as products">{{ products.length }} productos</span>
     </div>
@@ -231,7 +256,7 @@
                   @if (isAdmin) {
                     <td>
                       <span class="badge" [class.badge-danger]="product.borrado" [class.badge-success]="!product.borrado">
-                        {{ product.borrado ? 'Borrado' : 'Activo' }}
+                        {{ product.borrado ? 'Inactivo' : 'Activo' }}
                       </span>
                     </td>
                   }

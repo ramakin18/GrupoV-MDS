@@ -1,9 +1,4 @@
-export interface Client {
-  id?: number;
-  nombre: string;
-  apellido: string;
-  email: string;
-  contrasena?: string;
+export interface DomicilioEnvio {
   pais: string;
   provincia: string;
   localidad: string;
@@ -11,7 +6,18 @@ export interface Client {
   numero: string;
   piso?: string;
   departamento?: string;
+}
+
+export interface Client {
+  id?: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  domicilio: DomicilioEnvio;
   rol?: string;
 }
 
-export type ClientCreateDto = Omit<Client, 'id'>;
+export interface ClientCreateDto extends Omit<Client, 'id'> {
+  contrasena: string;
+  rol: string;
+}

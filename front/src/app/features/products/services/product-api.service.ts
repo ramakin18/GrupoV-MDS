@@ -19,8 +19,14 @@ export class ProductApiService implements IProductService {
     if (filters.precio !== null && filters.precio !== undefined) {
       params['precio'] = String(filters.precio);
     }
-    if (filters.stock !== null && filters.stock !== undefined) {
-      params['stock'] = String(filters.stock);
+    if (filters.stockMin !== null && filters.stockMin !== undefined) {
+      params['stockMin'] = String(filters.stockMin);
+    }
+    if (filters.stockMax !== null && filters.stockMax !== undefined) {
+      params['stockMax'] = String(filters.stockMax);
+    }
+    if (filters.estado) {
+      params['estado'] = filters.estado;
     }
 
     return this.http.get<Product[]>(this.apiUrl, {

@@ -1,5 +1,6 @@
 package backend.features.dtos.response;
 
+import backend.features.dtos.DomicilioEnvioDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,12 +16,6 @@ public class ClienteResponseDto {
     private String nombre;
     private String apellido;
     private String email;
-    private String pais;
-    private String provincia;
-    private String localidad;
-    private String calle;
-    private String numero;
-    private String piso;
-    private String departamento;
+    private DomicilioEnvioDto domicilio;
     private String rol;
 }

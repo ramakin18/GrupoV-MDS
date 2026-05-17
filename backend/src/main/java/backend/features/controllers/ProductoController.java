@@ -2,6 +2,7 @@ package backend.features.controllers;
 
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
+import backend.features.models.ProductoEstadoFiltro;
 import backend.features.models.ProductoViewRole;
 import backend.features.services.interfaces.domain.IProductoService;
 import jakarta.validation.Valid;
@@ -31,10 +32,15 @@ public class ProductoController {
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) BigDecimal precio,
             @RequestParam(required = false) Integer stock,
+            @RequestParam(required = false) Integer stockMin,
+            @RequestParam(required = false) Integer stockMax,
+            @RequestParam(required = false) String estado,
             @RequestParam(required = false) String rol) {
 
         ProductoViewRole viewRole = ProductoViewRole.from(rol);
-        return ResponseEntity.ok(productoService.getAll(nombre, precio, stock, viewRole));
+        ProductoEstadoFiltro estadoFiltro = ProductoEstadoFiltro.from(estado);
+        Integer stockMinimo = stockMin != null ? stockMin : stock;
+        return ResponseEntity.ok(productoService.getAll(nombre, precio, stockMinimo, stockMax, viewRole, estadoFiltro));
     }
 
     @GetMapping("/{id}")
