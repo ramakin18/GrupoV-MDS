@@ -29,13 +29,11 @@ export class ProductApiService implements IProductService {
       params['estado'] = filters.estado;
     }
 
-    return this.http.get<Product[]>(this.apiUrl, {
-      params
-    });
+    return this.http.get<Product[]>(this.apiUrl, { params });
   }
 
-  create(product: ProductCreateDto): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product);
+  create(formData: FormData): Observable<Product> {
+    return this.http.post<Product>(this.apiUrl, formData);
   }
 
   getById(id: number): Observable<Product> {

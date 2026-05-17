@@ -528,3 +528,79 @@ tbody tr:hover {
     padding: var(--spacing-sm);
   }
 }
+
+
+/* NUEVOS ESTILOS PARA EDICIÓN EN LÍNEA Y MODAL         */
+
+
+/* Inputs transparentes de la tabla */
+.inline-input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+.inline-input:focus, .inline-input:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  outline: none;
+}
+.inline-input.numeric { text-align: right; width: 80px; }
+.inline-input.small { width: 50px; }
+.input-with-prefix.inline { width: auto; height: 32px; border: 1px solid var(--color-border); }
+
+/* Controles de +/- Stock */
+.stock-controls { display: flex; align-items: center; gap: 4px; }
+.btn-stock {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; cursor: pointer;
+}
+.btn-stock:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+.btn-stock:disabled { opacity: 0.5; cursor: not-allowed; }
+.stock-display { min-width: 30px; text-align: center; font-weight: 600; }
+.stock-display.warning { color: var(--color-warning); }
+
+/* Botones de Activar/Inactivar de la tabla */
+.btn-toggle {
+  padding: 4px 12px; border-radius: 12px; border: none; font-size: 12px; font-weight: bold; cursor: pointer;
+  background: var(--color-surface-hover); color: var(--color-text-muted);
+}
+.btn-toggle.active { background: rgba(16, 185, 129, 0.2); color: var(--color-success); }
+.btn-sm { padding: 4px 12px; min-height: 32px; font-size: 12px; }
+
+/* Fila con alerta amarilla (Escasa) */
+.escaso-row { background: rgba(245, 158, 11, 0.05) !important; border-left: 3px solid var(--color-warning); }
+
+/* Botón Productos Escasos arriba */
+.btn-escasos {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--radius-sm);
+  background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); cursor: pointer; transition: all 0.2s;
+}
+.btn-escasos.has-escasos { border-color: var(--color-warning); color: var(--color-warning); }
+.btn-escasos.active { background: var(--color-warning); color: #fff; border-color: var(--color-warning); }
+
+/* Modal Oscuro */
+.modal-backdrop {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s;
+}
+.modal-card {
+  background: var(--color-surface); width: 90%; max-width: 500px; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--color-border); padding: 24px;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-header h3 { margin: 0; color: var(--color-text); font-size: 1.25rem; }
+.close-btn { background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.5rem; }
+.changes-list { background: var(--color-background); padding: 16px; border-radius: var(--radius-sm); list-style: none; margin-top: 16px; }
+.changes-list li { margin-bottom: 8px; color: var(--color-text-secondary); }
+.changes-list s { color: var(--color-error); }
+.new-val { color: var(--color-success); font-weight: bold; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }

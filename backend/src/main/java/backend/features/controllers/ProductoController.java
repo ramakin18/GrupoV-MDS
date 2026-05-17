@@ -1,5 +1,22 @@
 package backend.features.controllers;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.models.ProductoEstadoFiltro;
@@ -7,11 +24,6 @@ import backend.features.models.ProductoViewRole;
 import backend.features.services.interfaces.domain.IProductoService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -20,11 +32,12 @@ public class ProductoController {
 
     private final IProductoService productoService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductoResponseDto> create(
-            @Valid @RequestBody ProductoCreateReqDto request
+            @RequestPart("producto") @Valid ProductoCreateReqDto request,
+            @RequestPart(value = "imagen", required = true) MultipartFile imagen
     ) {
-        return ResponseEntity.ok(productoService.create(request));
+        return ResponseEntity.ok(productoService.create(request, imagen));
     }
 
     @GetMapping

@@ -1,5 +1,12 @@
 package backend.features.services.impl.domain;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import backend.exceptions.DuplicateResourceException;
 import backend.exceptions.ValidationException;
 import backend.exceptions.ResourceNotFoundException;
 import backend.features.dtos.request.ProductoCreateReqDto;
@@ -12,10 +19,6 @@ import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.specs.ProductoSpecifications;
 import backend.features.services.interfaces.domain.IProductoService;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -23,10 +26,25 @@ public class ProductoServiceImpl implements IProductoService {
 
     private final IProductoRepository productoRepository;
     private final ProductoMapper productoMapper;
+    private final CloudinaryServiceImpl cloudinaryService;
 
     @Override
-    public ProductoResponseDto create(ProductoCreateReqDto request) {
+    public ProductoResponseDto create(ProductoCreateReqDto request, MultipartFile imagen) {
+        if (productoRepository.existsByNombreProductoIgnoreCase(request.nombreProducto())) {
+            throw new DuplicateResourceException("Ya existe un producto con ese nombre.");
+        }
+
         Producto entity = productoMapper.toModel(request);
+
+        try {
+            if (imagen != null && !imagen.isEmpty()) {
+                String imageUrl = cloudinaryService.uploadImage(imagen);
+                entity.setImagenUrl(imageUrl);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al subir la imagen a Cloudinary");
+        }
+
         Producto saved = productoRepository.save(entity);
         return productoMapper.toResponseDto(saved);
     }
@@ -69,13 +87,22 @@ public class ProductoServiceImpl implements IProductoService {
 
     @Override
     public ProductoResponseDto update(Long id, ProductoCreateReqDto request) {
-        Producto producto = productoRepository.findByIdProductoAndBorradoFalse(id)
+        Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con id: " + id));
+
+        if (productoRepository.existsByNombreProductoIgnoreCaseAndIdProductoNot(request.nombreProducto(), id)) {
+            throw new DuplicateResourceException("El nombre ya está en uso por otro producto.");
+        }
 
         producto.setNombreProducto(request.nombreProducto());
         producto.setDescripcion(request.descripcion());
         producto.setPrecio(request.precio());
         producto.setStockDisponible(request.stockDisponible());
+        producto.setStockMinimo(request.stockMinimo());
+        
+        if (request.borrado() != null) {
+            producto.setBorrado(request.borrado());
+        }
 
         Producto updated = productoRepository.save(producto);
         return productoMapper.toResponseDto(updated);

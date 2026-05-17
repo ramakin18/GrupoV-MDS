@@ -42,12 +42,7 @@
         <div class="form-grid">
           <div class="form-field">
             <label for="nombreProducto">Nombre del Producto</label>
-            <input
-              id="nombreProducto"
-              type="text"
-              formControlName="nombreProducto"
-              placeholder="Ej. PROD-001"
-              [class.invalid]="productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched">
+            <input id="nombreProducto" type="text" formControlName="nombreProducto" placeholder="Ej. PROD-001" [class.invalid]="productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched">
             @if (productForm.get('nombreProducto')?.invalid && productForm.get('nombreProducto')?.touched) {
               <small class="field-error">Nombre requerido, minimo 4 caracteres</small>
             }
@@ -55,12 +50,7 @@
 
           <div class="form-field">
             <label for="descripcion">Descripcion</label>
-            <input
-              id="descripcion"
-              type="text"
-              formControlName="descripcion"
-              placeholder="Descripcion del producto"
-              [class.invalid]="productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched">
+            <input id="descripcion" type="text" formControlName="descripcion" placeholder="Descripcion del producto" [class.invalid]="productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched">
             @if (productForm.get('descripcion')?.invalid && productForm.get('descripcion')?.touched) {
               <small class="field-error">Descripcion requerida, minimo 5 caracteres</small>
             }
@@ -70,42 +60,40 @@
             <label for="precio">Precio</label>
             <div class="input-with-prefix">
               <span class="input-prefix">$</span>
-              <input
-                id="precio"
-                type="number"
-                formControlName="precio"
-                placeholder="0.00"
-                step="0.01"
-                [class.invalid]="productForm.get('precio')?.invalid && productForm.get('precio')?.touched">
+              <input id="precio" type="number" formControlName="precio" placeholder="0.00" step="0.01" [class.invalid]="productForm.get('precio')?.invalid && productForm.get('precio')?.touched">
             </div>
             @if (productForm.get('precio')?.invalid && productForm.get('precio')?.touched) {
-              <small class="field-error">Precio debe ser mayor a 0</small>
+              <small class="field-error">Precio debe ser mayor a 0 y máx 2 decimales</small>
             }
           </div>
 
           <div class="form-field">
             <label for="stockDisponible">Stock</label>
-            <input
-              id="stockDisponible"
-              type="number"
-              formControlName="stockDisponible"
-              placeholder="0"
-              [class.invalid]="productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched">
+            <input id="stockDisponible" type="number" formControlName="stockDisponible" placeholder="0" [class.invalid]="productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched">
             @if (productForm.get('stockDisponible')?.invalid && productForm.get('stockDisponible')?.touched) {
               <small class="field-error">Stock debe ser mayor o igual a 0</small>
             }
+          </div>
+
+          <div class="form-field">
+            <label for="stockMinimo">Stock Mínimo</label>
+            <input id="stockMinimo" type="number" formControlName="stockMinimo" placeholder="0" [class.invalid]="productForm.get('stockMinimo')?.invalid && productForm.get('stockMinimo')?.touched">
+            @if (productForm.get('stockMinimo')?.invalid && productForm.get('stockMinimo')?.touched) {
+              <small class="field-error">El stock mínimo debe ser mayor o igual a 0</small>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="imagenProducto">Imagen del Producto</label>
+            <input id="imagenProducto" type="file" accept="image/*" (change)="onFileSelected($event)" class="inline-input" style="padding-top: 8px;">
           </div>
         </div>
 
         <button type="submit" [disabled]="productForm.invalid || isLoading" class="btn-primary">
           @if (isLoading) {
-            <span class="spinner"></span>
-            <span>Guardando...</span>
+            <span class="spinner"></span><span>Guardando...</span>
           } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Crear Producto</span>
           }
         </button>
@@ -125,30 +113,18 @@
       <div class="form-grid filter-grid">
         <div class="form-field">
           <label for="filterNombre">Nombre</label>
-          <input
-            id="filterNombre"
-            type="text"
-            formControlName="nombre"
-            placeholder="Nombre del producto">
+          <input id="filterNombre" type="text" formControlName="nombre" placeholder="Nombre del producto">
         </div>
-
         <div class="form-field">
           <label for="filterPrecio">Precio minimo</label>
           <div class="input-with-prefix">
             <span class="input-prefix">$</span>
-            <input
-              id="filterPrecio"
-              type="number"
-              formControlName="precio"
-              placeholder="0.00"
-              step="0.01"
-              [class.invalid]="filterForm.get('precio')?.invalid && filterForm.get('precio')?.touched">
+            <input id="filterPrecio" type="number" formControlName="precio" placeholder="0.00" step="0.01" [class.invalid]="filterForm.get('precio')?.invalid && filterForm.get('precio')?.touched">
           </div>
           @if (filterForm.get('precio')?.invalid && filterForm.get('precio')?.touched) {
             <small class="field-error">El precio minimo no puede ser negativo</small>
           }
         </div>
-
         <div class="form-field">
           <label for="filterStockMin">Stock minimo</label>
           <input
@@ -189,14 +165,9 @@
           </div>
         }
       </div>
-
       <div class="filter-actions">
-        <button type="submit" [disabled]="filterForm.invalid || isLoading" class="btn-primary">
-          Aplicar filtros
-        </button>
-        <button type="button" [disabled]="isLoading" class="btn-secondary" (click)="clearFilters()">
-          Limpiar
-        </button>
+        <button type="submit" [disabled]="filterForm.invalid || isLoading" class="btn-primary">Aplicar filtros</button>
+        <button type="button" [disabled]="isLoading" class="btn-secondary" (click)="clearFilters()">Limpiar</button>
       </div>
     </form>
   </section>
@@ -207,22 +178,24 @@
         <h2 class="section-title">Lista de Productos</h2>
         <p class="section-description">{{ listDescription }}</p>
       </div>
-      <span class="product-count" *ngIf="products$ | async as products">{{ products.length }} productos</span>
+      <span class="product-count" *ngIf="products.length">{{ products.length }} productos</span>
     </div>
 
-    @if (isLoading) {
-      <div class="loading-state" aria-live="polite">
-        <div class="spinner spinner-lg"></div>
-        <p>Cargando productos...</p>
+    @if (isAdmin) {
+      <div class="actions-bar" style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+        <button class="btn-escasos" [class.active]="mostrarEscasos" [class.has-escasos]="hayProductosEscasos" (click)="toggleEscasos()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          {{ mostrarEscasos ? 'Mostrar Todos' : 'Productos Escasos' }}
+        </button>
       </div>
-    } @else if (products$ | async; as products) {
-      @if (products.length === 0) {
+    }
+
+    @if (isLoading && products.length === 0) {
+      <div class="loading-state" aria-live="polite"><div class="spinner spinner-lg"></div><p>Cargando productos...</p></div>
+    } @else {
+      @if (displayedProducts.length === 0) {
         <div class="empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           <p class="empty-message">{{ emptyMessage }}</p>
           <p class="empty-hint">{{ emptyHint }}</p>
         </div>
@@ -233,32 +206,62 @@
               <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Producto</th>
-                <th scope="col">Descripcion</th>
+                <th scope="col">Descripción</th>
                 <th scope="col">Precio</th>
-                <th scope="col">Stock</th>
+                <th scope="col">Stock / Mínimo</th>
                 @if (isAdmin) {
                   <th scope="col">Estado</th>
+                  <th scope="col">Acciones</th>
                 }
               </tr>
             </thead>
             <tbody>
-              @for (product of products; track product.idProducto) {
-                <tr [class.deleted-row]="product.borrado">
+              @for (product of displayedProducts; track product.idProducto) {
+                <tr [class.deleted-row]="product.borrado" [class.escaso-row]="product.stockDisponible <= product.stockMinimo && !product.borrado">
                   <td class="text-muted">{{ product.idProducto }}</td>
-                  <td><strong>{{ product.nombreProducto }}</strong></td>
-                  <td>{{ product.descripcion }}</td>
-                  <td class="text-numeric">{{ product.precio | number:'1.2-2' }}</td>
-                  <td class="text-numeric">
-                    <span class="badge" [class.badge-warning]="product.stockDisponible < 10">
-                      {{ product.stockDisponible }}
-                    </span>
-                  </td>
+                  
                   @if (isAdmin) {
                     <td>
-                      <span class="badge" [class.badge-danger]="product.borrado" [class.badge-success]="!product.borrado">
-                        {{ product.borrado ? 'Inactivo' : 'Activo' }}
-                      </span>
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        @if (product.imagenUrl) { <img [src]="product.imagenUrl" alt="img" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"> }
+                        <input type="text" class="inline-input font-bold" [(ngModel)]="product.nombreProducto" (change)="markAsEdited(product)" [placeholder]="product.original.nombreProducto">
+                      </div>
                     </td>
+                    <td>
+                      <input type="text" class="inline-input" [(ngModel)]="product.descripcion" (change)="markAsEdited(product)" [placeholder]="product.original.descripcion">
+                    </td>
+                    <td>
+                      <div class="input-with-prefix inline">
+                        <span class="input-prefix">$</span>
+                        <input type="number" step="0.01" min="0" class="inline-input numeric" [(ngModel)]="product.precio" (change)="validatePrice(product)" [placeholder]="product.original.precio.toString()">
+                      </div>
+                    </td>
+                    <td>
+                      <div class="stock-controls">
+                        <button class="btn-stock" (click)="adjustStock(product, -1)" [disabled]="product.stockDisponible <= 0">-</button>
+                        <span class="stock-display" [class.warning]="product.stockDisponible <= product.stockMinimo">{{ product.stockDisponible }}</span>
+                        <button class="btn-stock" (click)="adjustStock(product, 1)">+</button>
+                        <span class="text-muted mx-1">/ Min:</span>
+                        <input type="number" min="0" step="1" class="inline-input numeric small" [(ngModel)]="product.stockMinimo" (change)="validateStockMinimo(product)">
+                      </div>
+                      @if (product.stockDisponible <= product.stockMinimo && !product.borrado) {
+                        <small class="field-error">Stock Crítico!</small>
+                      }
+                    </td>
+                    <td><button class="btn-toggle" [class.active]="!product.borrado" (click)="toggleStatus(product)">{{ product.borrado ? 'Inactivo' : 'Activo' }}</button></td>
+                    <td><button class="btn-primary btn-sm" [disabled]="!product.isEditing" (click)="requestSave(product)">Guardar</button></td>
+                  } @else {
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        @if (product.imagenUrl) { <img [src]="product.imagenUrl" alt="img" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;"> }
+                        <strong>{{ product.nombreProducto }}</strong>
+                      </div>
+                    </td>
+                    <td>{{ product.descripcion }}</td>
+                    <td class="text-numeric">${{ product.precio | number:'1.2-2' }}</td>
+                    <td class="text-numeric">
+                      <span class="badge" [class.badge-warning]="product.stockDisponible <= product.stockMinimo">
+                        {{ product.stockDisponible }}
                   }
                 </tr>
               }
@@ -269,3 +272,29 @@
     }
   </section>
 </div>
+
+@if (productToConfirm) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Confirmar Cambios</h3>
+        <button class="close-btn" (click)="cancelSave()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Estás a punto de modificar el producto <strong>{{ productToConfirm.original.nombreProducto }}</strong>. Revisa los cambios:</p>
+        <ul class="changes-list">
+          @if (pendingChanges?.nombre) { <li><strong>Nombre:</strong> <s>{{ pendingChanges.nombre.old }}</s> ➔ <span class="new-val">{{ pendingChanges.nombre.new }}</span></li> }
+          @if (pendingChanges?.descripcion) { <li><strong>Descripción:</strong> <s>{{ pendingChanges.descripcion.old }}</s> ➔ <span class="new-val">{{ pendingChanges.descripcion.new }}</span></li> }
+          @if (pendingChanges?.precio) { <li><strong>Precio:</strong> <s>${{ pendingChanges.precio.old }}</s> ➔ <span class="new-val">${{ pendingChanges.precio.new }}</span></li> }
+          @if (pendingChanges?.stock) { <li><strong>Stock:</strong> <s>{{ pendingChanges.stock.old }}</s> ➔ <span class="new-val">{{ pendingChanges.stock.new }}</span></li> }
+          @if (pendingChanges?.stockMinimo) { <li><strong>Stock Mín.:</strong> <s>{{ pendingChanges.stockMinimo.old }}</s> ➔ <span class="new-val">{{ pendingChanges.stockMinimo.new }}</span></li> }
+          @if (pendingChanges?.estado) { <li><strong>Estado:</strong> <s>{{ pendingChanges.estado.old }}</s> ➔ <span class="new-val">{{ pendingChanges.estado.new }}</span></li> }
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="cancelSave()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmSave()">Confirmar y Guardar</button>
+      </div>
+    </div>
+  </div>
+}

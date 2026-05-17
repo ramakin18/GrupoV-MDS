@@ -1,11 +1,12 @@
 package backend.features.mappers;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.models.Producto;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class ProductoMapper {
@@ -16,6 +17,8 @@ public class ProductoMapper {
                 .descripcion(request.descripcion())
                 .precio(request.precio())
                 .stockDisponible(request.stockDisponible())
+                .stockMinimo(request.stockMinimo())
+                .borrado(request.borrado() != null ? request.borrado() : false)
                 .build();
     }
 
@@ -26,13 +29,13 @@ public class ProductoMapper {
                 model.getDescripcion(),
                 model.getPrecio(),
                 model.getStockDisponible(),
-                model.isBorrado()
+                model.getStockMinimo(),
+                model.isBorrado(),
+                model.getImagenUrl()
         );
     }
 
     public List<ProductoResponseDto> toResponseDtoList(List<Producto> models) {
-        return models.stream()
-                .map(this::toResponseDto)
-                .toList();
+        return models.stream().map(this::toResponseDto).toList();
     }
 }

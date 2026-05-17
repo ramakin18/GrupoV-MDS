@@ -1,14 +1,22 @@
 package backend.features.models;
 
-import jakarta.persistence.*;
+import java.math.BigDecimal;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "productos")
@@ -31,17 +39,28 @@ public class Producto {
 
     @NotNull(message = "Debe ingresar un precio valido")
     @Positive(message = "El precio debe ser mayor a 0")
+    @Digits(integer = 10, fraction = 2, message = "El precio no puede tener mas de 2 decimales") 
     private BigDecimal precio;
 
     @NotNull(message = "Debe ingresar un stock valido")
     @PositiveOrZero(message = "El stock debe ser mayor o igual a 0")
     private Integer stockDisponible;
 
+    @NotNull(message = "Debe ingresar un stock mínimo valido")
+    @PositiveOrZero(message = "El stock mínimo debe ser mayor o igual a 0")
+    private Integer stockMinimo;
+
+    private String imagenUrl;
+
     @Builder.Default
     private boolean borrado = false;
 
     public void markAsDeleted() {
         this.borrado = true;
+    }
+
+    public void setBorrado(boolean estado) {
+        this.borrado = estado;
     }
 
     public boolean isActive() {

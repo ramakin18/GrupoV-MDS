@@ -4,7 +4,7 @@ import { Product, ProductCreateDto, ProductFilters, ProductViewRole } from '../m
 
 export interface IProductService {
   getAll(role?: ProductViewRole, filters?: ProductFilters): Observable<Product[]>;
-  create(product: ProductCreateDto): Observable<Product>;
+  create(formData: FormData): Observable<Product>;
   getById(id: number): Observable<Product>;
   update(id: number, product: Partial<ProductCreateDto>): Observable<Product>;
   delete(id: number): Observable<void>;

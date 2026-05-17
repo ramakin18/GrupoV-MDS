@@ -6,33 +6,40 @@ import {
   FormBuilder,
   FormGroup,
   ValidationErrors,
-  Validators
+  Validators,
+  FormsModule
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Observable, catchError, finalize, of, shareReplay } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
 import {
   Product,
   ProductCreateDto,
   ProductFilters,
   ProductStatusFilter,
-  ProductViewRole
+  ProductViewRole,
+  ProductRow
 } from '@core/models/product.model';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink], 
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent implements OnInit {
-  products$: Observable<Product[]> = of([]);
+  products: ProductRow[] = []; 
   productForm: FormGroup;
   filterForm: FormGroup;
   role: ProductViewRole = 'USUARIO';
   isLoading = false;
   errorMessage = '';
+
+  mostrarEscasos = false; 
+  selectedFile: File | null = null;
+  productToConfirm: ProductRow | null = null;
+  pendingChanges: any = null;
 
   constructor(
     @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
@@ -43,8 +50,9 @@ export class ProductListComponent implements OnInit {
     this.productForm = this.fb.group({
       nombreProducto: ['', [Validators.required, Validators.minLength(4)]],
       descripcion: ['', [Validators.required, Validators.minLength(5)]],
-      precio: [0, [Validators.required, Validators.min(0.01)]],
-      stockDisponible: [0, [Validators.required, Validators.min(0)]]
+      precio: [0, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]], 
+      stockDisponible: [0, [Validators.required, Validators.min(0)]],
+      stockMinimo: [0, [Validators.required, Validators.min(0)]] 
     });
     this.filterForm = this.fb.group({
       nombre: [''],
@@ -62,8 +70,17 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  get isAdmin(): boolean {
-    return this.role === 'ADMIN';
+  get isAdmin(): boolean { return this.role === 'ADMIN'; }
+  
+  get hayProductosEscasos(): boolean { 
+    return this.products.some(p => p.stockDisponible <= p.stockMinimo && !p.borrado); 
+  }
+
+  get displayedProducts(): ProductRow[] {
+    if (!this.mostrarEscasos) return this.products;
+    return this.products
+      .filter(p => p.stockDisponible <= p.stockMinimo && !p.borrado)
+      .sort((a, b) => (a.stockDisponible - a.stockMinimo) - (b.stockDisponible - b.stockMinimo));
   }
 
   get pageTitle(): string {
@@ -83,7 +100,18 @@ export class ProductListComponent implements OnInit {
   get emptyHint(): string {
     return this.isAdmin
       ? 'Usa el formulario de arriba para agregar tu primer producto'
-      : 'Cuando el administrador registre productos activos, apareceran aca';
+      : 'Cuando el administrador registre productos activos, aparecerán acá';
+  }
+
+  toggleEscasos(): void {
+    this.mostrarEscasos = !this.mostrarEscasos;
+  }
+
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
   }
 
   get listDescription(): string {
@@ -100,17 +128,101 @@ export class ProductListComponent implements OnInit {
   loadProducts(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    this.products$ = this.productService.getAll(this.role, this.getFilters()).pipe(
-      catchError((error: unknown) => {
+    this.productService.getAll(this.role, this.getFilters()).pipe(
+      catchError((error) => {
         this.errorMessage = 'Error al cargar productos';
-        console.error('Error loading products:', error);
         return of([]);
       }),
-      finalize(() => {
+      finalize(() => this.isLoading = false)
+    ).subscribe(data => {
+      this.products = data.map(p => ({
+        ...p,
+        original: { ...p },
+        stockDelta: 0,
+        isEditing: false
+      }));
+    });
+  }
+
+  adjustStock(row: ProductRow, delta: number): void {
+    const newVal = (row.stockDelta || 0) + delta;
+    if (row.original.stockDisponible + newVal < 0) return;
+    row.stockDelta = newVal;
+    row.stockDisponible = row.original.stockDisponible + row.stockDelta;
+    this.markAsEdited(row);
+  }
+
+  validatePrice(row: ProductRow): void {
+    if (row.precio < 0) row.precio = row.original.precio;
+    row.precio = parseFloat(row.precio.toFixed(2));
+    this.markAsEdited(row);
+  }
+
+  validateStockMinimo(row: ProductRow): void {
+    const parsed = Math.floor(Number(row.stockMinimo));
+    row.stockMinimo = parsed < 0 ? row.original.stockMinimo : parsed;
+    this.markAsEdited(row);
+  }
+
+  markAsEdited(row: ProductRow): void {
+    row.isEditing = true;
+  }
+
+  toggleStatus(row: ProductRow): void {
+    row.borrado = !row.borrado;
+    this.markAsEdited(row);
+  }
+
+  requestSave(row: ProductRow): void {
+    if (row.nombreProducto.trim() === '') {
+      this.errorMessage = 'El nombre no puede estar vacío';
+      return;
+    }
+    
+    this.pendingChanges = {
+      nombre: row.nombreProducto !== row.original.nombreProducto ? { old: row.original.nombreProducto, new: row.nombreProducto } : null,
+      descripcion: row.descripcion !== row.original.descripcion ? { old: row.original.descripcion, new: row.descripcion } : null,
+      precio: row.precio !== row.original.precio ? { old: row.original.precio, new: row.precio } : null,
+      stock: row.stockDelta !== 0 ? { old: row.original.stockDisponible, new: row.stockDisponible } : null,
+      stockMinimo: row.stockMinimo !== row.original.stockMinimo ? { old: row.original.stockMinimo, new: row.stockMinimo } : null,
+      estado: row.borrado !== row.original.borrado ? { old: row.original.borrado ? 'Inactivo' : 'Activo', new: row.borrado ? 'Inactivo' : 'Activo' } : null
+    };
+
+    this.productToConfirm = row;
+  }
+
+  cancelSave(): void {
+    if (this.productToConfirm) {
+      Object.assign(this.productToConfirm, { ...this.productToConfirm.original, stockDelta: 0, isEditing: false });
+    }
+    this.productToConfirm = null;
+    this.pendingChanges = null;
+  }
+
+  confirmSave(): void {
+    if (!this.productToConfirm || !this.productToConfirm.idProducto) return;
+    
+    this.isLoading = true;
+    const dto: Partial<ProductCreateDto> = {
+      nombreProducto: this.productToConfirm.nombreProducto,
+      descripcion: this.productToConfirm.descripcion,
+      precio: this.productToConfirm.precio,
+      stockDisponible: this.productToConfirm.stockDisponible,
+      stockMinimo: this.productToConfirm.stockMinimo,
+      borrado: this.productToConfirm.borrado
+    };
+
+    this.productService.update(this.productToConfirm.idProducto, dto).subscribe({
+      next: () => {
+        this.productToConfirm = null;
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al guardar los cambios';
         this.isLoading = false;
-      }),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
+        this.productToConfirm = null;
+      }
+    });
   }
 
   applyFilters(): void {
@@ -118,7 +230,6 @@ export class ProductListComponent implements OnInit {
       this.filterForm.markAllAsTouched();
       return;
     }
-
     this.loadProducts();
   }
 
@@ -134,7 +245,10 @@ export class ProductListComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.isAdmin) {
+    if (!this.isAdmin) return;
+    
+    if (!this.selectedFile) {
+      this.errorMessage = 'Debes seleccionar una imagen para el nuevo producto';
       return;
     }
 
@@ -144,29 +258,27 @@ export class ProductListComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
-    const productData: ProductCreateDto = this.productForm.value;
+    const formData = new FormData();
+    const productoBlob = new Blob([JSON.stringify(this.productForm.value)], {
+      type: 'application/json'
+    });
+    
+    formData.append('producto', productoBlob);
+    formData.append('imagen', this.selectedFile as Blob);
 
-    this.productService.create(productData).subscribe({
+    this.productService.create(formData).subscribe({
       next: () => {
-        this.productForm.reset({
-          nombreProducto: '',
-          descripcion: '',
-          precio: 0,
-          stockDisponible: 0
-        });
+        this.productForm.reset({ precio: 0, stockDisponible: 0, stockMinimo: 0 });
+        this.selectedFile = null;
+        const fileInput = document.getElementById('imagenProducto') as HTMLInputElement;
+        if(fileInput) fileInput.value = '';
         this.loadProducts();
       },
-      error: (error: any) => {
+      error: (error) => {
         this.errorMessage = error?.error?.message || 'Error al crear producto';
-        console.error('Error creating product:', error);
         this.isLoading = false;
       }
     });
-  }
-
-  goHome(): void {
-    this.router.navigate(['/']);
   }
 
   private normalizeRole(role: string | null): ProductViewRole {
