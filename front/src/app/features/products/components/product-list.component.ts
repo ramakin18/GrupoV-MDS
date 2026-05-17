@@ -12,6 +12,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, finalize, of } from 'rxjs';
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
+import { CartService } from '../../../core/services/cart.service';
 import {
   Product,
   ProductCreateDto,
@@ -20,11 +21,12 @@ import {
   ProductViewRole,
   ProductRow
 } from '@core/models/product.model';
+import { ModalCarritoComponent } from '../../modal-carrito/modal-carrito';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink], 
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, ModalCarritoComponent], 
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
@@ -32,9 +34,9 @@ export class ProductListComponent implements OnInit {
   products: ProductRow[] = []; 
   productForm: FormGroup;
   filterForm: FormGroup;
-  productForm: FormGroup; // Para el alta de productos si sos admin
   role: ProductViewRole = 'USUARIO';
   isLoading = false;
+  isCartOpen = false;
   errorMessage = '';
 
   mostrarEscasos = false; 
@@ -46,7 +48,7 @@ export class ProductListComponent implements OnInit {
     @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
     private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly cartService: CartService
   ) {
     this.productForm = this.fb.group({
       nombreProducto: ['', [Validators.required, Validators.minLength(4)]],
@@ -124,6 +126,10 @@ export class ProductListComponent implements OnInit {
     if (estado === 'ACTIVO') return 'Muestra productos activos';
     if (estado === 'INACTIVO') return 'Muestra productos inactivos';
     return 'Incluye productos activos e inactivos';
+  }
+
+  get cartQuantity(): number {
+    return this.cartService.getTotalQuantity();
   }
 
   loadProducts(): void {
@@ -282,8 +288,80 @@ export class ProductListComponent implements OnInit {
     });
   }
 
+  addToCart(product: Product): void {
+    const result = this.cartService.addProduct(product);
+    if (!result.success) {
+      this.errorMessage = result.message || 'No se pudo agregar el producto al carrito.';
+      return;
+    }
+    this.errorMessage = '';
+  }
+
+  openCart(): void {
+    this.isCartOpen = true;
+  }
+
+  closeCart(): void {
+    this.isCartOpen = false;
+  }
+
   private normalizeRole(role: string | null): ProductViewRole {
     return role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USUARIO';
+  }
+
+    if (this.productForm.invalid) {
+      this.productForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading = true;
+    const formData = new FormData();
+    const productoBlob = new Blob([JSON.stringify(this.productForm.value)], {
+      type: 'application/json'
+    });
+    
+    formData.append('producto', productoBlob);
+    formData.append('imagen', this.selectedFile as Blob);
+
+    this.productService.create(formData).subscribe({
+      next: () => {
+        this.productForm.reset({ precio: 0, stockDisponible: 0, stockMinimo: 0 });
+        this.selectedFile = null;
+        const fileInput = document.getElementById('imagenProducto') as HTMLInputElement;
+        if(fileInput) fileInput.value = '';
+        this.loadProducts();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Error al crear producto';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private normalizeRole(role: string | null): ProductViewRole {
+    return role?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USUARIO';
+=======
+  // Recibe el producto del catalogo y delega la validacion/agregado al CartService.
+  addToCart(product: Product): void {
+    const result = this.cartService.addProduct(product);
+
+    if (!result.success) {
+      this.errorMessage = result.message || 'No se pudo agregar el producto al carrito.';
+      return;
+    }
+
+    this.errorMessage = '';
+  }
+
+  // Abre el modal del carrito.
+  openCart(): void {
+    this.isCartOpen = true;
+  }
+
+  // Cierra el modal cuando el componente hijo emite el evento cerrar.
+  closeCart(): void {
+    this.isCartOpen = false;
+>>>>>>> origin/quintero
   }
 
   private getFilters(): ProductFilters {
