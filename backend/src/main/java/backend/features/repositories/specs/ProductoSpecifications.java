@@ -10,35 +10,56 @@ import java.util.List;
 
 public class ProductoSpecifications {
 
+    public static Specification<Producto> hasNombre(String nombre) {
+        return (root, query, cb) -> (nombre == null || nombre.isEmpty())
+                ? null : cb.like(cb.lower(root.get("nombre")), "%" + nombre.toLowerCase() + "%");
+    }
+
+    public static Specification<Producto> hasPrecioMax(Double precio) {
+        return (root, query, cb) -> precio == null
+                ? null : cb.lessThanOrEqualTo(root.get("precio"), precio);
+    }
+
+    public static Specification<Producto> hasStockMin(Integer stock) {
+        return (root, query, cb) -> stock == null
+                ? null : cb.greaterThanOrEqualTo(root.get("stock"), stock);
+    }
     public static Specification<Producto> filtrarProductos(
             String nombre,
             BigDecimal precio,
             Integer stock,
             boolean incluirBorrados
     ) {
-        return (root, query, criteriaBuilder) -> {
+        return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // 1. Filtro por estado (borrado)
             if (!incluirBorrados) {
-                predicates.add(criteriaBuilder.isFalse(root.get("borrado")));
-            }
-            if (nombre != null && !nombre.isBlank()) {
-                predicates.add(
-                    criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("nombreProducto")),
-                        "%" + nombre.toLowerCase() + "%"
-                    )
-                );
-            }
-            if (precio != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("precio"), precio));
-            }
-            if (stock != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("stockDisponible"), stock));
+                predicates.add(cb.isFalse(root.get("borrado")));
             }
 
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            // 2. Filtro por nombre (like)
+            if (nombre != null && !nombre.isBlank()) {
+                predicates.add(cb.like(
+                        cb.lower(root.get("nombre")),
+                        "%" + nombre.toLowerCase() + "%"
+                ));
+            }
+
+            // 3. Filtro por precio (Menor o igual al presupuesto enviado)
+            if (precio != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("precio"), precio));
+            }
+
+            // 4. Filtro por stock (Mayor o igual al stock mínimo requerido)
+            if (stock != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("stockDisponible"), stock));
+            }
+
+            // Unimos todos los predicados con un AND
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
 }
 

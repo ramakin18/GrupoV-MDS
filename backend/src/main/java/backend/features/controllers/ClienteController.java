@@ -19,9 +19,16 @@ public class ClienteController {
     private final IClienteService clienteService;
 
     @PostMapping("/registrar")
-    public ResponseEntity<ClienteResponseDto> registrar(@Valid @RequestBody ClienteCreateRequestDto request) {
-        ClienteResponseDto response = clienteService.register(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> registrar(@Valid @RequestBody ClienteCreateRequestDto request) {
+        try {
+            // Intentamos registrar normalmente
+            ClienteResponseDto response = clienteService.register(request);
+            return ResponseEntity.ok(response);
+        } catch (backend.exceptions.DuplicateResourceException e) {
+            // Si el service tira la excepción del email, devolvemos un 400
+            // con el mensaje "El email ya se encuentra registrado"
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
     }
 
     @PostMapping("/login")

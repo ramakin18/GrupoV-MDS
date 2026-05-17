@@ -24,8 +24,8 @@ export class ClientRegistrationComponent implements OnInit {
     private readonly router: Router
   ) {
     this.registrationForm = this.fb.group({
-      nombre: ['', [Validators.required, Validators.minLength(2)]],
-      apellido: ['', [Validators.required, Validators.minLength(2)]],
+      nombre: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
+      apellido: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
       email: ['', [Validators.required, Validators.email]],
       contrasena: ['', [Validators.required, Validators.minLength(8)]],
       pais: ['', Validators.required],
@@ -49,7 +49,7 @@ export class ClientRegistrationComponent implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     const formValue = this.registrationForm.value;
     const clientData: ClientCreateDto = {
       ...formValue,
@@ -88,7 +88,17 @@ export class ClientRegistrationComponent implements OnInit {
     if (field.errors['minlength']) {
       return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
     }
-    if (field.errors['pattern']) return 'Solo números permitidos';
+
+    // Aquí es donde arreglamos los mensajes del pattern
+    if (field.errors['pattern']) {
+      if (fieldName === 'nombre' || fieldName === 'apellido') {
+        return 'Solo se permiten letras';
+      }
+      if (fieldName === 'numero' || fieldName === 'piso') {
+        return 'Solo se permiten números';
+      }
+      return 'Formato inválido';
+    }
 
     return 'Campo inválido';
   }
