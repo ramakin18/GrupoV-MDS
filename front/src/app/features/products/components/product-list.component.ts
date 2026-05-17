@@ -32,6 +32,7 @@ export class ProductListComponent implements OnInit {
   products: ProductRow[] = []; 
   productForm: FormGroup;
   filterForm: FormGroup;
+  productForm: FormGroup; // Para el alta de productos si sos admin
   role: ProductViewRole = 'USUARIO';
   isLoading = false;
   errorMessage = '';
@@ -64,8 +65,10 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      this.role = this.normalizeRole(params.get('role'));
+    // Escuchamos el rol de la URL y cargamos productos
+    this.route.paramMap.subscribe(params => {
+      const roleParam = params.get('role');
+      this.role = roleParam?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USUARIO';
       this.loadProducts();
     });
   }
@@ -88,13 +91,11 @@ export class ProductListComponent implements OnInit {
   }
 
   get pageSubtitle(): string {
-    return this.isAdmin
-      ? 'Visualiza y administra todos los productos registrados'
-      : 'Visualiza los productos activos disponibles';
+    return this.isAdmin ? 'Visualiza y administra el inventario' : 'Visualiza los productos activos disponibles';
   }
 
   get emptyMessage(): string {
-    return this.isAdmin ? 'No hay productos registrados' : 'No hay productos activos para mostrar';
+    return 'No se encontraron productos con estos filtros.';
   }
 
   get emptyHint(): string {
@@ -226,11 +227,11 @@ export class ProductListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    if (this.filterForm.invalid) {
+    if (this.filterForm.valid) {
+      this.loadProducts();
+    } else {
       this.filterForm.markAllAsTouched();
-      return;
     }
-    this.loadProducts();
   }
 
   clearFilters(): void {
@@ -286,14 +287,13 @@ export class ProductListComponent implements OnInit {
   }
 
   private getFilters(): ProductFilters {
-    const rawFilters = this.filterForm.value;
-
+    const rawValues = this.filterForm.value;
     return {
-      nombre: rawFilters.nombre,
-      precio: rawFilters.precio,
-      stockMin: rawFilters.stockMin,
-      stockMax: rawFilters.stockMax,
-      estado: this.isAdmin ? rawFilters.estado : null
+      nombre: rawValues.nombre,
+      precio: rawValues.precio,
+      stockMin: rawValues.stockMin,
+      stockMax: rawValues.stockMax,
+      estado: this.isAdmin ? rawValues.estado : null
     };
   }
 

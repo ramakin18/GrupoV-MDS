@@ -4,11 +4,14 @@ import backend.exceptions.DuplicateResourceException;
 import backend.exceptions.InvalidCredentialsException;
 import backend.exceptions.ResourceNotFoundException;
 import backend.exceptions.ValidationException;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import java.util.stream.Collectors;
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -36,10 +39,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiError(ex.getMessage()));
     }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldError().getDefaultMessage();
+    public ResponseEntity<ApiError> handleMethodArgumentNotValid(@NotNull MethodArgumentNotValidException ex) {
+        String message = "Error de validación"; // Mensaje por defecto
+
+        if (ex.getBindingResult().getFieldError() != null) {
+            message = ex.getBindingResult().getFieldError().getDefaultMessage();
+        }
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiError(message));
     }

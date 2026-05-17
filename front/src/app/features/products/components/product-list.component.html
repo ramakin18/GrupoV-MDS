@@ -181,6 +181,7 @@
       <span class="product-count" *ngIf="products.length">{{ products.length }} productos</span>
     </div>
 
+<<<<<<< HEAD
     @if (isAdmin) {
       <div class="actions-bar" style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
         <button class="btn-escasos" [class.active]="mostrarEscasos" [class.has-escasos]="hayProductosEscasos" (click)="toggleEscasos()">
@@ -271,6 +272,75 @@
       }
     }
   </section>
+</div>
+=======
+    @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner spinner-lg"></div>
+      <p>Cargando productos...</p>
+    </div>
+    } @else {
+    @if (products$ | async; as productsList) {
+
+    @if (productsList.length === 0) {
+    <div class="empty-state">
+      <p class="empty-message">{{ emptyMessage }}</p>
+    </div>
+    } @else {
+
+    @if (isAdmin) {
+    <div class="table-wrapper">
+      <table>
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Stock</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for (product of productsList; track product.idProducto) {
+        <tr [class.deleted-row]="product.borrado">
+          <td>{{ product.idProducto }}</td>
+          <td><strong>{{ product.nombreProducto }}</strong></td>
+          <td>{{ product.precio | number:'1.2-2' }}</td>
+          <td>{{ product.stockDisponible }}</td>
+        </tr>
+        }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="product-grid">
+      @for (product of productsList; track product.idProducto) {
+      <div class="product-card">
+        <div class="price-tag">${{ product.precio | number:'1.2-2' }}</div>
+        <h3>{{ product.nombreProducto }}</h3>
+        <p>{{ product.descripcion }}</p>
+        <div class="card-footer">
+          <small>Stock: {{ product.stockDisponible }}</small>
+          <button class="btn-primary" style="width: auto; padding: 8px 20px;">
+            Agregar
+          </button>
+        </div>
+      </div>
+>>>>>>> origin/rama-Medina
+      }
+    </div>
+    }
+    }
+    }
+    } </section>
+  @if (!isAdmin) {
+  <button class="cart-floating-button" title="Ver mi carrito">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+    <span class="cart-badge">0</span> </button>
+  }
 </div>
 
 @if (productToConfirm) {

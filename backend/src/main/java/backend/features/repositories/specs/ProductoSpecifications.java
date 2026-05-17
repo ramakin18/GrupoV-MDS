@@ -11,6 +11,20 @@ import java.util.List;
 
 public class ProductoSpecifications {
 
+    public static Specification<Producto> hasNombre(String nombre) {
+        return (root, query, cb) -> (nombre == null || nombre.isEmpty())
+                ? null : cb.like(cb.lower(root.get("nombre")), "%" + nombre.toLowerCase() + "%");
+    }
+
+    public static Specification<Producto> hasPrecioMax(Double precio) {
+        return (root, query, cb) -> precio == null
+                ? null : cb.lessThanOrEqualTo(root.get("precio"), precio);
+    }
+
+    public static Specification<Producto> hasStockMin(Integer stock) {
+        return (root, query, cb) -> stock == null
+                ? null : cb.greaterThanOrEqualTo(root.get("stock"), stock);
+    }
     public static Specification<Producto> filtrarProductos(
             String nombre,
             BigDecimal precio,
@@ -18,7 +32,7 @@ public class ProductoSpecifications {
             Integer stockMax,
             ProductoEstadoFiltro estado
     ) {
-        return (root, query, criteriaBuilder) -> {
+        return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (estado == ProductoEstadoFiltro.ACTIVO) {
@@ -53,5 +67,6 @@ public class ProductoSpecifications {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
+
 }
 
