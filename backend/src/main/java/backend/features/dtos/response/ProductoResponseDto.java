@@ -14,6 +14,8 @@ public record ProductoResponseDto(
 
         Integer stockDisponible,
 
+        Integer stockMinimo, 
+
         boolean borrado
 
 ) {
