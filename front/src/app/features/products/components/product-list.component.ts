@@ -1,16 +1,20 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, shareReplay } from 'rxjs/operators';
 import { IProductService, PRODUCT_SERVICE_TOKEN } from '../../../core/services/product.service.interface';
+// Servicio compartido que guarda el carrito y expone sus acciones.
+import { CartService } from '../../../core/services/cart.service';
 import { Product, ProductFilters, ProductViewRole } from '../../../core/models/product.model';
+// Modal standalone que se abre desde el boton flotante del catalogo.
+import { ModalCarritoComponent } from '../../modal-carrito/modal-carrito';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ModalCarritoComponent],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
@@ -21,13 +25,16 @@ export class ProductListComponent implements OnInit {
   productForm: FormGroup; // Para el alta de productos si sos admin
   role: ProductViewRole = 'USUARIO';
   isLoading = false;
+  // Controla si el modal del carrito se muestra o permanece cerrado.
+  isCartOpen = false;
   errorMessage = '';
 
   constructor(
     @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
     private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    // Inyectamos el carrito para agregar productos y leer el contador del badge.
+    private readonly cartService: CartService
   ) {
     // Inicializamos formularios
     this.filterForm = this.fb.group({
@@ -75,6 +82,11 @@ export class ProductListComponent implements OnInit {
   }
 
   // Lógica principal
+  // Cantidad total de unidades en carrito; se usa en el badge del boton flotante.
+  get cartQuantity(): number {
+    return this.cartService.getTotalQuantity();
+  }
+
   loadProducts(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -105,6 +117,28 @@ export class ProductListComponent implements OnInit {
       stock: null
     });
     this.loadProducts();
+  }
+
+  // Recibe el producto del catalogo y delega la validacion/agregado al CartService.
+  addToCart(product: Product): void {
+    const result = this.cartService.addProduct(product);
+
+    if (!result.success) {
+      this.errorMessage = result.message || 'No se pudo agregar el producto al carrito.';
+      return;
+    }
+
+    this.errorMessage = '';
+  }
+
+  // Abre el modal del carrito.
+  openCart(): void {
+    this.isCartOpen = true;
+  }
+
+  // Cierra el modal cuando el componente hijo emite el evento cerrar.
+  closeCart(): void {
+    this.isCartOpen = false;
   }
 
   private getFilters(): ProductFilters {
