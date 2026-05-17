@@ -1,9 +1,14 @@
-Package backend.features.dtos.response;
+package backend.features.dtos.response;
+
 import backend.features.models.SituacionPedido;
-Pubilic record PedidoResponseDTO(
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+public record PedidoResponseDTO(
         Long idPedido,
-        situacionPedido situacion
-
+        Long clienteId,
+        LocalDateTime fecha,
+        SituacionPedido situacion,
+        BigDecimal total
 ) {
 }

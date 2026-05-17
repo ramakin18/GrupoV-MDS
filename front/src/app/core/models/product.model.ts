@@ -12,7 +12,7 @@ export interface Product {
   imagenUrl?: string;
 }
 
-export type ProductCreateDto = Omit<Product, 'idProducto'>;
+export type ProductCreateDto = Omit<Product, 'idProducto' | 'imagenUrl'>;
 
 export interface ProductRow extends Product {
   original: Product;
