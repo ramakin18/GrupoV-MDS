@@ -305,8 +305,6 @@ export class ProductListComponent implements OnInit {
     this.isCartOpen = false;
   }
 
-  }
-
   private getFilters(): ProductFilters {
     const rawValues = this.filterForm.value;
     return {
