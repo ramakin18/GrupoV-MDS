@@ -82,12 +82,12 @@ export class OrderListComponent {
       next: (data) => {
         this.orders = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       },
       error: () => {
         this.errorMessage = 'Error al cargar pedidos';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       }
     });
   }

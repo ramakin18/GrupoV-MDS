@@ -1,6 +1,8 @@
 # GrupoV-MDS
 
-Sistema de gestión de productos y clientes desarrollado con **Spring Boot** (backend) y **Angular** (frontend).
+Sistema de gestión de productos, clientes, pedidos y kits desarrollado con **Spring Boot 3** (backend) y **Angular 21** (frontend).
+
+---
 
 ## Tabla de Contenidos
 
@@ -10,29 +12,47 @@ Sistema de gestión de productos y clientes desarrollado con **Spring Boot** (ba
 - [Configuración del Backend](#configuración-del-backend)
 - [Configuración del Frontend](#configuración-del-frontend)
 - [Ejecución del Proyecto](#ejecución-del-proyecto)
-- [Documentación de API](#documentación-de-api)
+- [Ejecución de Pruebas](#ejecución-de-pruebas)
+- [Documentación de API (Swagger)](#documentación-de-api-swagger)
+- [Endpoints REST](#endpoints-rest)
 - [Arquitectura](#arquitectura)
+- [Features](#features)
 - [Buenas Prácticas](#buenas-prácticas)
+- [Scripts Disponibles](#scripts-disponibles)
 
 ---
 
 ## Tecnologías
 
 ### Backend
-- **Java 21**
-- **Spring Boot 3.5.13**
-- **Spring Data JPA** con Hibernate
-- **PostgreSQL** (Neon - Cloud Database)
-- **Maven** como gestor de dependencias
-- **Lombok** para reducción de boilerplate
-- **Bean Validation** (Jakarta Validation)
+| Tecnología | Versión |
+|------------|---------|
+| Java | 21 |
+| Spring Boot | 3.5.13 |
+| Spring Data JPA (Hibernate) | 6.6.x |
+| PostgreSQL (Neon) | 17 |
+| Maven Wrapper | 3.x |
+| Lombok | 1.18.x |
+| MapStruct | 1.5.5 |
+| Bean Validation (Jakarta) | latest |
+| SpringDoc OpenAPI (Swagger) | 2.8.5 |
+| Cloudinary | 1.36.0 |
+| JUnit 5 + Mockito | latest |
 
 ### Frontend
-- **Angular 21**
-- **TypeScript 5.9+**
-- **RxJS 7.8+**
-- **Vitest 4.0+** para testing
-- **Angular Router** para navegación
+| Tecnología | Versión |
+|------------|---------|
+| Angular | 21 |
+| TypeScript | 5.9+ |
+| RxJS | 7.8+ |
+| Vitest | 4.0+ |
+| Angular Router | standalone |
+
+### Testing
+| Componente | Framework | Cantidad de Tests |
+|------------|-----------|------------------:|
+| Backend (JUnit 5 + Mockito) | `@WebMvcTest` / `@ExtendWith(MockitoExtension.class)` | 81 |
+| Frontend (Vitest) | `@angular/build:unit-test` | 105 |
 
 ---
 
@@ -42,30 +62,138 @@ Sistema de gestión de productos y clientes desarrollado con **Spring Boot** (ba
 GrupoV-MDS/
 ├── backend/
 │   ├── src/main/java/backend/
+│   │   ├── BackendApplication.java
+│   │   ├── configs/
+│   │   │   ├── CloudinaryConfig.java       # Configuración Cloudinary
+│   │   │   ├── CorsFilter.java             # Filtro CORS global
+│   │   │   ├── BaseResponse.java           # Wrapper genérico de respuesta
+│   │   │   └── OpenApiConfig.java          # Configuración Swagger/OpenAPI
 │   │   ├── features/
-│   │   │   ├── controllers/     # REST Controllers
-│   │   │   ├── services/        # Lógica de negocio
-│   │   │   │   ├── impl/domain/ # Implementaciones
-│   │   │   │   └── interfaces/  # Contratos de servicio
-│   │   │   ├── dtos/            # Data Transfer Objects
-│   │   │   │   ├── request/     # DTOs de entrada
-│   │   │   │   └── response/    # DTOs de salida
-│   │   │   ├── models/          # Entidades JPA
-│   │   │   ├── mappers/         # Conversión Entity ↔ DTO
-│   │   │   └── repositories/    # Acceso a datos
-│   │   └── GrupoVMdsApplication.java
+│   │   │   ├── controllers/                # REST Controllers
+│   │   │   │   ├── ProductoController.java
+│   │   │   │   ├── CarritoController.java
+│   │   │   │   ├── PedidoController.java
+│   │   │   │   ├── ClienteController.java
+│   │   │   │   ├── KitController.java
+│   │   │   │   └── GlobalExceptionHandler.java
+│   │   │   ├── dtos/
+│   │   │   │   ├── DomicilioEnvioDto.java
+│   │   │   │   ├── request/                # DTOs de entrada
+│   │   │   │   │   ├── ProductoCreateReqDto.java
+│   │   │   │   │   ├── CarritoValidateRequestDto.java
+│   │   │   │   │   ├── CarritoItemRequestDto.java
+│   │   │   │   │   ├── ClienteCreateRequestDto.java
+│   │   │   │   │   ├── ClienteLoginRequestDto.java
+│   │   │   │   │   ├── DomicilioUpdateRequest.java
+│   │   │   │   │   ├── PedidoCreateRequest.java
+│   │   │   │   │   ├── PedidoItemRequest.java
+│   │   │   │   │   ├── PedidoCancelRequest.java
+│   │   │   │   │   ├── PedidoSituacionUpdateRequestDto.java
+│   │   │   │   │   └── KitCreateRequest.java
+│   │   │   │   └── response/               # DTOs de salida
+│   │   │   │       ├── ProductoResponseDto.java
+│   │   │   │       ├── CarritoResponseDto.java
+│   │   │   │       ├── CarritoItemResponseDto.java
+│   │   │   │       ├── ClienteResponseDto.java
+│   │   │   │       ├── PedidoResponseDTO.java
+│   │   │   │       ├── PedidoDetalleResponseDTO.java
+│   │   │   │       └── KitResponseDto.java
+│   │   │   ├── models/                     # Entidades JPA
+│   │   │   │   ├── Producto.java
+│   │   │   │   ├── Cliente.java
+│   │   │   │   ├── Pedido.java
+│   │   │   │   ├── PedidoDetalle.java
+│   │   │   │   ├── Kit.java
+│   │   │   │   ├── KitProducto.java
+│   │   │   │   ├── SituacionPedido.java (enum)
+│   │   │   │   ├── ProductoEstadoFiltro.java (enum)
+│   │   │   │   └── ProductoViewRole.java (enum)
+│   │   │   ├── mappers/                    # Conversión Entity ↔ DTO
+│   │   │   │   ├── ProductoMapper.java
+│   │   │   │   ├── PedidoMapper.java
+│   │   │   │   ├── ClienteMapper.java
+│   │   │   │   └── KitMapper.java
+│   │   │   ├── services/
+│   │   │   │   ├── interfaces/
+│   │   │   │   │   └── domain/             # Contratos de servicio
+│   │   │   │   │       ├── IProductoService.java
+│   │   │   │   │       ├── IProductoCreateService.java
+│   │   │   │   │       ├── IProductoListService.java
+│   │   │   │   │       ├── ICarritoService.java
+│   │   │   │   │       ├── IPedidoService.java
+│   │   │   │   │       ├── IClienteService.java
+│   │   │   │   │       └── IKitService.java
+│   │   │   │   └── impl/domain/            # Implementaciones
+│   │   │   │       ├── ProductoServiceImpl.java
+│   │   │   │       ├── ProductoCreateService.java
+│   │   │   │       ├── ProductoListService.java
+│   │   │   │       ├── CarritoServiceImpl.java
+│   │   │   │       ├── PedidoServiceImpl.java
+│   │   │   │       ├── ClienteServiceImpl.java
+│   │   │   │       ├── KitServiceImpl.java
+│   │   │   │       └── CloudinaryServiceImpl.java
+│   │   │   └── repositories/
+│   │   │       ├── IProductoRepository.java
+│   │   │       ├── IKitRepository.java
+│   │   │       ├── PedidoRepository.java
+│   │   │       ├── PedidoDetalleRepository.java
+│   │   │       ├── ClienteRepository.java
+│   │   │       └── specs/
+│   │   │           └── ProductoSpecifications.java
+│   │   └── exceptions/
+│   │       ├── DuplicateResourceException.java
+│   │       ├── ResourceNotFoundException.java
+│   │       ├── InvalidCredentialsException.java
+│   │       └── ValidationException.java
 │   ├── src/main/resources/
-│   │   └── application.properties
+│   │   ├── application.properties
+│   │   ├── application-dev.properties
+│   │   └── application-prod.properties
+│   ├── src/test/java/backend/
+│   │   ├── BackendApplicationTests.java
+│   │   ├── features/controllers/
+│   │   │   ├── ProductoControllerTest.java
+│   │   │   ├── CarritoControllerTest.java
+│   │   │   ├── PedidoControllerTest.java
+│   │   │   ├── ClienteControllerTest.java
+│   │   │   └── KitControllerTest.java
+│   │   └── features/services/impl/domain/
+│   │       ├── ProductoServiceImplTest.java
+│   │       ├── CarritoServiceImplTest.java
+│   │       ├── PedidoServiceImplTest.java
+│   │       ├── ClienteServiceImplTest.java
+│   │       └── KitServiceImplTest.java
+│   ├── .env.example
+│   ├── mvnw / mvnw.cmd
 │   └── pom.xml
 │
 └── front/
     ├── src/app/
-    │   ├── core/                # Servicios core, modelos, interfaces
-    │   ├── features/            # Componentes por feature
-    │   │   ├── home/           # Página principal
-    │   │   ├── products/       # Gestión de productos
-    │   │   └── clients/        # Gestión de clientes
-    │   └── app.routes.ts       # Configuración de rutas
+    │   ├── app.config.ts
+    │   ├── app.routes.ts
+    │   ├── app.ts
+    │   ├── app.html
+    │   ├── app.css
+    │   ├── core/
+    │   │   ├── models/          # Interfaces TypeScript
+    │   │   ├── services/        # Servicios Angular (HttpClient)
+    │   │   │   ├── auth.service.ts
+    │   │   │   ├── auth.guard.ts
+    │   │   │   ├── admin.guard.ts
+    │   │   │   ├── cart.service.ts
+    │   │   │   ├── product.service.ts
+    │   │   │   ├── client.service.ts
+    │   │   │   ├── order.service.ts
+    │   │   │   └── kit.service.ts
+    │   │   └── validators/      # Validadores personalizados
+    │   ├── features/
+    │   │   ├── home/            # Página principal / catálogo
+    │   │   ├── products/        # CRUD de productos
+    │   │   ├── clients/         # Registro, login, perfil
+    │   │   ├── orders/          # Pedidos + pendientes entrega
+    │   │   ├── kits/            # CRUD de kits
+    │   │   └── modal-carrito/   # Modal de carrito de compras
+    │   └── shared/              # Componentes compartidos
     ├── package.json
     └── angular.json
 ```
@@ -74,15 +202,14 @@ GrupoV-MDS/
 
 ## Prerrequisitos
 
-- **JDK 21** instalado
-- **Node.js 18+** y npm
-- **Maven 3.8+**
-- Conexión a internet (base de datos en la nube Neon)
+- **JDK 21** instalado (`java -version`)
+- **Node.js 18+** y npm (`node -version`, `npm -version`)
+- **Maven Wrapper** incluido (no requiere Maven global)
+- Conexión a internet (base de datos Neon en la nube + Cloudinary)
 
 Verificar instalaciones:
 ```bash
 java -version
-mvn -version
 node -version
 npm -version
 ```
@@ -91,42 +218,48 @@ npm -version
 
 ## Configuración del Backend
 
-El backend utiliza una base de datos PostgreSQL en **Neon**. La configuración se encuentra en:
+### Base de Datos (Neon PostgreSQL)
 
-`backend/src/main/resources/application.properties`
+El backend usa una base de datos PostgreSQL en la nube (Neon). Configuración en `application.properties`:
 
 ```properties
-# Base de datos PostgreSQL en Neon
-spring.datasource.url=jdbc:postgresql://ep-lively-flower-acknkoey-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require
-spring.datasource.username=neondb_owner
-spring.datasource.password=npg_cb6qOpKwG3Ui
-
-# JPA/Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-
-# Puerto
-server.port=8081
-
-# Deshabilitar Spring Security (para desarrollo)
-spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+spring.datasource.url=${DB_URL:jdbc:postgresql://...}
+spring.datasource.username=${DB_USER:neondb_owner}
+spring.datasource.password=${DB_PASS:...}
 ```
 
-> **Nota:** En producción, las credenciales deben estar en variables de entorno y no en el repositorio.
+Las credenciales por defecto están en el archivo, pero se pueden sobrescribir con variables de entorno:
+```bash
+set DB_URL=jdbc:postgresql://tu-host/neondb?sslmode=require
+set DB_USER=tu-usuario
+set DB_PASS=tu-contraseña
+```
+
+### Cloudinary (Imágenes de Productos)
+
+Para la subida de imágenes de productos se requiere Cloudinary. Configurar vía `.env` (copiar `.env.example`):
+
+```
+CLOUDINARY_CLOUD_NAME=tu-cloud
+CLOUDINARY_API_KEY=tu-api-key
+CLOUDINARY_API_SECRET=tu-api-secret
+```
+
+### Perfiles
+
+- **`dev`** (default): `spring.jpa.show-sql=true`, `spring.sql.init.mode=never`
+- **`prod`**: Variables de entorno requeridas, logs JSON
 
 ---
 
 ## Configuración del Frontend
-
-Instalar dependencias:
 
 ```bash
 cd front
 npm install
 ```
 
-El frontend se comunica con el backend en `http://localhost:8081`.
+Proxy configurado en `angular.json` para redirigir `/api/*` a `http://localhost:8081`.
 
 ---
 
@@ -136,10 +269,11 @@ El frontend se comunica con el backend en `http://localhost:8081`.
 
 ```bash
 cd backend
-mvn spring-boot:run
+mvnw spring-boot:run
+# o: ./mvnw spring-boot:run (Linux/Mac)
 ```
 
-El backend estará disponible en: `http://localhost:8081`
+El backend arranca en: `http://localhost:8081`
 
 ### 2. Iniciar el Frontend
 
@@ -148,69 +282,151 @@ cd front
 npm start
 ```
 
-El frontend estará disponible en: `http://localhost:4200`
+El frontend arranca en: `http://localhost:4200`
 
 ---
 
-## Documentación de API
+## Ejecución de Pruebas
 
-### Base URL
-```
-http://localhost:8081/api
-```
+### Backend (81 tests - JUnit 5 + Mockito)
 
-### Endpoints de Productos
-
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| `GET` | `/api/productos` | Listar productos | `nombre` (opcional), `precio` (opcional), `stock` (opcional), `rol` (opcional) |
-| `GET` | `/api/productos/{id}` | Obtener producto por ID | `id` (path) |
-| `POST` | `/api/productos` | Crear producto | Body: ProductoCreateReqDto |
-| `PUT` | `/api/productos/{id}` | Actualizar producto | `id` (path), Body: ProductoCreateReqDto |
-| `DELETE` | `/api/productos/{id}` | Eliminar producto | `id` (path) |
-
-### Ejemplos de uso
-
-**Listar productos:**
 ```bash
-curl http://localhost:8081/api/productos
+cd backend
+mvnw test
 ```
 
-**Listar con filtros:**
+Estructura de tests:
+
+| Capa | Archivo | Tipo |
+|------|---------|------|
+| Controller | `ProductoControllerTest.java` | `@WebMvcTest` |
+| Controller | `CarritoControllerTest.java` | `@WebMvcTest` |
+| Controller | `PedidoControllerTest.java` | `@WebMvcTest` |
+| Controller | `ClienteControllerTest.java` | `@WebMvcTest` |
+| Controller | `KitControllerTest.java` | `@WebMvcTest` |
+| Service | `ProductoServiceImplTest.java` | `@ExtendWith(MockitoExtension.class)` |
+| Service | `CarritoServiceImplTest.java` | `@ExtendWith(MockitoExtension.class)` |
+| Service | `PedidoServiceImplTest.java` | `@ExtendWith(MockitoExtension.class)` |
+| Service | `ClienteServiceImplTest.java` | `@ExtendWith(MockitoExtension.class)` |
+| Service | `KitServiceImplTest.java` | `@ExtendWith(MockitoExtension.class)` |
+
+### Frontend (105 tests - Vitest)
+
 ```bash
-curl "http://localhost:8081/api/productos?nombre=Test&precio=100&rol=usuario"
+cd front
+npm test
 ```
 
-**Crear producto:**
-```bash
-curl -X POST http://localhost:8081/api/productos \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Producto A","precio":150.00,"stock":10,"descripcion":"Descripción"}'
-```
+Estructura de tests (archivos `.spec.ts`):
 
-**Actualizar producto:**
-```bash
-curl -X PUT http://localhost:8081/api/productos/1 \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Producto A Actualizado","precio":200.00,"stock":15}'
-```
+| Feature | Archivo |
+|---------|---------|
+| App | `app.spec.ts` |
+| Auth | `auth.service.spec.ts`, `auth.guard.spec.ts`, `admin.guard.spec.ts` |
+| Cart | `cart.service.spec.ts`, `modal-carrito.spec.ts` |
+| Clients | `client-registration.component.spec.ts`, `client-login.component.spec.ts` |
+| Products | `product-list.component.spec.ts` |
+| Orders | `order-list.component.spec.ts`, `pending-delivery.component.spec.ts` |
+| Kits | `kit-list.component.spec.ts` |
 
-**Eliminar producto:**
-```bash
-curl -X DELETE http://localhost:8081/api/productos/1
-```
+> **Nota:** Usar `ng test --watch=false` para ejecución única.
 
-### Roles de Vista (ProductoViewRole)
+---
 
-- `usuario` - Vista estándar para usuarios
-- `admin` - Vista administrativa con información adicional
-- Si no se especifica, usa el rol por defecto
+## Documentación de API (Swagger)
+
+La API REST está documentada con **SpringDoc OpenAPI 3** (Swagger UI).
+
+### Acceso
+
+| Recurso | URL |
+|---------|-----|
+| Swagger UI | `http://localhost:8081/swagger-ui.html` |
+| OpenAPI JSON | `http://localhost:8081/api-docs` |
+
+### ¿Qué incluye la documentación?
+
+- **Tags** por recurso: Productos, Carrito, Pedidos, Clientes, Kits
+- **`@Operation`** con descripciones en español para cada endpoint
+- **`@ApiResponses`** con códigos HTTP (200, 201, 400, 401, 404, 409, 500)
+- **`@Parameter`** con descripciones para query params y path vars
+- **`@Schema`** en todos los DTOs con ejemplos (`example`) y descripciones de campos
+- **Request/Response schemas** generados automáticamente desde los DTOs y records de Java
+
+---
+
+## Endpoints REST
+
+### Productos — `/api/productos`
+
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/productos` | Listar productos (con filtros) | No |
+| `GET` | `/api/productos/{id}` | Obtener producto por ID | No |
+| `POST` | `/api/productos` | Crear producto con imagen (multipart) | No |
+| `PUT` | `/api/productos/{id}` | Actualizar producto | No |
+| `DELETE` | `/api/productos/{id}` | Borrado lógico del producto | No |
+
+**Filtros GET:** `nombre`, `precio`, `stock`, `stockMin`, `stockMax`, `estado` (TODOS/ACTIVO/INACTIVO), `rol` (ADMIN/USUARIO)
+
+### Carrito — `/api/carrito`
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/api/carrito/validar` | Validar stock y precios del carrito |
+
+### Pedidos — `/api/pedidos`
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/pedidos` | Listar pedidos (filtro `?estado=`) |
+| `GET` | `/api/pedidos/pendientes` | Pedidos pendientes de entrega |
+| `GET` | `/api/pedidos/{id}` | Obtener pedido por ID |
+| `POST` | `/api/pedidos` | Crear pedido |
+| `PUT` | `/api/pedidos/{id}/situacion` | Actualizar situación |
+| `PUT` | `/api/pedidos/{id}/cancelar` | Cancelar pedido con motivo |
+
+**Situaciones:** `RESERVADO` → `PENDIENTE` → `LISTO` → `RETIRADO` → `ENTREGADO` | `CANCELADO`
+
+### Clientes — `/api/clientes`
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/api/clientes/registrar` | Registrar nuevo cliente |
+| `POST` | `/api/clientes/login` | Iniciar sesión |
+| `GET` | `/api/clientes` | Listar todos los clientes |
+| `GET` | `/api/clientes/{id}` | Obtener cliente por ID |
+| `PUT` | `/api/clientes/{id}` | Actualizar cliente |
+| `PUT` | `/api/clientes/{id}/domicilio` | Actualizar solo el domicilio |
+| `DELETE` | `/api/clientes/{id}` | Eliminar cliente |
+
+### Kits — `/api/kits`
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/kits` | Listar kits (`?activos=true`) |
+| `GET` | `/api/kits/{id}` | Obtener kit por ID |
+| `POST` | `/api/kits` | Crear kit con productos |
+| `PUT` | `/api/kits/{id}` | Actualizar kit |
+| `DELETE` | `/api/kits/{id}` | Eliminar kit |
+
+### Estados HTTP
+
+| Código | Significado |
+|--------|-------------|
+| `200` | OK |
+| `201` | Creado (POST) |
+| `400` | Bad Request (validación) |
+| `401` | Unauthorized (credenciales inválidas) |
+| `404` | Not Found |
+| `409` | Conflict (email duplicado) |
+| `500` | Internal Server Error |
 
 ---
 
 ## Arquitectura
 
-### Backend (Hexagonal/Onion Architecture)
+### Backend (Hexagonal / Onion Architecture)
 
 ```
 Controller → Service Interface → Service Implementation → Repository → Entity
@@ -218,25 +434,57 @@ Controller → Service Interface → Service Implementation → Repository → E
             DTOs / Mappers
 ```
 
-- **Controllers:** Exponen endpoints REST y validan requests
-- **Services:** Lógica de negocio, definidos mediante interfaces
-- **Repositories:** Acceso a datos con Spring Data JPA
-- **DTOs:** Separan la API de las entidades internas
-- **Mappers:** Conversión entre entidades y DTOs
+- **Controllers:** Exponen endpoints REST, validan requests con `@Valid`
+- **Services:** Lógica de negocio vía interfaces (IProductoService, IPedidoService...)
+- **Repositories:** Spring Data JPA + Specifications para consultas dinámicas
+- **DTOs:** Separan la API de las entidades JPA (records inmutables)
+- **Mappers:** MapStruct para conversión Entity ↔ DTO
+- **Exceptions:** Manejadas centralizadamente con `@RestControllerAdvice`
 
 ### Frontend (Feature-Based Architecture)
 
 ```
-core/           # Servicios compartidos, modelos, interfaces
-features/       # Módulos por funcionalidad
-  ├── home/     # Componentes de inicio
-  ├── products/ # Gestión de productos
-  └── clients/  # Gestión de clientes
+core/       → Servicios, modelos, guards compartidos
+features/   → Módulos por funcionalidad (home, products, clients, orders, kits)
+shared/     → Componentes reutilizables
 ```
 
-- **Inyección de dependencias** mediante interfaces (`IProductService`)
-- **Lazy loading** de rutas
-- **Observable patterns** con RxJS
+- **Standalone Components** (Angular 21, sin NgModules)
+- **Control Flow** (`@if` / `@for` en templates)
+- **Inyección con `provideHttpClient(withFetch())`**
+- **Route Guards** (`auth.guard`, `admin.guard`) para protección de rutas
+- **RxJS** para comunicación asíncrona y estado del carrito
+
+---
+
+## Features
+
+### Catálogo de Productos
+- Listado con filtros por nombre, precio, stock y estado
+- Vista ADMIN (productos borrados) / USUARIO (solo activos)
+- Subida de imágenes a Cloudinary (multipart/form-data)
+- Borrado lógico (soft delete)
+
+### Registro y Login de Clientes
+- Validación de email único
+- Domicilio de envío completo (país, provincia, localidad, calle, número, piso, depto.)
+- Roles: `USUARIO`, `ADMIN`
+
+### Carrito de Compras
+- Validación de stock y precios antes de crear pedido
+- Cálculo de subtotales y total
+
+### Pedidos
+- Ciclo de vida: RESERVADO → PENDIENTE → LISTO → RETIRADO → ENTREGADO
+- Cancelación con motivo
+- Vista de pedidos pendientes de entrega
+- Dirección de envío desnormalizada en el pedido
+
+### Kits de Productos
+- CRUD completo de kits con productos asociados
+- Control de stock (no permitir desactivar kit con producto inactivo)
+- Filtro de kits activos para el catálogo
+- Precio y stock propios del kit
 
 ---
 
@@ -244,27 +492,29 @@ features/       # Módulos por funcionalidad
 
 ### Backend
 - ✅ Validación de entrada con `@Valid` y Jakarta Validation
-- ✅ Uso de DTOs para separar API de entidades
-- ✅ Interfaces de servicio para facilitar testing y desacoplamiento
-- ✅ Mappers dedicados para conversión de objetos
-- ✅ JPA Specifications para consultas dinámicas con filtros
-- ✅ Respuestas HTTP adecuadas (`ResponseEntity`)
+- ✅ DTOs inmutables (records) para request/response
+- ✅ Interfaces de servicio para desacoplamiento y testabilidad
+- ✅ MapStruct para mappers (type-safe, sin reflection)
+- ✅ JPA Specifications para consultas dinámicas
+- ✅ ResponseEntity con códigos HTTP adecuados
+- ✅ Manejador global de excepciones (`@RestControllerAdvice`)
+- ✅ Documentación OpenAPI/Swagger 3
+- ✅ Tests unitarios con JUnit 5 + Mockito (81 tests)
+- ✅ Separación de perfiles (dev/prod)
 
 ### Frontend
 - ✅ TypeScript estricto con interfaces definidas
-- ✅ Servicios con tokens de inyección (`InjectionToken`)
-- ✅ Separación de modelos en `core/models`
-- ✅ Componentes organizados por feature
-- ✅ Rutas lazy-loaded para mejor performance
-- ✅ Prettier configurado para consistencia de código
+- ✅ Servicios con HttpClient y RxJS
+- ✅ Componentes standalone (Angular 21)
+- ✅ Control Flow (`@if`/`@for`) en templates
+- ✅ Route Guards para autenticación y roles
+- ✅ Tests con Vitest (105 tests)
 
 ### General
 - ✅ `.gitignore` configurado para ambos proyectos
-- ✅ Commits descriptivos (conventional commits recomendado)
 - ✅ Estructura de carpetas limpia y predecible
-- ⚠️ **Pendiente:** Mover credenciales a variables de entorno
-- ⚠️ **Pendiente:** Agregar tests unitarios en backend
-- ⚠️ **Pendiente:** Configurar CORS apropiadamente para producción
+- ✅ Variables de entorno para credenciales
+- ✅ Maven Wrapper (no requiere Maven global)
 
 ---
 
@@ -272,32 +522,30 @@ features/       # Módulos por funcionalidad
 
 ### Backend
 ```bash
-mvn clean          # Limpiar build
-mvn compile        # Compilar código
-mvn test          # Ejecutar tests
-mvn spring-boot:run  # Iniciar aplicación
+cd backend
+mvnw clean                  # Limpiar build
+mvnw compile                # Compilar código
+mvnw test                   # Ejecutar tests (81 tests)
+mvnw spring-boot:run        # Iniciar aplicación
 ```
 
 ### Frontend
 ```bash
-npm start         # Iniciar servidor de desarrollo
-npm run build     # Build de producción
-npm test          # Ejecutar tests con Vitest
-npm run watch     # Build en modo watch
+cd front
+npm start                   # Iniciar servidor de desarrollo
+npm run build               # Build de producción
+npm test                    # Ejecutar tests (105 tests)
+ng test --watch=false       # Tests una sola vez
 ```
 
 ---
 
 ## Autores
 
-**Grupo 5 - Metodologías de Desarrollo de Software**
+**Grupo 5 — Metodologías de Desarrollo de Software — TUP**
 
-- Backend: Spring Boot con Java 21
-- Frontend: Angular 21
-- Base de Datos: PostgreSQL (Neon)
-
----
-
-## Licencia
-
-Este proyecto es parte del curso de Metodologías de Desarrollo de Software - TUP.
+- Backend: Spring Boot 3 + Java 21 + PostgreSQL (Neon)
+- Frontend: Angular 21 standalone
+- Testing: JUnit 5 / Mockito (backend) + Vitest (frontend)
+- Documentación API: Swagger UI (SpringDoc OpenAPI 3)
+- Imágenes: Cloudinary

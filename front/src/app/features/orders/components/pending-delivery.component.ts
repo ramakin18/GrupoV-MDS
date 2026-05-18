@@ -90,12 +90,12 @@ export class PendingDeliveryComponent {
       next: (data) => {
         this.orders = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       },
       error: () => {
         this.errorMessage = 'Error al cargar pedidos pendientes';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       }
     });
   }

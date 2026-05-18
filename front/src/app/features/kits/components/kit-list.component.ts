@@ -59,12 +59,12 @@ export class KitListComponent {
       next: (data) => {
         this.kits = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       },
       error: () => {
         this.errorMessage = 'Error al cargar kits';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       }
     });
   }

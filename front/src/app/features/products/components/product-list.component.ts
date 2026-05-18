@@ -130,18 +130,14 @@ export class ProductListComponent {
           isEditing: false
         }));
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       },
       error: () => {
         this.errorMessage = 'Error al cargar productos';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        setTimeout(() => this.cdr.detectChanges());
       }
     });
-    setTimeout(() => {
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }, 10000);
   }
 
   adjustStock(row: ProductRow, delta: number): void {
