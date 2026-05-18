@@ -5,6 +5,7 @@ import { ClientRegistrationComponent } from './features/clients/components/clien
 import { ClientLoginComponent } from './features/clients/components/client-login.component';
 import { OrderListComponent } from './features/orders/components/order-list.component';
 import { PendingDeliveryComponent } from './features/orders/components/pending-delivery.component';
+import { KitListComponent } from './features/kits/components/kit-list.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: 'products/:role', component: ProductListComponent },
   { path: 'orders', component: OrderListComponent },
   { path: 'orders/pendientes', component: PendingDeliveryComponent },
+  { path: 'kits', component: KitListComponent },
   { path: 'register', component: ClientRegistrationComponent },
   { path: 'login', component: ClientLoginComponent },
   { path: '**', redirectTo: '' }

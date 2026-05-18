@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pedido, PedidoCreateRequest, SituacionPedido } from '@core/models/order.model';
 import { IOrderService } from '@core/services/order.service.interface';
+import { environment } from '@environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class OrderApiService implements IOrderService {
-  private readonly apiUrl = 'http://localhost:8081/api/pedidos';
+  private readonly apiUrl = `${environment.apiUrl}/api/pedidos`;
 
   constructor(private readonly http: HttpClient) {}
 

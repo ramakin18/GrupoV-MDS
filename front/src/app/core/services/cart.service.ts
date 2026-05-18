@@ -8,6 +8,7 @@ import {
   CartValidationRequest,
   CartValidationResponse
 } from '../models/cart-item.model';
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class CartService {
   // Clave usada para guardar y recuperar el carrito del navegador.
   private readonly storageKey = 'shopping_cart';
   // URL del backend que valida que los productos sigan activos y con stock.
-  private readonly apiUrl = 'http://localhost:8081/api/carrito';
+  private readonly apiUrl = `${environment.apiUrl}/api/carrito`;
   // Estado en memoria del carrito mientras la app esta abierta.
   private items: CartItem[] = [];
 

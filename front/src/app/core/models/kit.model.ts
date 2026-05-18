@@ -1,17 +1,23 @@
-export type KitEstado = 'ACTIVO' | 'INACTIVO';
-
-export interface KitDetalle {
+export interface KitProductoItem {
   idProducto: number;
   nombreProducto: string;
   cantidad: number;
 }
 
 export interface Kit {
-  idKit: number;
+  idKit?: number;
   nombre: string;
   descripcion: string;
   precio: number;
   stock: number;
-  estado: KitEstado;
-  productos: KitDetalle[];
+  activo: boolean;
+  productos: KitProductoItem[];
+}
+
+export interface KitCreateRequest {
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  activo?: boolean;
+  productos: { idProducto: number; cantidad: number }[];
 }

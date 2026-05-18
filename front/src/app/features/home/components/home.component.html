@@ -1,6 +1,6 @@
 <div class="home-container">
   <header class="header">
-    <div class="header-brand" routerLink="/" (click)="loadProducts()">
+    <div class="header-brand" routerLink="/" (click)="loadCatalog()">
       <svg class="brand-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
         <path d="M2 17l10 5 10-5"/>
@@ -14,12 +14,13 @@
         <span class="user-greeting">{{ user.nombre }}</span>
         @if (user.rol === 'ADMIN') {
           <a routerLink="/products/admin" class="btn-outline">Panel Admin</a>
+          <a routerLink="/kits" class="btn-outline">Kits</a>
           <a routerLink="/orders" class="btn-outline">Pedidos</a>
           <a routerLink="/orders/pendientes" class="btn-outline">Pendientes</a>
         }
-        <button class="btn-ghost" (click)="logout()">Cerrar sesión</button>
+        <button class="btn-ghost" (click)="logout()">Cerrar sesion</button>
       } @else {
-        <a routerLink="/login" class="btn-outline">Iniciar sesión</a>
+        <a routerLink="/login" class="btn-outline">Iniciar sesion</a>
         <a routerLink="/register" class="btn-primary">Registrarse</a>
       }
     </nav>
@@ -32,7 +33,7 @@
       <div class="shape shape-3"></div>
     </div>
     <div class="hero-content">
-      <h1 class="hero-title">Expresá tu arte</h1>
+      <h1 class="hero-title">Expresa tu arte</h1>
       <p class="hero-subtitle">Pintura corporal de alta calidad para profesionales y artistas</p>
     </div>
   </section>
@@ -40,26 +41,52 @@
   <section class="catalog">
     <div class="catalog-header">
       <h2 class="catalog-title">Nuestros Productos</h2>
-      @if (!isLoadingProducts) {
-        <p class="catalog-subtitle">{{ products.length }} productos disponibles</p>
+      @if (!isLoading) {
+        <p class="catalog-subtitle">{{ catalogItems.length }} productos y kits disponibles</p>
       }
     </div>
 
-    @if (isLoadingProducts) {
+    @if (isLoading) {
       <div class="loading-state">
         <div class="spinner"></div>
-        <p>Cargando productos...</p>
+        <p>Cargando catalogo...</p>
       </div>
     } @else {
       <div class="product-grid">
-        @for (product of products; track product.idProducto) {
-          <div class="product-card" [class.card-disabled]="!isLoggedIn">
-            <div class="product-swatch"></div>
+        @for (item of catalogItems; track item.type + '-' + item.id) {
+          <div class="product-card" [class.card-disabled]="!isLoggedIn || isOutOfStock(item)">
+            <div class="product-swatch" [class.kit-swatch]="item.type === 'kit'"></div>
+            @if (item.type === 'kit') {
+              <div class="kit-badge">Kit</div>
+            }
             @if (isLoggedIn) {
-              <div class="product-clickable" (click)="openQuickView(product)">
+              <div class="product-clickable" (click)="openQuickView(item)">
                 <div class="product-image">
-                  @if (product.imagenUrl) {
-                    <img [src]="product.imagenUrl" [alt]="product.nombreProducto" loading="lazy">
+                  @if (item.type === 'product' && item.imagenUrl) {
+                    <img [src]="item.imagenUrl" [alt]="item.nombre" loading="lazy">
+                  } @else if (item.type === 'kit') {
+                    <div class="kit-collage">
+                      @if (item.imagenesCollage && item.imagenesCollage.length > 0) {
+                        <div class="collage-grid" [class.collage-1img]="item.imagenesCollage.length === 1" [class.collage-2img]="item.imagenesCollage.length === 2">
+                          @for (imgUrl of item.imagenesCollage.slice(0, 4); track $index) {
+                            <div class="collage-cell">
+                              <img [src]="imgUrl" alt="" loading="lazy">
+                            </div>
+                          }
+                          @if (item.imagenesCollage.length > 4) {
+                            <div class="collage-cell collage-more">+{{ item.imagenesCollage.length - 3 }}</div>
+                          }
+                        </div>
+                      } @else {
+                        <div class="kit-icon-wrapper">
+                          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            <path d="M12 11l-3 3h2v4h2v-4h2l-3-3z"/>
+                          </svg>
+                        </div>
+                      }
+                    </div>
                   } @else {
                     <div class="placeholder-image">
                       <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -72,15 +99,15 @@
                 </div>
                 <div class="product-card-body">
                   <div class="product-info">
-                    <h3 class="product-name">{{ product.nombreProducto }}</h3>
-                    <span class="product-price">${{ product.precio | number:'1.2-2' }}</span>
+                    <h3 class="product-name">{{ item.nombre }}</h3>
+                    <span class="product-price">${{ item.precio | number:'1.2-2' }}</span>
                   </div>
                 </div>
               </div>
             } @else {
               <div class="product-image">
-                @if (product.imagenUrl) {
-                  <img [src]="product.imagenUrl" [alt]="product.nombreProducto" loading="lazy">
+                @if (item.type === 'product' && item.imagenUrl) {
+                  <img [src]="item.imagenUrl" [alt]="item.nombre" loading="lazy">
                 } @else {
                   <div class="placeholder-image">
                     <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -93,16 +120,22 @@
               </div>
               <div class="product-card-body">
                 <div class="product-info">
-                  <h3 class="product-name">{{ product.nombreProducto }}</h3>
-                  <span class="product-price">${{ product.precio | number:'1.2-2' }}</span>
+                  <h3 class="product-name">{{ item.nombre }}</h3>
+                  <span class="product-price">${{ item.precio | number:'1.2-2' }}</span>
                 </div>
               </div>
             }
             <div class="product-actions">
               @if (isLoggedIn) {
-                <button class="btn-add-cart" (click)="addToCart(product)">Agregar al carrito</button>
+                @if (item.type === 'product' && !isOutOfStock(item)) {
+                  <button class="btn-add-cart" (click)="addToCart(item)">Agregar al carrito</button>
+                } @else if (item.type === 'kit' && !isOutOfStock(item)) {
+                  <button class="btn-add-cart btn-add-cart-kit" (click)="openQuickView(item)">Ver Kit</button>
+                } @else {
+                  <button class="btn-add-cart" disabled>Sin stock</button>
+                }
               } @else {
-                <a routerLink="/login" class="btn-login-prompt">Inicia sesión para comprar</a>
+                <a routerLink="/login" class="btn-login-prompt">Inicia sesion para comprar</a>
               }
             </div>
           </div>
@@ -113,7 +146,7 @@
               <path d="M12 8v4M12 16h.01"/>
             </svg>
             <p>No hay productos disponibles en este momento</p>
-            <button class="btn-retry" (click)="loadProducts()">Reintentar</button>
+            <button class="btn-retry" (click)="loadCatalog()">Reintentar</button>
           </div>
         }
       </div>
@@ -121,15 +154,39 @@
   </section>
 </div>
 
-@if (showQuickView && selectedProduct) {
+@if (showQuickView && selectedItem) {
   <div class="modal-overlay" (click)="closeQuickView()">
     <div class="quick-view-modal" (click)="$event.stopPropagation()">
       <button class="modal-close" (click)="closeQuickView()">&times;</button>
       <div class="modal-layout">
         <div class="modal-image-section">
-          <div class="modal-swatch"></div>
-          @if (selectedProduct.imagenUrl) {
-            <img [src]="selectedProduct.imagenUrl" [alt]="selectedProduct.nombreProducto">
+          <div class="modal-swatch" [class.kit-swatch]="selectedItem.type === 'kit'"></div>
+          @if (selectedItem.type === 'product' && selectedItem.imagenUrl) {
+            <img [src]="selectedItem.imagenUrl" [alt]="selectedItem.nombre">
+          } @else if (selectedItem.type === 'kit') {
+            <div class="kit-collage-modal">
+              @if (selectedItem.imagenesCollage && selectedItem.imagenesCollage.length > 0) {
+                <div class="collage-grid-modal" [class.collage-1img]="selectedItem.imagenesCollage.length === 1" [class.collage-2img]="selectedItem.imagenesCollage.length === 2">
+                  @for (imgUrl of selectedItem.imagenesCollage.slice(0, 4); track $index) {
+                    <div class="collage-cell-modal">
+                      <img [src]="imgUrl" alt="" loading="lazy">
+                    </div>
+                  }
+                  @if (selectedItem.imagenesCollage.length > 4) {
+                    <div class="collage-cell-modal collage-more-modal">+{{ selectedItem.imagenesCollage.length - 3 }}</div>
+                  }
+                </div>
+              } @else {
+                <div class="kit-icon-wrapper-lg">
+                  <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                    <path d="M12 11l-3 3h2v4h2v-4h2l-3-3z"/>
+                  </svg>
+                </div>
+              }
+              <span class="kit-badge-modal">Kit</span>
+            </div>
           } @else {
             <div class="placeholder-image-lg">
               <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -141,44 +198,70 @@
           }
         </div>
         <div class="modal-details">
-          <h2 class="modal-product-name">{{ selectedProduct.nombreProducto }}</h2>
-          <p class="modal-description">{{ selectedProduct.descripcion }}</p>
+          <h2 class="modal-product-name">{{ selectedItem.nombre }}</h2>
+          @if (!isOutOfStock(selectedItem)) {
+            <p class="modal-stock-label stock-ok">Stock disponible</p>
+          } @else {
+            <p class="modal-stock-label stock-ko">Sin stock</p>
+          }
+          <p class="modal-description">{{ selectedItem.descripcion }}</p>
           <div class="modal-price-row">
-            <span class="modal-price">${{ selectedProduct.precio | number:'1.2-2' }}</span>
-            <span class="modal-stock">Stock: {{ selectedProduct.stockDisponible }} uds.</span>
+            <span class="modal-price">${{ selectedItem.precio | number:'1.2-2' }}</span>
+            <span class="modal-stock">{{ getStockLabel(selectedItem) }}</span>
           </div>
 
-          <div class="quantity-selector">
-            <span class="quantity-label">Cantidad:</span>
-            <div class="quantity-controls">
-              <button
-                class="qty-btn"
-                [disabled]="quickViewQuantity <= 1"
-                (click)="quickViewQuantity = quickViewQuantity - 1">-</button>
-              <span class="qty-value">{{ quickViewQuantity }}</span>
-              <button
-                class="qty-btn"
-                [disabled]="quickViewQuantity >= selectedProduct.stockDisponible"
-                (click)="quickViewQuantity = quickViewQuantity + 1">+</button>
+          @if (selectedItem.type === 'kit' && selectedItem.productos) {
+            <div class="kit-productos-section">
+              <h3 class="kit-productos-title">Productos incluidos:</h3>
+              <div class="kit-productos-list">
+                @for (kp of selectedItem.productos; track kp.idProducto) {
+                  <div class="kit-producto-item">
+                    <span class="kit-producto-nombre">{{ kp.nombreProducto }}</span>
+                    <span class="kit-producto-cantidad">x{{ kp.cantidad }}</span>
+                  </div>
+                }
+              </div>
             </div>
-          </div>
+          }
+
+          @if (isLoggedIn && selectedItem.type === 'product') {
+            <div class="quantity-selector">
+              <span class="quantity-label">Cantidad:</span>
+              <div class="quantity-controls">
+                <button class="qty-btn" [disabled]="quickViewQuantity <= 1" (click)="quickViewQuantity = quickViewQuantity - 1">-</button>
+                <span class="qty-value">{{ quickViewQuantity }}</span>
+                <button class="qty-btn" [disabled]="quickViewQuantity >= selectedItem.stock" (click)="quickViewQuantity = quickViewQuantity + 1">+</button>
+              </div>
+            </div>
+          }
 
           @if (quickViewMessage) {
-            <p class="modal-message"
-              [class.success]="quickViewMessageType === 'success'"
-              [class.error]="quickViewMessageType === 'error'">
+            <p class="modal-message" [class.success]="quickViewMessageType === 'success'" [class.error]="quickViewMessageType === 'error'">
               {{ quickViewMessage }}
             </p>
           }
 
-          <button class="btn-add-to-cart" (click)="addToCartFromQuickView()">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="9" cy="21" r="1"/>
-              <circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
-            Agregar al carrito
-          </button>
+          @if (isLoggedIn) {
+            @if (selectedItem.type === 'product' && !isOutOfStock(selectedItem)) {
+              <button class="btn-add-to-cart" (click)="addToCartFromQuickView()">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="9" cy="21" r="1"/>
+                  <circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                Agregar al carrito
+              </button>
+            } @else if (selectedItem.type === 'kit' && !isOutOfStock(selectedItem)) {
+              <button class="btn-add-to-cart btn-add-to-cart-kit" (click)="addToCartFromQuickView()">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="9" cy="21" r="1"/>
+                  <circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                Agregar kit al carrito
+              </button>
+            }
+          }
         </div>
       </div>
     </div>

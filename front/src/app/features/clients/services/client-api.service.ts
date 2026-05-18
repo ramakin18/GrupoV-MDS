@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Client, ClientCreateDto, ClientLoginDto } from '@core/models/client.model';
 import { IClientService } from '@core/services/client.service.interface';
+import { environment } from '@environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ClientApiService implements IClientService {
-  private readonly apiUrl = 'http://localhost:8081/api/clientes';
+  private readonly apiUrl = `${environment.apiUrl}/api/clientes`;
 
   constructor(private readonly http: HttpClient) {}
 

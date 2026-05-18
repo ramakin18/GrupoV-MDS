@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product, ProductCreateDto, ProductFilters, ProductViewRole } from '@core/models/product.model';
 import { IProductService } from '@core/services/product.service.interface';
+import { environment } from '@environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProductApiService implements IProductService {
-  private readonly apiUrl = 'http://localhost:8081/api/productos';
+  private readonly apiUrl = `${environment.apiUrl}/api/productos`;
 
   constructor(private readonly http: HttpClient) {}
 
