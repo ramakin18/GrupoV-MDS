@@ -6,14 +6,16 @@ import { ClientLoginComponent } from './features/clients/components/client-login
 import { OrderListComponent } from './features/orders/components/order-list.component';
 import { PendingDeliveryComponent } from './features/orders/components/pending-delivery.component';
 import { KitListComponent } from './features/kits/components/kit-list.component';
+import { AuthGuard } from './core/services/auth.guard';
+import { AdminGuard } from './core/services/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
   { path: 'products', redirectTo: 'products/usuario', pathMatch: 'full' },
   { path: 'products/:role', component: ProductListComponent },
-  { path: 'orders', component: OrderListComponent },
-  { path: 'orders/pendientes', component: PendingDeliveryComponent },
-  { path: 'kits', component: KitListComponent },
+  { path: 'orders', component: OrderListComponent, canActivate: [AdminGuard] },
+  { path: 'orders/pendientes', component: PendingDeliveryComponent, canActivate: [AdminGuard] },
+  { path: 'kits', component: KitListComponent, canActivate: [AdminGuard] },
   { path: 'register', component: ClientRegistrationComponent },
   { path: 'login', component: ClientLoginComponent },
   { path: '**', redirectTo: '' }

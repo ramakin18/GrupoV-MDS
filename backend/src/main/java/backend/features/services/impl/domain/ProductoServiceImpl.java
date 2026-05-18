@@ -15,6 +15,7 @@ import backend.features.mappers.ProductoMapper;
 import backend.features.models.Producto;
 import backend.features.models.ProductoEstadoFiltro;
 import backend.features.models.ProductoViewRole;
+import backend.features.repositories.IKitRepository;
 import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.specs.ProductoSpecifications;
 import backend.features.services.interfaces.domain.IProductoService;
@@ -27,6 +28,7 @@ public class ProductoServiceImpl implements IProductoService {
     private final IProductoRepository productoRepository;
     private final ProductoMapper productoMapper;
     private final CloudinaryServiceImpl cloudinaryService;
+    private final IKitRepository kitRepository;
 
     @Override
     public ProductoResponseDto create(ProductoCreateReqDto request, MultipartFile imagen) {
@@ -101,6 +103,10 @@ public class ProductoServiceImpl implements IProductoService {
         producto.setStockMinimo(request.stockMinimo());
         
         if (request.borrado() != null) {
+            if (request.borrado() && kitRepository.existsByProductos_Producto_IdProductoAndActivoTrue(id)) {
+                throw new ValidationException(
+                    "No se puede desactivar el producto porque pertenece a un kit activo.");
+            }
             producto.setBorrado(request.borrado());
         }
 

@@ -13,6 +13,7 @@ import { Router, RouterLink } from '@angular/router';
 
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
 import { CartService } from '../../../core/services/cart.service';
+import { AuthService } from '../../../core/services/auth.service';
 import {
   Product,
   ProductCreateDto,
@@ -46,6 +47,7 @@ export class ProductListComponent {
     @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
     private readonly fb: FormBuilder,
     private readonly cartService: CartService,
+    private readonly authService: AuthService,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.productForm = this.fb.group({
@@ -65,7 +67,7 @@ export class ProductListComponent {
     this.loadProducts();
   }
 
-  get isAdmin(): boolean { return true; }
+  get isAdmin(): boolean { return this.authService.currentUser?.rol === 'ADMIN'; }
   
   get hayProductosEscasos(): boolean { 
     return this.products.some(p => p.stockDisponible <= p.stockMinimo && !p.borrado); 
