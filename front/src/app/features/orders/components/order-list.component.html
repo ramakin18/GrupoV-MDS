@@ -1,0 +1,175 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>{{ pageTitle }}</h1>
+      <p class="subtitle">{{ pageSubtitle }}</p>
+    </div>
+    <a routerLink="/" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Volver al inicio
+    </a>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <section class="filters-section">
+    <div class="section-header">
+      <h2 class="section-title">Filtros</h2>
+      <p class="section-description">Filtra pedidos por estado</p>
+    </div>
+    <div class="filter-form">
+      <div class="form-grid filter-grid">
+        <div class="form-field">
+          <label for="filterStatus">Estado</label>
+          <select id="filterStatus" [(ngModel)]="selectedStatus" (change)="onStatusFilterChange()">
+            <option value="TODOS">Todos</option>
+            <option value="RESERVADO">Reservado</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="LISTO">Listo</option>
+            <option value="RETIRADO">Retirado</option>
+            <option value="ENTREGADO">Entregado</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Lista de Pedidos</h2>
+        <p class="section-description">{{ orderCount }} pedido{{ orderCount !== 1 ? 's' : '' }} encontrado{{ orderCount !== 1 ? 's' : '' }}</p>
+      </div>
+    </div>
+
+    @if (isLoading && orders.length === 0) {
+      <div class="loading-state" aria-live="polite">
+        <div class="spinner spinner-lg"></div>
+        <p>Cargando pedidos...</p>
+      </div>
+    } @else {
+      @if (filteredOrders.length === 0) {
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <p class="empty-message">No se encontraron pedidos</p>
+          <p class="empty-hint">No hay pedidos que coincidan con los filtros seleccionados.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Productos</th>
+                <th scope="col">Total</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of filteredOrders; track order.idPedido) {
+                <tr>
+                  <td class="text-muted">{{ order.idPedido }}</td>
+                  <td>
+                    <div class="cliente-info">
+                      <span class="cliente-nombre">{{ order.nombreCliente }} {{ order.apellidoCliente }}</span>
+                      <span class="cliente-email">{{ order.emailCliente }}</span>
+                    </div>
+                  </td>
+                  <td class="text-nowrap">{{ order.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <div class="productos-list">
+                      @for (detalle of order.detalles; track detalle.id) {
+                        <span class="producto-item">{{ detalle.nombreProducto }} x{{ detalle.cantidad }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td class="text-numeric">${{ order.total | number:'1.2-2' }}</td>
+                  <td>
+                    <span class="badge"
+                      [class.badge-warning]="order.situacion === 'RESERVADO' || order.situacion === 'PENDIENTE'"
+                      [class.badge-info]="order.situacion === 'LISTO'"
+                      [class.badge-success]="order.situacion === 'ENTREGADO'"
+                      [class.badge-danger]="order.situacion === 'CANCELADO'">
+                      {{ getStatusLabel(order.situacion) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions-cell">
+                      @if (getAllowedTransitions(order.situacion).length > 0) {
+                        <select class="status-select" (change)="updateStatus($event, order)">
+                          <option value="">Cambiar estado...</option>
+                          @for (trans of getAllowedTransitions(order.situacion); track trans) {
+                            <option [value]="trans">{{ getStatusLabel(trans) }}</option>
+                          }
+                        </select>
+                      }
+                      @if (canCancel(order.situacion)) {
+                        <button class="btn btn-danger btn-sm" (click)="requestCancel(order)">
+                          Cancelar
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+</div>
+
+@if (orderToCancel) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Cancelar Pedido #{{ orderToCancel.idPedido }}</h3>
+        <button class="close-btn" (click)="cancelCancel()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Estás a punto de cancelar el pedido de <strong>{{ orderToCancel.nombreCliente }} {{ orderToCancel.apellidoCliente }}</strong>.</p>
+        <div class="form-field">
+          <label for="cancelMotivo">Motivo de cancelación</label>
+          <textarea
+            id="cancelMotivo"
+            [(ngModel)]="cancelMotivo"
+            placeholder="Indica el motivo de la cancelación..."
+            rows="4"
+            [class.invalid]="cancelMotivo.trim() === '' && cancelMotivo.length > 0">
+          </textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="cancelCancel()">Cancelar</button>
+        <button class="btn-danger" [disabled]="!cancelMotivo.trim() || isLoading" (click)="confirmCancel()">
+          @if (isLoading) {
+            <span class="spinner"></span><span>Cancelando...</span>
+          } @else {
+            <span>Confirmar Cancelación</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

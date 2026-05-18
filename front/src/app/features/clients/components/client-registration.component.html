@@ -165,13 +165,17 @@
          }
        </div>
 
-      <div class="form-field">
+       <div class="form-field">
         <label for="piso">Piso (opcional)</label>
         <input 
           id="piso" 
           type="text" 
           formControlName="piso" 
-          placeholder="Opcional">
+          placeholder="Opcional"
+          [class.invalid]="hasFieldError('domicilio.piso')">
+        @if (hasFieldError('domicilio.piso')) {
+          <small class="field-error">{{ getFieldError('domicilio.piso') }}</small>
+        }
       </div>
 
       <div class="form-field">
@@ -180,7 +184,11 @@
           id="departamento" 
           type="text" 
           formControlName="departamento" 
-          placeholder="Opcional">
+          placeholder="Opcional"
+          [class.invalid]="hasFieldError('domicilio.departamento')">
+        @if (hasFieldError('domicilio.departamento')) {
+          <small class="field-error">{{ getFieldError('domicilio.departamento') }}</small>
+        }
       </div>
       </ng-container>
 

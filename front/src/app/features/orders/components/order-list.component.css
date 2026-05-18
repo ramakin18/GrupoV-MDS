@@ -75,11 +75,6 @@
   margin-bottom: var(--spacing-md);
 }
 
-.section-header .product-count {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
-
 .section-title {
   font-size: var(--font-size-xl);
   font-weight: 600;
@@ -93,17 +88,6 @@
   margin: var(--spacing-xs) 0 0 0;
 }
 
-.product-count {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  background: var(--color-surface);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  border: 1px solid var(--color-border);
-}
-
-.form-section,
 .filters-section,
 .table-section {
   background: var(--color-surface);
@@ -115,14 +99,13 @@
 }
 
 .filter-grid {
-  grid-template-columns: minmax(220px, 2fr) repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: minmax(220px, 1fr);
 }
 
-.filter-actions {
+.filter-form {
   display: flex;
-  gap: var(--spacing-sm);
-  justify-content: flex-end;
-  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: flex-end;
 }
 
 /* === Form Grid === */
@@ -131,6 +114,7 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
+  width: 100%;
 }
 
 .form-field {
@@ -146,7 +130,8 @@
 }
 
 .form-field input,
-.form-field select {
+.form-field select,
+.form-field textarea {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-base);
   border: 2px solid var(--color-border);
@@ -164,8 +149,15 @@
   cursor: pointer;
 }
 
+.form-field textarea {
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+}
+
 .form-field input:focus,
-.form-field select:focus {
+.form-field select:focus,
+.form-field textarea:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
@@ -173,61 +165,15 @@
 }
 
 .form-field input.invalid,
-.form-field select.invalid {
+.form-field select.invalid,
+.form-field textarea.invalid {
   border-color: var(--color-error);
 }
 
 .form-field input.invalid:focus,
-.form-field select.invalid:focus {
+.form-field select.invalid:focus,
+.form-field textarea.invalid:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
-.field-error {
-  font-size: var(--font-size-sm);
-  color: var(--color-error);
-  margin-top: var(--spacing-xs);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-/* === Input with prefix === */
-.input-with-prefix {
-  display: flex;
-  align-items: center;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  transition: all 150ms ease-out;
-  background: var(--color-background);
-}
-
-.input-with-prefix:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-  background: var(--color-surface);
-}
-
-.input-prefix {
-  display: flex;
-  align-items: center;
-  padding: 0 var(--spacing-sm);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  height: 44px;
-  border-right: 2px solid var(--color-border);
-}
-
-.input-with-prefix input {
-  border: none;
-  border-radius: 0;
-  flex: 1;
-  background: transparent;
-}
-
-.input-with-prefix input:focus {
-  box-shadow: none;
 }
 
 /* === Buttons === */
@@ -246,7 +192,6 @@
   cursor: pointer;
   transition: all 200ms ease-out;
   min-height: 48px;
-  width: 100%;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
@@ -266,12 +211,6 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-}
-
-.filter-actions .btn-primary,
-.btn-secondary {
-  width: auto;
-  min-width: 150px;
 }
 
 .btn-secondary {
@@ -300,6 +239,49 @@
   color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--color-error), #dc2626);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+  min-height: 48px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-danger:disabled {
+  background: var(--color-surface-hover);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-sm {
+  min-height: auto !important;
+  padding: 4px 14px !important;
+  width: auto !important;
+  font-size: 0.8rem !important;
 }
 
 /* === Spinner === */
@@ -340,12 +322,6 @@
   background: rgba(239, 68, 68, 0.1);
   color: var(--color-error);
   border-left-color: var(--color-error);
-}
-
-.alert-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-  line-height: 1;
 }
 
 /* === Loading State === */
@@ -414,6 +390,7 @@ td {
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
+  vertical-align: top;
 }
 
 .text-muted {
@@ -423,6 +400,11 @@ td {
 .text-numeric {
   text-align: right;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.text-nowrap {
+  white-space: nowrap;
 }
 
 tbody tr {
@@ -433,10 +415,6 @@ tbody tr:hover {
   background: var(--color-surface-hover);
 }
 
-.deleted-row {
-  opacity: 0.7;
-}
-
 /* === Badges === */
 .badge {
   display: inline-block;
@@ -445,6 +423,9 @@ tbody tr:hover {
   font-weight: 600;
   border-radius: var(--radius-sm);
   white-space: nowrap;
+  background: rgba(100, 116, 139, 0.18);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(100, 116, 139, 0.3);
 }
 
 .badge-warning {
@@ -465,210 +446,81 @@ tbody tr:hover {
   border: 1px solid rgba(239, 68, 68, 0.35);
 }
 
-/* === Stock Controls === */
-.stock-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.badge-info {
+  background: rgba(59, 130, 246, 0.18);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.35);
 }
 
-.btn-stock {
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  background: var(--color-background);
-  color: var(--color-text);
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 150ms ease-out;
-  line-height: 1;
+/* === Cliente Info === */
+.cliente-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.btn-stock:hover:not(:disabled) {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.btn-stock:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.stock-display {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 30px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.stock-display.warning {
-  color: var(--color-warning);
-}
-
-/* === Inline Inputs === */
-.inline-input {
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.875rem;
-  font-family: inherit;
-  background: transparent;
-  color: var(--color-text);
-  transition: all 150ms ease-out;
-}
-
-.inline-input:hover {
-  border-color: var(--color-border);
-}
-
-.inline-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
-  outline: none;
-  background: var(--color-surface);
-}
-
-.inline-input.numeric {
-  width: 60px;
-  text-align: center;
-}
-
-.inline-input.small {
-  width: 50px;
-  font-size: 0.8rem;
-}
-
-.font-bold {
+.cliente-nombre {
   font-weight: 600;
-}
-
-.mx-1 {
-  margin-left: 4px;
-  margin-right: 4px;
-}
-
-/* === Escasos Button === */
-.btn-escasos {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-background);
   color: var(--color-text);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 150ms ease-out;
 }
 
-.btn-escasos:hover {
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-}
-
-.btn-escasos.has-escasos {
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-  background: rgba(245, 158, 11, 0.06);
-}
-
-.btn-escasos.active {
-  border-color: var(--color-primary);
-  color: var(--color-primary-light);
-  background: rgba(99, 102, 241, 0.06);
-}
-
-/* === Toggle Status Button === */
-.btn-toggle {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-background);
+.cliente-email {
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 150ms ease-out;
 }
 
-.btn-toggle:hover {
-  border-color: var(--color-primary);
+/* === Productos List === */
+.productos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 250px;
+}
+
+.producto-item {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.producto-item::before {
+  content: '\2022';
+  margin-right: 4px;
   color: var(--color-primary-light);
 }
 
-.btn-toggle.active {
-  background: rgba(16, 185, 129, 0.12);
-  color: var(--color-success);
-  border-color: rgba(16, 185, 129, 0.3);
+/* === Actions Cell === */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: nowrap;
 }
 
-/* === Escaso Row === */
-.escaso-row {
-  background: rgba(245, 158, 11, 0.04);
-}
-
-/* === Button Small === */
-.btn-sm {
-  min-height: auto !important;
-  padding: 4px 14px !important;
-  width: auto !important;
-  font-size: 0.8rem !important;
-}
-
-/* === Cart floating button in admin mode === */
-.cart-floating-button {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  color: white;
-  border: none;
+.status-select {
+  padding: 4px 8px;
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+  color: var(--color-text);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  min-height: 32px;
+  min-width: 140px;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.btn {
+  cursor: pointer;
   transition: all 200ms ease-out;
-  z-index: 100;
-}
-
-.cart-floating-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
-}
-
-.cart-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--color-error);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--color-background);
 }
 
 /* === Modal Overlay === */
@@ -745,33 +597,6 @@ tbody tr:hover {
   line-height: 1.5;
 }
 
-.changes-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.changes-list li {
-  padding: var(--spacing-sm) 0;
-  border-bottom: 1px solid var(--color-border);
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-}
-
-.changes-list li:last-child {
-  border-bottom: none;
-}
-
-.changes-list s {
-  color: var(--color-error);
-  text-decoration: line-through;
-}
-
-.changes-list .new-val {
-  color: var(--color-success);
-  font-weight: 600;
-}
-
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -785,7 +610,6 @@ tbody tr:hover {
   .page-container {
     padding: var(--spacing-md) var(--spacing-sm);
   }
-  }
 
   .page-header {
     flex-direction: column;
@@ -797,16 +621,6 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
-  .filter-actions {
-    flex-direction: column;
-  }
-
-  .filter-actions .btn-primary,
-  .btn-secondary {
-    width: 100%;
-  }
-
-  .form-section,
   .filters-section,
   .table-section {
     padding: var(--spacing-md);
@@ -819,111 +633,13 @@ tbody tr:hover {
   th, td {
     padding: var(--spacing-sm);
   }
-  /* === VISTA DE CATÁLOGO (CARDS) === */
 
-  /* Contenedor principal de las tarjetas */
-  .product-grid {
-    display: grid;
-    /* Esto crea columnas automáticas de mínimo 280px */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg) 0;
-    animation: fadeIn 0.5s ease-out;
-  }
-
-  /* Estilo de cada tarjeta individual */
-  .product-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    display: flex;
+  .actions-cell {
     flex-direction: column;
-    gap: var(--spacing-md);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
+    align-items: stretch;
   }
 
-  .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-primary-light);
+  .status-select {
+    min-width: 100%;
   }
-
-  /* Estilo del precio resaltado */
-  .price-tag {
-    font-size: var(--font-size-2xl);
-    font-weight: 800;
-    color: var(--color-primary-light);
-    margin-bottom: var(--spacing-xs);
-  }
-
-  .product-card h3 {
-    margin: 0;
-    font-size: var(--font-size-xl);
-    color: var(--color-text);
-    font-weight: 700;
-  }
-
-  .product-card p {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-base);
-    line-height: 1.5;
-    flex-grow: 1; /* Esto empuja el botón siempre al fondo */
-  }
-
-  /* Línea divisoria y pie de la tarjeta */
-  .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--color-border);
-  }
-
-  .card-footer small {
-    color: var(--color-text-secondary);
-    font-weight: 500;
-  }
-  .cart-floating-button {
-    position: fixed;
-    bottom: 40px;
-    right: 40px;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #8b5cf6, #ec4899); /* Violeta a Rosa */
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    cursor: pointer;
-    z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .cart-floating-button:hover {
-    transform: scale(1.1) rotate(-5deg);
-  }
-
-  .cart-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: #ef4444;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    height: 22px;
-    min-width: 22px;
-    border-radius: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 6px;
-    border: 2px solid #0f172a;
-  }
+}

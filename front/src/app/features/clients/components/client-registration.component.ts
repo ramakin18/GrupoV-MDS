@@ -29,13 +29,13 @@ export class ClientRegistrationComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       contrasena: ['', [Validators.required, Validators.minLength(8)]],
       domicilio: this.fb.group({
-        pais: ['', Validators.required],
-        provincia: ['', Validators.required],
-        localidad: ['', Validators.required],
-        calle: ['', Validators.required],
+        pais: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
+        provincia: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
+        localidad: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
+        calle: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,ºª\-]+$/)]],
         numero: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-        piso: [''],
-        departamento: [''],
+        piso: ['', [Validators.pattern(/^\d+$/)]],
+        departamento: ['', [Validators.pattern(/^[a-zA-Z0-9\s]+$/)]],
       }),
       rol: ['CLIENTE']
     });
@@ -106,13 +106,26 @@ export class ClientRegistrationComponent implements OnInit {
       return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
     }
 
-    // Aquí es donde arreglamos los mensajes del pattern
     if (field.errors['pattern']) {
       if (fieldName === 'nombre' || fieldName === 'apellido') {
         return 'Solo se permiten letras';
       }
-      if (fieldName === 'numero' || fieldName === 'piso') {
+      if (fieldName === 'numero' || fieldName === 'domicilio.numero') {
         return 'Solo se permiten números';
+      }
+      if (fieldName === 'piso' || fieldName === 'domicilio.piso') {
+        return 'Solo se permiten números';
+      }
+      if (fieldName === 'pais' || fieldName === 'domicilio.pais'
+        || fieldName === 'provincia' || fieldName === 'domicilio.provincia'
+        || fieldName === 'localidad' || fieldName === 'domicilio.localidad') {
+        return 'Solo se permiten letras';
+      }
+      if (fieldName === 'calle' || fieldName === 'domicilio.calle') {
+        return 'Solo se permiten letras, números y puntos';
+      }
+      if (fieldName === 'departamento' || fieldName === 'domicilio.departamento') {
+        return 'Solo se permiten letras y números';
       }
       return 'Formato inválido';
     }

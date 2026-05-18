@@ -1,85 +1,202 @@
 <div class="home-container">
-  <header class="hero-section">
-    <div class="hero-content">
-      <h1 class="hero-title">{{ title }}</h1>
-      <p class="hero-subtitle">Selecciona como queres visualizar los productos existentes</p>
+  <header class="header">
+    <div class="header-brand" routerLink="/" (click)="loadProducts()">
+      <svg class="brand-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      <span class="brand-name">BodyPaint</span>
+    </div>
+
+    <nav class="header-nav">
       @if (authService.currentUser; as user) {
-        <p class="user-greeting">Bienvenido, {{ user.nombre }} {{ user.apellido }}</p>
-      }
-    </div>
-    <div class="header-actions">
-      @if (authService.isLoggedIn) {
-        <button class="btn-logout" (click)="logout()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Cerrar sesión
-        </button>
+        <span class="user-greeting">{{ user.nombre }}</span>
+        @if (user.rol === 'ADMIN') {
+          <a routerLink="/products/admin" class="btn-outline">Panel Admin</a>
+          <a routerLink="/orders" class="btn-outline">Pedidos</a>
+          <a routerLink="/orders/pendientes" class="btn-outline">Pendientes</a>
+        }
+        <button class="btn-ghost" (click)="logout()">Cerrar sesión</button>
       } @else {
-        <a routerLink="/login" class="btn-login">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-            <polyline points="10 17 15 12 10 7"/>
-            <line x1="15" y1="12" x2="3" y2="12"/>
-          </svg>
-          Iniciar sesión
-        </a>
+        <a routerLink="/login" class="btn-outline">Iniciar sesión</a>
+        <a routerLink="/register" class="btn-primary">Registrarse</a>
+      }
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">Expresá tu arte</h1>
+      <p class="hero-subtitle">Pintura corporal de alta calidad para profesionales y artistas</p>
+    </div>
+  </section>
+
+  <section class="catalog">
+    <div class="catalog-header">
+      <h2 class="catalog-title">Nuestros Productos</h2>
+      @if (!isLoadingProducts) {
+        <p class="catalog-subtitle">{{ products.length }} productos disponibles</p>
       }
     </div>
-  </header>
+
+    @if (isLoadingProducts) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando productos...</p>
+      </div>
+    } @else {
+      <div class="product-grid">
+        @for (product of products; track product.idProducto) {
+          <div class="product-card" [class.card-disabled]="!isLoggedIn">
+            <div class="product-swatch"></div>
+            @if (isLoggedIn) {
+              <div class="product-clickable" (click)="openQuickView(product)">
+                <div class="product-image">
+                  @if (product.imagenUrl) {
+                    <img [src]="product.imagenUrl" [alt]="product.nombreProducto" loading="lazy">
+                  } @else {
+                    <div class="placeholder-image">
+                      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                      </svg>
+                    </div>
+                  }
+                </div>
+                <div class="product-card-body">
+                  <div class="product-info">
+                    <h3 class="product-name">{{ product.nombreProducto }}</h3>
+                    <span class="product-price">${{ product.precio | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="product-image">
+                @if (product.imagenUrl) {
+                  <img [src]="product.imagenUrl" [alt]="product.nombreProducto" loading="lazy">
+                } @else {
+                  <div class="placeholder-image">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                      <path d="M2 17l10 5 10-5"/>
+                      <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                  </div>
+                }
+              </div>
+              <div class="product-card-body">
+                <div class="product-info">
+                  <h3 class="product-name">{{ product.nombreProducto }}</h3>
+                  <span class="product-price">${{ product.precio | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            }
+            <div class="product-actions">
+              @if (isLoggedIn) {
+                <button class="btn-add-cart" (click)="addToCart(product)">Agregar al carrito</button>
+              } @else {
+                <a routerLink="/login" class="btn-login-prompt">Inicia sesión para comprar</a>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-catalog">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01"/>
+            </svg>
+            <p>No hay productos disponibles en este momento</p>
+            <button class="btn-retry" (click)="loadProducts()">Reintentar</button>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</div>
+
+@if (showQuickView && selectedProduct) {
+  <div class="modal-overlay" (click)="closeQuickView()">
+    <div class="quick-view-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeQuickView()">&times;</button>
+      <div class="modal-layout">
+        <div class="modal-image-section">
+          <div class="modal-swatch"></div>
+          @if (selectedProduct.imagenUrl) {
+            <img [src]="selectedProduct.imagenUrl" [alt]="selectedProduct.nombreProducto">
+          } @else {
+            <div class="placeholder-image-lg">
+              <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+          }
+        </div>
+        <div class="modal-details">
+          <h2 class="modal-product-name">{{ selectedProduct.nombreProducto }}</h2>
+          <p class="modal-description">{{ selectedProduct.descripcion }}</p>
+          <div class="modal-price-row">
+            <span class="modal-price">${{ selectedProduct.precio | number:'1.2-2' }}</span>
+            <span class="modal-stock">Stock: {{ selectedProduct.stockDisponible }} uds.</span>
+          </div>
+
+          <div class="quantity-selector">
+            <span class="quantity-label">Cantidad:</span>
+            <div class="quantity-controls">
+              <button
+                class="qty-btn"
+                [disabled]="quickViewQuantity <= 1"
+                (click)="quickViewQuantity = quickViewQuantity - 1">-</button>
+              <span class="qty-value">{{ quickViewQuantity }}</span>
+              <button
+                class="qty-btn"
+                [disabled]="quickViewQuantity >= selectedProduct.stockDisponible"
+                (click)="quickViewQuantity = quickViewQuantity + 1">+</button>
+            </div>
+          </div>
+
+          @if (quickViewMessage) {
+            <p class="modal-message"
+              [class.success]="quickViewMessageType === 'success'"
+              [class.error]="quickViewMessageType === 'error'">
+              {{ quickViewMessage }}
+            </p>
+          }
+
+          <button class="btn-add-to-cart" (click)="addToCartFromQuickView()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (isLoggedIn) {
   <button class="cart-floating-button" title="Ver mi carrito" (click)="abrirModalCarrito()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="9" cy="21" r="1"></circle>
-      <circle cx="20" cy="21" r="1"></circle>
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="9" cy="21" r="1"/>
+      <circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
     </svg>
     <span class="cart-badge">{{ cartQuantity }}</span>
   </button>
-  <app-modal-carrito
-    *ngIf="mostrarModalCarrito"
-    (cerrar)="cerrarModalCarrito()"
-  >
-  </app-modal-carrito>
+}
 
-  <nav class="menu-grid">
-    <a routerLink="/products/admin" class="menu-card role-card admin-card">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
-          <path d="m9 12 2 2 4-4"/>
-        </svg>
-      </div>
-      <h2 class="card-title">ADMIN</h2>
-      <p class="card-description">Visualiza todos los productos de la base de datos y administra el inventario.</p>
-      <span class="card-action">Entrar como ADMIN</span>
-    </a>
-
-    <a routerLink="/products/usuario" class="menu-card role-card user-card">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-          <line x1="12" y1="22.08" x2="12" y2="12"/>
-        </svg>
-      </div>
-      <h2 class="card-title">USUARIO</h2>
-      <p class="card-description">Consulta los productos activos disponibles para visualizar como cliente.</p>
-      <span class="card-action">Entrar como USUARIO</span>
-    </a>
-
-    <a routerLink="/register" class="menu-card">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="8.5" cy="7" r="4"/>
-          <line x1="20" y1="8" x2="20" y2="14"/>
-          <line x1="23" y1="11" x2="17" y2="11"/>
-        </svg>
-      </div>
-      <h2 class="card-title">Clientes</h2>
-      <p class="card-description">Registro de nuevos clientes en el sistema</p>
-    </a>
-  </nav>
-</div>
+<app-modal-carrito
+  *ngIf="mostrarModalCarrito"
+  (cerrar)="cerrarModalCarrito()">
+</app-modal-carrito>

@@ -9,6 +9,8 @@ import java.util.List;
 
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
-    List<Pedido> findByClienteId(Long clienteId);
-    List<Pedido> findBySituacion(SituacionPedido situacion);
+    List<Pedido> findByClienteIdOrderByFechaDesc(Long clienteId);
+    List<Pedido> findBySituacionOrderByFechaDesc(SituacionPedido situacion);
+    List<Pedido> findAllByOrderByFechaDesc();
+    List<Pedido> findBySituacionInOrderByFechaDesc(List<SituacionPedido> situaciones);
 }

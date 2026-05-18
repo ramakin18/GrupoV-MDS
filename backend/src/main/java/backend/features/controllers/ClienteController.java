@@ -1,7 +1,9 @@
 package backend.features.controllers;
 
+import backend.features.dtos.DomicilioEnvioDto;
 import backend.features.dtos.request.ClienteCreateRequestDto;
 import backend.features.dtos.request.ClienteLoginRequestDto;
+import backend.features.dtos.request.DomicilioUpdateRequest;
 import backend.features.dtos.response.ClienteResponseDto;
 import backend.features.services.interfaces.domain.IClienteService;
 import jakarta.validation.Valid;
@@ -53,6 +55,13 @@ public class ClienteController {
     public ResponseEntity<ClienteResponseDto> update(@PathVariable Long id, @Valid @RequestBody ClienteCreateRequestDto request) {
         ClienteResponseDto cliente = clienteService.update(id, request);
         return ResponseEntity.ok(cliente);
+    }
+
+    @PutMapping("/{id}/domicilio")
+    public ResponseEntity<ClienteResponseDto> updateDomicilio(
+            @PathVariable Long id,
+            @Valid @RequestBody DomicilioUpdateRequest request) {
+        return ResponseEntity.ok(clienteService.updateDomicilio(id, request.getDomicilio()));
     }
 
     @DeleteMapping("/{id}")

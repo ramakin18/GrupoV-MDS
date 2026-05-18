@@ -12,6 +12,7 @@ import backend.features.repositories.ClienteRepository;
 import backend.features.services.interfaces.domain.IClienteService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -89,6 +90,24 @@ public class ClienteServiceImpl implements IClienteService {
 
         Cliente updatedCliente = clienteRepository.save(cliente);
         return clienteMapper.toResponseDto(updatedCliente);
+    }
+
+    @Override
+    @Transactional
+    public ClienteResponseDto updateDomicilio(Long id, backend.features.dtos.DomicilioEnvioDto domicilio) {
+        Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + id));
+
+        cliente.setPais(domicilio.getPais());
+        cliente.setProvincia(domicilio.getProvincia());
+        cliente.setLocalidad(domicilio.getLocalidad());
+        cliente.setCalle(domicilio.getCalle());
+        cliente.setNumero(domicilio.getNumero());
+        cliente.setPiso(domicilio.getPiso());
+        cliente.setDepartamento(domicilio.getDepartamento());
+
+        Cliente updated = clienteRepository.save(cliente);
+        return clienteMapper.toResponseDto(updated);
     }
 
     @Override

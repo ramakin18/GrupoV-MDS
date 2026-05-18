@@ -1,6 +1,4 @@
-<!-- Fondo oscuro del modal; al hacer click afuera se cierra. -->
 <div class="modal-overlay" (click)="cerrarModal()">
-  <!-- Tarjeta principal; stopPropagation evita que un click interno cierre el modal. -->
   <div class="cart-card" (click)="$event.stopPropagation()">
     <div class="cart-header">
       <h3>Mi Carrito</h3>
@@ -8,71 +6,84 @@
     </div>
 
     <div class="cart-body">
-      <!-- Estado vacio cuando todavia no se agregaron productos. -->
-      @if (cartItems.length === 0) {
-        <div class="empty-cart">
-          <p>El carrito esta vacio.</p>
-        </div>
-      } @else {
-        <!-- Recorre los productos reales guardados en CartService. -->
-        @for (item of cartItems; track item.idProducto) {
-          <div class="cart-item">
-            <div class="item-info">
-              <div>
-                <h4>{{ item.nombreProducto }}</h4>
-                <!-- Precio unitario y subtotal calculado por cantidad. -->
-                <p>Precio unitario: ${{ item.precio | number:'1.2-2' }}</p>
-                <p>Subtotal: ${{ item.precio * item.cantidad | number:'1.2-2' }}</p>
-              </div>
-
-              <div class="item-actions">
-                <!-- Controles para restar/sumar unidades sin superar el stock. -->
-                <div class="item-controls">
-                  <button type="button" (click)="decrease(item.idProducto)">-</button>
-                  <span>{{ item.cantidad }}</span>
-                  <button
-                    type="button"
-                    [disabled]="item.cantidad >= item.stockDisponible"
-                    (click)="increase(item.idProducto)">
-                    +
-                  </button>
+      @if (step === 'cart') {
+        @if (cartItems.length === 0) {
+          <div class="empty-cart">
+            <p>El carrito esta vacio.</p>
+          </div>
+        } @else {
+          @for (item of cartItems; track item.idProducto) {
+            <div class="cart-item">
+              <div class="item-info">
+                <div>
+                  <h4>{{ item.nombreProducto }}</h4>
+                  <p>Precio unitario: ${{ item.precio | number:'1.2-2' }}</p>
+                  <p>Subtotal: ${{ item.precio * item.cantidad | number:'1.2-2' }}</p>
                 </div>
-
-                <!-- Quita el producto completo del carrito. -->
-                <button type="button" class="btn-remove" (click)="remove(item.idProducto)">
-                  Eliminar
-                </button>
+                <div class="item-actions">
+                  <div class="item-controls">
+                    <button type="button" (click)="decrease(item.idProducto)">-</button>
+                    <span>{{ item.cantidad }}</span>
+                    <button type="button" [disabled]="item.cantidad >= item.stockDisponible" (click)="increase(item.idProducto)">+</button>
+                  </div>
+                  <button type="button" class="btn-remove" (click)="remove(item.idProducto)">Eliminar</button>
+                </div>
               </div>
             </div>
-          </div>
+          }
         }
       }
 
-      <!-- Mensaje de error al validar stock o consultar el backend. -->
-      @if (checkoutErrorMessage) {
-        <p class="cart-message cart-message-error">{{ checkoutErrorMessage }}</p>
+      @if (step === 'confirm') {
+        <div class="confirm-step">
+          <div class="confirm-icon">&#10003;</div>
+          <h3>Confirmar Pedido</h3>
+          <p>Productos validados correctamente.</p>
+          <p class="confirm-total">Total: <strong>${{ confirmedTotal | number:'1.2-2' }}</strong></p>
+          <p class="confirm-payment">Forma de pago: <strong>Efectivo</strong></p>
+          <p class="confirm-address">El pedido se enviara al domicilio registrado en tu perfil.</p>
+        </div>
       }
 
-      <!-- Mensaje exitoso cuando el backend valida el carrito. -->
-      @if (checkoutMessage) {
-        <p class="cart-message cart-message-success">{{ checkoutMessage }}</p>
+      @if (step === 'success') {
+        <div class="success-step">
+          <div class="success-icon">&#10003;</div>
+          <h3>Pedido Confirmado</h3>
+          <p>Tu pedido ha sido registrado exitosamente.</p>
+          <p class="order-id">Numero de pedido: <strong>#{{ createdOrderId }}</strong></p>
+          <p class="success-note">Recibiras notificaciones sobre el estado de tu pedido.</p>
+        </div>
+      }
+
+      @if (checkoutErrorMessage) {
+        <p class="cart-message cart-message-error">{{ checkoutErrorMessage }}</p>
       }
     </div>
 
     <div class="cart-footer">
-      <!-- Total acumulado de todos los subtotales del carrito. -->
       <div class="total-section">
         <span>Total:</span>
         <span class="total-price">${{ total | number:'1.2-2' }}</span>
       </div>
-      <!-- Dispara la validacion final contra el backend. -->
-      <button
-        type="button"
-        class="btn-checkout"
-        [disabled]="cartItems.length === 0 || isCheckingOut"
-        (click)="checkout()">
-        {{ isCheckingOut ? 'Validando...' : 'Finalizar Compra' }}
-      </button>
+
+      @if (step === 'cart') {
+        <button type="button" class="btn-checkout" [disabled]="cartItems.length === 0 || isCheckingOut" (click)="checkout()">
+          {{ isCheckingOut ? 'Validando...' : 'Finalizar Compra' }}
+        </button>
+      }
+
+      @if (step === 'confirm') {
+        <div class="confirm-actions">
+          <button type="button" class="btn-secondary" (click)="volverAlCarrito()" [disabled]="isCheckingOut">Volver</button>
+          <button type="button" class="btn-checkout" (click)="confirmOrder()" [disabled]="isCheckingOut">
+            {{ isCheckingOut ? 'Confirmando...' : 'Confirmar Pedido' }}
+          </button>
+        </div>
+      }
+
+      @if (step === 'success') {
+        <button type="button" class="btn-checkout" (click)="cerrarModal()">Cerrar</button>
+      }
     </div>
   </div>
 </div>

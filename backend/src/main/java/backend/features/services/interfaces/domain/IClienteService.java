@@ -12,5 +12,6 @@ public interface IClienteService {
     List<ClienteResponseDto> getAll();
     ClienteResponseDto getById(Long id);
     ClienteResponseDto update(Long id, ClienteCreateRequestDto request);
+    ClienteResponseDto updateDomicilio(Long id, backend.features.dtos.DomicilioEnvioDto domicilio);
     void delete(Long id);
 }

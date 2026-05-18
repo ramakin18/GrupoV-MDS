@@ -1,12 +1,4 @@
-export interface DomicilioEnvio {
-  pais: string;
-  provincia: string;
-  localidad: string;
-  calle: string;
-  numero: string;
-  piso?: string;
-  departamento?: string;
-}
+import { DomicilioEnvio } from './order.model';
 
 export interface Client {
   id?: number;

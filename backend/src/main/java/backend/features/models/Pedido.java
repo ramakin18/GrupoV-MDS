@@ -31,6 +31,8 @@ public class Pedido {
     @NotNull
     private LocalDateTime fecha;
 
+    private LocalDateTime fechaActualizacion;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private SituacionPedido situacion;
@@ -38,6 +40,20 @@ public class Pedido {
     @NotNull
     @PositiveOrZero
     private BigDecimal total;
+
+    @NotNull
+    @Builder.Default
+    private String formaPago = "EFECTIVO";
+
+    private String motivoCancelacion;
+
+    private String paisEnvio;
+    private String provinciaEnvio;
+    private String localidadEnvio;
+    private String calleEnvio;
+    private String numeroEnvio;
+    private String pisoEnvio;
+    private String departamentoEnvio;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoDetalle> detalles;

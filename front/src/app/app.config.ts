@@ -1,17 +1,20 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { ProductApiService } from './features/products/services/product-api.service';
 import { ClientApiService } from './features/clients/services/client-api.service';
+import { OrderApiService } from './features/orders/services/order-api.service';
 import { PRODUCT_SERVICE_TOKEN } from './core/services/product.service.interface';
 import { CLIENT_SERVICE_TOKEN } from './core/services/client.service.interface';
+import { ORDER_SERVICE_TOKEN } from './core/services/order.service.interface';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withFetch()),
     { provide: PRODUCT_SERVICE_TOKEN, useClass: ProductApiService },
-    { provide: CLIENT_SERVICE_TOKEN, useClass: ClientApiService }
+    { provide: CLIENT_SERVICE_TOKEN, useClass: ClientApiService },
+    { provide: ORDER_SERVICE_TOKEN, useClass: OrderApiService }
   ]
 };

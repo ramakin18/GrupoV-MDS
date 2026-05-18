@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -9,8 +9,8 @@ import {
   Validators,
   FormsModule
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, finalize, of } from 'rxjs';
+import { Router, RouterLink } from '@angular/router';
+
 import { PRODUCT_SERVICE_TOKEN, IProductService } from '@core/services/product.service.interface';
 import { CartService } from '../../../core/services/cart.service';
 import {
@@ -18,7 +18,6 @@ import {
   ProductCreateDto,
   ProductFilters,
   ProductStatusFilter,
-  ProductViewRole,
   ProductRow
 } from '@core/models/product.model';
 import { ModalCarritoComponent } from '../../modal-carrito/modal-carrito';
@@ -30,11 +29,10 @@ import { ModalCarritoComponent } from '../../modal-carrito/modal-carrito';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent {
   products: ProductRow[] = []; 
   productForm: FormGroup;
   filterForm: FormGroup;
-  role: ProductViewRole = 'USUARIO';
   isLoading = false;
   isCartOpen = false;
   errorMessage = '';
@@ -47,8 +45,8 @@ export class ProductListComponent implements OnInit {
   constructor(
     @Inject(PRODUCT_SERVICE_TOKEN) private readonly productService: IProductService,
     private readonly fb: FormBuilder,
-    private readonly route: ActivatedRoute,
-    private readonly cartService: CartService
+    private readonly cartService: CartService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.productForm = this.fb.group({
       nombreProducto: ['', [Validators.required, Validators.minLength(4)]],
@@ -64,18 +62,10 @@ export class ProductListComponent implements OnInit {
       stockMax: [null, [Validators.min(0)]],
       estado: ['TODOS' as ProductStatusFilter]
     }, { validators: this.stockRangeValidator });
+    this.loadProducts();
   }
 
-  ngOnInit(): void {
-    // Escuchamos el rol de la URL y cargamos productos
-    this.route.paramMap.subscribe(params => {
-      const roleParam = params.get('role');
-      this.role = roleParam?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USUARIO';
-      this.loadProducts();
-    });
-  }
-
-  get isAdmin(): boolean { return this.role === 'ADMIN'; }
+  get isAdmin(): boolean { return true; }
   
   get hayProductosEscasos(): boolean { 
     return this.products.some(p => p.stockDisponible <= p.stockMinimo && !p.borrado); 
@@ -89,11 +79,11 @@ export class ProductListComponent implements OnInit {
   }
 
   get pageTitle(): string {
-    return this.isAdmin ? 'Vista ADMIN de Productos' : 'Vista USUARIO de Productos';
+    return 'Panel de Administracion';
   }
 
   get pageSubtitle(): string {
-    return this.isAdmin ? 'Visualiza y administra el inventario' : 'Visualiza los productos activos disponibles';
+    return 'Visualiza y administra el inventario de productos';
   }
 
   get emptyMessage(): string {
@@ -101,9 +91,7 @@ export class ProductListComponent implements OnInit {
   }
 
   get emptyHint(): string {
-    return this.isAdmin
-      ? 'Usa el formulario de arriba para agregar tu primer producto'
-      : 'Cuando el administrador registre productos activos, aparecerán acá';
+    return 'Usa el formulario de arriba para agregar tu primer producto';
   }
 
   toggleEscasos(): void {
@@ -118,10 +106,6 @@ export class ProductListComponent implements OnInit {
   }
 
   get listDescription(): string {
-    if (!this.isAdmin) {
-      return 'Solo muestra productos activos';
-    }
-
     const estado = this.filterForm.get('estado')?.value as ProductStatusFilter;
     if (estado === 'ACTIVO') return 'Muestra productos activos';
     if (estado === 'INACTIVO') return 'Muestra productos inactivos';
@@ -135,20 +119,27 @@ export class ProductListComponent implements OnInit {
   loadProducts(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    this.productService.getAll(this.role, this.getFilters()).pipe(
-      catchError((error) => {
+    this.productService.getAll('ADMIN', this.getFilters()).subscribe({
+      next: (data) => {
+        this.products = data.map(p => ({
+          ...p,
+          original: { ...p },
+          stockDelta: 0,
+          isEditing: false
+        }));
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
         this.errorMessage = 'Error al cargar productos';
-        return of([]);
-      }),
-      finalize(() => this.isLoading = false)
-    ).subscribe(data => {
-      this.products = data.map(p => ({
-        ...p,
-        original: { ...p },
-        stockDelta: 0,
-        isEditing: false
-      }));
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
+    setTimeout(() => {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }, 10000);
   }
 
   adjustStock(row: ProductRow, delta: number): void {

@@ -1,0 +1,155 @@
+<div class="page-container">
+  <div class="page-header">
+      <a routerLink="/orders" class="btn-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Volver
+    </a>
+    <div class="header-content">
+      <h1>{{ pageTitle }}</h1>
+      <p class="subtitle">{{ pageSubtitle }}</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner spinner-lg"></div>
+      <span>Cargando pedidos...</span>
+    </div>
+  } @else if (errorMessage) {
+    <div class="alert alert-error">
+      <span class="alert-icon">&#9888;</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  } @else if (orders.length === 0) {
+    <div class="empty-state">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <p class="empty-message">{{ emptyMessage }}</p>
+      <p class="empty-hint">{{ emptyHint }}</p>
+    </div>
+  } @else {
+    <div class="section-header">
+      <h2 class="section-title">Pedidos Pendientes</h2>
+      <span class="product-count">{{ orders.length }} pedido(s)</span>
+    </div>
+
+    <div class="order-grid">
+      @for (order of orders; track order.idPedido) {
+        <div class="order-card">
+          <div class="order-card-header">
+            <div class="order-id">
+              <span class="order-id-label">Pedido #{{ order.idPedido }}</span>
+              <span [class]="estadoBadgeClass(order.situacion)">{{ estadoLabel(order.situacion) }}</span>
+            </div>
+            <span class="order-date">{{ order.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <div class="order-card-body">
+            <div class="order-section">
+              <h4 class="order-section-title">Cliente</h4>
+              <p class="order-info">{{ clienteNombre(order) }}</p>
+              <p class="order-info order-email">{{ order.emailCliente }}</p>
+            </div>
+
+            <div class="order-section">
+              <h4 class="order-section-title">Domicilio de Envio</h4>
+              <p class="order-info">{{ domicilioCompleto(order.domicilioEnvio) }}</p>
+            </div>
+
+            <div class="order-section">
+              <h4 class="order-section-title">Forma de Pago</h4>
+              <p class="order-info">{{ order.formaPago }}</p>
+            </div>
+
+            <div class="order-section order-section-full">
+              <h4 class="order-section-title">Productos</h4>
+              <div class="order-products-table">
+                <div class="products-table-header">
+                  <span class="col-producto">Producto</span>
+                  <span class="col-cantidad">Cant.</span>
+                  <span class="col-precio">P. Unit.</span>
+                  <span class="col-subtotal">Subtotal</span>
+                </div>
+                @for (detalle of order.detalles; track detalle.id) {
+                  <div class="products-table-row">
+                    <span class="col-producto">{{ detalle.nombreProducto }}</span>
+                    <span class="col-cantidad">{{ detalle.cantidad }}</span>
+                    <span class="col-precio">{{ detalle.precioUnitario | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
+                    <span class="col-subtotal">{{ detalle.subtotal | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="order-total">
+              <span class="total-label">Total</span>
+              <span class="total-value">{{ order.total | currency:'ARS':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="order-card-footer">
+            <button
+              class="btn btn-primary btn-sm"
+              (click)="markAsReady(order)"
+              [disabled]="isLoading"
+            >
+              @if (isLoading) {
+                <span class="spinner"></span>
+              }
+              Marcar como Listo
+            </button>
+            <button
+              class="btn btn-danger btn-sm"
+              (click)="openCancelModal(order)"
+              [disabled]="isLoading"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showCancelModal) {
+    <div class="modal-backdrop" (click)="closeCancelModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Cancelar Pedido #{{ cancelOrder?.idPedido }}</h3>
+          <button class="close-btn" (click)="closeCancelModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Ingrese el motivo por el cual desea cancelar este pedido. Esta accion no se puede deshacer.</p>
+          <div class="form-field">
+            <label for="cancelMotivo">Motivo de cancelacion</label>
+            <textarea
+              id="cancelMotivo"
+              class="cancel-textarea"
+              [(ngModel)]="cancelMotivo"
+              placeholder="Describa el motivo de la cancelacion..."
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeCancelModal()">Volver</button>
+          <button
+            class="btn btn-danger"
+            (click)="confirmCancel()"
+            [disabled]="!cancelMotivo.trim() || isLoading"
+          >
+            @if (isLoading) {
+              <span class="spinner"></span>
+            }
+            Confirmar Cancelacion
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
