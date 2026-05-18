@@ -1,6 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { httpTimeoutInterceptor } from './core/interceptors/http-timeout.interceptor';
 import { routes } from './app.routes';
 import { ProductApiService } from './features/products/services/product-api.service';
 import { ClientApiService } from './features/clients/services/client-api.service';
@@ -14,7 +15,7 @@ import { KIT_SERVICE_TOKEN } from './core/services/kit.service.interface';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withInterceptors([httpTimeoutInterceptor])),
     { provide: PRODUCT_SERVICE_TOKEN, useClass: ProductApiService },
     { provide: CLIENT_SERVICE_TOKEN, useClass: ClientApiService },
     { provide: ORDER_SERVICE_TOKEN, useClass: OrderApiService },

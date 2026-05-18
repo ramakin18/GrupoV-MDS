@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -21,7 +21,8 @@ export class ClientRegistrationComponent implements OnInit {
   constructor(
     private readonly fb: FormBuilder,
     @Inject(CLIENT_SERVICE_TOKEN) private readonly clientService: IClientService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.registrationForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
@@ -66,6 +67,7 @@ export class ClientRegistrationComponent implements OnInit {
       next: () => {
         this.isRegistered = true;
         this.isLoading = false;
+        this.cdr.detectChanges();
         this.registrationForm.reset({
           rol: 'CLIENTE',
           domicilio: {
@@ -81,8 +83,8 @@ export class ClientRegistrationComponent implements OnInit {
       },
       error: (error: any) => {
         this.errorMessage = error?.error?.message || 'Error al registrar cliente';
-        console.error('Registration error:', error);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
