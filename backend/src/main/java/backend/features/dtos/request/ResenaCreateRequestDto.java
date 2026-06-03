@@ -1,24 +1,23 @@
 package backend.features.dtos.request;
 
 import backend.features.models.Cliente;
+import backend.features.models.Producto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReseñaCreateRequestDto {
+public class ResenaCreateRequestDto {
 
     @NotNull
     @Min(1)
@@ -30,7 +29,7 @@ public class ReseñaCreateRequestDto {
 
     private LocalDateTime fechaCreacion;
 
-    private Long usuarioId;
+    private Cliente usuario;
 
-    private Long productoId;
+    private Producto producto;
 }

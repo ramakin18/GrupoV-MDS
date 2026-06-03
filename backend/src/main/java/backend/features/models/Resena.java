@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class Reseña {
+public class Resena {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

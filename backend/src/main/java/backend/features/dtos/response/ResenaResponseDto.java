@@ -1,6 +1,5 @@
 package backend.features.dtos.response;
 
-import backend.features.models.Cliente;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReseñaResponseDto {
+public class ResenaResponseDto {
 
     @Schema(description = "Id de reseña", example = "3")
     private long id;
