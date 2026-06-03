@@ -1,0 +1,66 @@
+<div class="container">
+  <header class="report-header">
+    <h1 class="report-title">Productos Más Vendidos</h1>
+    <p class="report-subtitle">Análisis de rendimiento y rotación de stock</p>
+  </header>
+
+  <div class="filter-card">
+    <div class="filter-grid">
+      <div class="filter-field">
+        <label class="filter-label">Mes</label>
+        <select class="filter-select" [(ngModel)]="selectedMes">
+          <option [ngValue]="null">Todos los meses</option>
+          <option *ngFor="let m of meses" [ngValue]="m.value">{{ m.name }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label class="filter-label">Año</label>
+        <select class="filter-select" [(ngModel)]="selectedAnio">
+          <option [ngValue]="null">Todos los años</option>
+          <option *ngFor="let a of anios" [ngValue]="a">{{ a }}</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-filter" (click)="onFilter()" [disabled]="loading">
+          <span *ngIf="!loading">Filtrar</span>
+          <span *ngIf="loading">Procesando...</span>
+        </button>
+        <button class="btn-clear" (click)="onClear()" [disabled]="loading">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div *ngIf="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Consultando base de datos...</p>
+    </div>
+
+    <table *ngIf="!loading && reportData && reportData.length > 0" class="report-table">
+      <thead>
+      <tr>
+        <th class="col-rank">#</th>
+        <th class="col-product">Producto</th>
+        <th class="col-quantity">Unidades Vendidas</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of reportData; let i = index">
+        <td class="col-rank"><span>{{ i + 1 }}</span></td>
+        <td class="col-product">{{ item.nombreProducto }}</td>
+        <td class="col-quantity">{{ item.cantidadVendida }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && error" class="empty-state" style="color: var(--color-error);">
+      <p>{{ error }}</p>
+    </div>
+
+    <div *ngIf="!loading && reportData && reportData.length === 0 && !error" class="empty-state">
+      <p>No se encontraron registros para la selección realizada.</p>
+    </div>
+  </div>
+</div>
