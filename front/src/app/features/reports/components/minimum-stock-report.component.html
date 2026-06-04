@@ -1,0 +1,50 @@
+<div class="container">
+  <header class="report-header">
+    <div>
+      <h1 class="report-title">Stock Mínimo</h1>
+      <p class="report-subtitle">Productos y kits que requieren reposición a la brevedad</p>
+    </div>
+
+    <button class="btn-refresh" type="button" (click)="loadReport()" [disabled]="loading">
+      {{ loading ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </header>
+
+  <div class="table-container">
+    <div *ngIf="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Consultando stock disponible...</p>
+    </div>
+
+    <table *ngIf="!loading && reportData.length > 0" class="report-table">
+      <thead>
+        <tr>
+          <th class="col-code">Código</th>
+          <th>Nombre</th>
+          <th class="col-stock">Stock Actual</th>
+          <th class="col-stock">Stock Mínimo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of reportData" [class.critical-row]="isBelowMinimum(item)">
+          <td class="col-code">{{ item.codigo }}</td>
+          <td>{{ item.nombre }}</td>
+          <td class="col-stock">
+            <span class="stock-badge" [class.critical]="isBelowMinimum(item)">
+              {{ item.stockActual }}
+            </span>
+          </td>
+          <td class="col-stock">{{ item.stockMinimo }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && error" class="empty-state error-state">
+      <p>{{ error }}</p>
+    </div>
+
+    <div *ngIf="!loading && reportData.length === 0 && !error" class="empty-state">
+      <p>No hay productos ni kits cercanos al stock mínimo.</p>
+    </div>
+  </div>
+</div>

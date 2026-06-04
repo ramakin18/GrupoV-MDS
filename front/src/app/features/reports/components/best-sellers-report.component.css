@@ -177,6 +177,10 @@ tr:nth-child(3) .rank-badge { background: #b45309; color: #fff; }    /* Bronze *
   color: var(--color-text-muted);
 }
 
+.error-state {
+  color: var(--color-error);
+}
+
 .loading-overlay {
   display: flex;
   flex-direction: column;

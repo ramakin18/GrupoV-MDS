@@ -1,7 +1,7 @@
 <div class="container">
   <header class="report-header">
-    <h1 class="report-title">Productos Más Vendidos</h1>
-    <p class="report-subtitle">Análisis de rendimiento y rotación de stock</p>
+    <h1 class="report-title">Productos Mas Vendidos</h1>
+    <p class="report-subtitle">Analisis de rendimiento y rotacion de stock</p>
   </header>
 
   <div class="filter-card">
@@ -15,10 +15,18 @@
       </div>
 
       <div class="filter-field">
-        <label class="filter-label">Año</label>
+        <label class="filter-label">Anio</label>
         <select class="filter-select" [(ngModel)]="selectedAnio">
-          <option [ngValue]="null">Todos los años</option>
+          <option [ngValue]="null">Todos los anios</option>
           <option *ngFor="let a of anios" [ngValue]="a">{{ a }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label class="filter-label">Dia</label>
+        <select class="filter-select" [(ngModel)]="selectedDia">
+          <option [ngValue]="null">Todos los dias</option>
+          <option *ngFor="let d of dias" [ngValue]="d">{{ d }}</option>
         </select>
       </div>
 
@@ -38,29 +46,29 @@
       <p>Consultando base de datos...</p>
     </div>
 
-    <table *ngIf="!loading && reportData && reportData.length > 0" class="report-table">
+    <table *ngIf="!loading && reportData.length > 0" class="report-table">
       <thead>
-      <tr>
-        <th class="col-rank">#</th>
-        <th class="col-product">Producto</th>
-        <th class="col-quantity">Unidades Vendidas</th>
-      </tr>
+        <tr>
+          <th class="col-rank">#</th>
+          <th class="col-product">Producto</th>
+          <th class="col-quantity">Unidades Vendidas</th>
+        </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let item of reportData; let i = index">
-        <td class="col-rank"><span>{{ i + 1 }}</span></td>
-        <td class="col-product">{{ item.nombreProducto }}</td>
-        <td class="col-quantity">{{ item.cantidadVendida }}</td>
-      </tr>
+        <tr *ngFor="let item of reportData; let i = index">
+          <td class="col-rank"><span>{{ i + 1 }}</span></td>
+          <td class="col-product">{{ item.nombreProducto }}</td>
+          <td class="col-quantity">{{ item.cantidadVendida }}</td>
+        </tr>
       </tbody>
     </table>
 
-    <div *ngIf="!loading && error" class="empty-state" style="color: var(--color-error);">
+    <div *ngIf="!loading && error" class="empty-state error-state">
       <p>{{ error }}</p>
     </div>
 
-    <div *ngIf="!loading && reportData && reportData.length === 0 && !error" class="empty-state">
-      <p>No se encontraron registros para la selección realizada.</p>
+    <div *ngIf="!loading && reportData.length === 0 && !error" class="empty-state">
+      <p>No se encontraron ventas para la seleccion realizada.</p>
     </div>
   </div>
 </div>
