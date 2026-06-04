@@ -1,15 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, Output, Inject, ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CartItem } from '../../core/models/cart-item.model';
+import { CouponApplyResponse } from '../../core/models/coupon.model';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ORDER_SERVICE_TOKEN, IOrderService } from '../../core/services/order.service.interface';
+import { CouponApiService } from '../coupons/services/coupon-api.service';
 
 @Component({
   selector: 'app-modal-carrito',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './modal-carrito.html',
   styleUrl: './modal-carrito.css',
 })
@@ -20,13 +23,17 @@ export class ModalCarritoComponent {
   checkoutMessage = '';
   checkoutErrorMessage = '';
   isCheckingOut = false;
+  isApplyingCoupon = false;
   confirmedTotal = 0;
   createdOrderId: number | null = null;
+  couponCode = '';
+  appliedCoupon: CouponApplyResponse | null = null;
 
   constructor(
     private readonly cartService: CartService,
     private readonly authService: AuthService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly couponService: CouponApiService,
     @Inject(ORDER_SERVICE_TOKEN) private readonly orderService: IOrderService
   ) {}
 
@@ -36,6 +43,10 @@ export class ModalCarritoComponent {
 
   get total(): number {
     return this.cartService.getTotal();
+  }
+
+  get finalTotal(): number {
+    return this.appliedCoupon?.totalConDescuento ?? this.total;
   }
 
   get isLoggedIn(): boolean {
@@ -52,18 +63,79 @@ export class ModalCarritoComponent {
     if (!result.success) {
       this.checkoutErrorMessage = result.message || 'No se pudo aumentar la cantidad.';
     }
+    this.clearAppliedCoupon();
   }
 
   decrease(idProducto: number): void {
     if (this.step !== 'cart') return;
     this.cartService.decreaseQuantity(idProducto);
+    this.clearAppliedCoupon();
     this.clearMessages();
   }
 
   remove(idProducto: number): void {
     if (this.step !== 'cart') return;
     this.cartService.removeProduct(idProducto);
+    this.clearAppliedCoupon();
     this.clearMessages();
+  }
+
+  applyCoupon(): void {
+    this.clearMessages();
+
+    const user = this.authService.currentUser;
+    if (!user || !user.id) {
+      this.checkoutErrorMessage = 'Debes iniciar sesion para usar un cupon.';
+      return;
+    }
+
+    const code = this.couponCode.trim();
+    if (!code) {
+      this.checkoutErrorMessage = 'Ingresa el codigo del cupon.';
+      return;
+    }
+
+    if (this.cartItems.length === 0) {
+      this.checkoutErrorMessage = 'El carrito esta vacio.';
+      return;
+    }
+
+    this.isApplyingCoupon = true;
+    this.couponService.apply({
+      clienteId: user.id,
+      codigo: code,
+      items: this.cartItems.map(item => ({
+        idProducto: item.idProducto,
+        cantidad: item.cantidad
+      }))
+    }).subscribe({
+      next: (coupon) => {
+        this.appliedCoupon = coupon;
+        this.couponCode = coupon.codigo;
+        this.checkoutMessage = 'Cupon aplicado correctamente.';
+        this.isApplyingCoupon = false;
+        this.cdr.detectChanges();
+      },
+      error: (error: unknown) => {
+        this.appliedCoupon = null;
+        this.checkoutErrorMessage = this.getErrorMessage(error);
+        this.isApplyingCoupon = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removeCoupon(): void {
+    this.couponCode = '';
+    this.clearAppliedCoupon();
+    this.clearMessages();
+  }
+
+  onCouponCodeChange(): void {
+    if (this.appliedCoupon) {
+      this.clearAppliedCoupon();
+      this.checkoutMessage = '';
+    }
   }
 
   checkout(): void {
@@ -89,10 +161,16 @@ export class ModalCarritoComponent {
 
     this.cartService.validateCartWithBackend().subscribe({
       next: (response) => {
-        this.confirmedTotal = response.total;
-        this.step = 'confirm';
-        this.isCheckingOut = false;
-        this.cdr.detectChanges();
+        const code = this.couponCode.trim();
+        if (!code) {
+          this.confirmedTotal = response.total;
+          this.step = 'confirm';
+          this.isCheckingOut = false;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.applyCouponForCheckout();
       },
       error: (error: unknown) => {
         this.checkoutErrorMessage = this.getErrorMessage(error);
@@ -119,13 +197,15 @@ export class ModalCarritoComponent {
         idProducto: item.idProducto,
         cantidad: item.cantidad
       })),
-      formaPago: 'EFECTIVO'
+      formaPago: 'EFECTIVO',
+      codigoCupon: this.appliedCoupon?.codigo
     }).subscribe({
       next: (pedido) => {
         this.createdOrderId = pedido.idPedido;
         this.step = 'success';
         this.isCheckingOut = false;
         this.cartService.clearCart();
+        this.removeCoupon();
         this.cdr.detectChanges();
       },
       error: (error: unknown) => {
@@ -145,6 +225,42 @@ export class ModalCarritoComponent {
   private clearMessages(): void {
     this.checkoutMessage = '';
     this.checkoutErrorMessage = '';
+  }
+
+  private clearAppliedCoupon(): void {
+    this.appliedCoupon = null;
+  }
+
+  private applyCouponForCheckout(): void {
+    const user = this.authService.currentUser;
+    if (!user || !user.id) {
+      this.checkoutErrorMessage = 'Debes iniciar sesion para comprar.';
+      this.isCheckingOut = false;
+      return;
+    }
+
+    this.couponService.apply({
+      clienteId: user.id,
+      codigo: this.couponCode.trim(),
+      items: this.cartItems.map(item => ({
+        idProducto: item.idProducto,
+        cantidad: item.cantidad
+      }))
+    }).subscribe({
+      next: (coupon) => {
+        this.appliedCoupon = coupon;
+        this.confirmedTotal = coupon.totalConDescuento;
+        this.step = 'confirm';
+        this.isCheckingOut = false;
+        this.cdr.detectChanges();
+      },
+      error: (error: unknown) => {
+        this.appliedCoupon = null;
+        this.checkoutErrorMessage = this.getErrorMessage(error);
+        this.isCheckingOut = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private getErrorMessage(error: unknown): string {

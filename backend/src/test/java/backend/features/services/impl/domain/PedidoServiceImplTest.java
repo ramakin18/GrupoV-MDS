@@ -10,6 +10,7 @@ import backend.features.models.*;
 import backend.features.repositories.ClienteRepository;
 import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.PedidoRepository;
+import backend.features.services.interfaces.domain.ICuponService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ class PedidoServiceImplTest {
     @Mock private ClienteRepository clienteRepository;
     @Mock private IProductoRepository productoRepository;
     @Mock private PedidoMapper pedidoMapper;
+    @Mock private ICuponService cuponService;
 
     private PedidoServiceImpl service;
     private Cliente cliente;
@@ -40,7 +42,7 @@ class PedidoServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new PedidoServiceImpl(pedidoRepository, clienteRepository, productoRepository, pedidoMapper);
+        service = new PedidoServiceImpl(pedidoRepository, clienteRepository, productoRepository, pedidoMapper, cuponService);
 
         cliente = Cliente.builder()
             .id(1L).nombre("Juan").apellido("Perez")
@@ -64,7 +66,7 @@ class PedidoServiceImplTest {
     @Test
     void create_conProductosConStock_shouldDescontarStock() {
         PedidoItemRequest item = new PedidoItemRequest(1L, 2);
-        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null);
+        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(productoRepository.findByIdProductoAndBorradoFalse(1L)).thenReturn(Optional.of(producto));
@@ -81,7 +83,7 @@ class PedidoServiceImplTest {
     @Test
     void create_conClienteInexistente_shouldThrow() {
         PedidoItemRequest item = new PedidoItemRequest(1L, 1);
-        PedidoCreateRequest request = new PedidoCreateRequest(99L, List.of(item), null);
+        PedidoCreateRequest request = new PedidoCreateRequest(99L, List.of(item), null, null);
 
         when(clienteRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -91,7 +93,7 @@ class PedidoServiceImplTest {
     @Test
     void create_conProductoInexistente_shouldThrow() {
         PedidoItemRequest item = new PedidoItemRequest(99L, 1);
-        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null);
+        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(productoRepository.findByIdProductoAndBorradoFalse(99L)).thenReturn(Optional.empty());
@@ -103,7 +105,7 @@ class PedidoServiceImplTest {
     @Test
     void create_conStockInsuficiente_shouldThrow() {
         PedidoItemRequest item = new PedidoItemRequest(1L, 99);
-        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null);
+        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(productoRepository.findByIdProductoAndBorradoFalse(1L)).thenReturn(Optional.of(producto));
@@ -115,7 +117,7 @@ class PedidoServiceImplTest {
     @Test
     void create_debeCrearEnEstadoReservado() {
         PedidoItemRequest item = new PedidoItemRequest(1L, 2);
-        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null);
+        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(productoRepository.findByIdProductoAndBorradoFalse(1L)).thenReturn(Optional.of(producto));
@@ -130,7 +132,7 @@ class PedidoServiceImplTest {
     @Test
     void create_formaPagoDebeSerEfectivo() {
         PedidoItemRequest item = new PedidoItemRequest(1L, 2);
-        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null);
+        PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(productoRepository.findByIdProductoAndBorradoFalse(1L)).thenReturn(Optional.of(producto));

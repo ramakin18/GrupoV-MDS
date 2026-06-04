@@ -10,6 +10,7 @@ import backend.features.models.*;
 import backend.features.repositories.ClienteRepository;
 import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.PedidoRepository;
+import backend.features.services.interfaces.domain.ICuponService;
 import backend.features.services.interfaces.domain.IPedidoService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class PedidoServiceImpl implements IPedidoService {
     private final ClienteRepository clienteRepository;
     private final IProductoRepository productoRepository;
     private final PedidoMapper pedidoMapper;
+    private final ICuponService cuponService;
 
     @Override
     public List<PedidoResponseDTO> getAll(String estado) {
@@ -62,6 +64,7 @@ public class PedidoServiceImpl implements IPedidoService {
             .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + request.clienteId()));
 
         List<PedidoDetalle> detalles = new ArrayList<>();
+        List<Producto> productosAActualizar = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
         for (PedidoItemRequest item : request.items()) {
@@ -88,7 +91,21 @@ public class PedidoServiceImpl implements IPedidoService {
             detalles.add(detalle);
 
             producto.setStockDisponible(producto.getStockDisponible() - item.cantidad());
-            productoRepository.save(producto);
+            productosAActualizar.add(producto);
+        }
+
+        BigDecimal subtotal = total;
+        BigDecimal descuento = BigDecimal.ZERO;
+        ICuponService.CuponCalculation cuponCalculation = null;
+
+        if (request.codigoCupon() != null && !request.codigoCupon().isBlank()) {
+            cuponCalculation = cuponService.validateForOrder(
+                request.clienteId(),
+                request.codigoCupon(),
+                request.items()
+            );
+            descuento = cuponCalculation.descuento();
+            total = cuponCalculation.totalConDescuento();
         }
 
         String formaPago = request.formaPago() != null ? request.formaPago() : "EFECTIVO";
@@ -98,6 +115,9 @@ public class PedidoServiceImpl implements IPedidoService {
             .fecha(LocalDateTime.now())
             .situacion(SituacionPedido.RESERVADO)
             .total(total)
+            .subtotal(subtotal)
+            .descuento(descuento)
+            .cupon(cuponCalculation != null ? cuponCalculation.cupon() : null)
             .formaPago(formaPago)
             .paisEnvio(cliente.getPais())
             .provinciaEnvio(cliente.getProvincia())
@@ -110,8 +130,12 @@ public class PedidoServiceImpl implements IPedidoService {
             .build();
 
         detalles.forEach(d -> d.setPedido(pedido));
+        productosAActualizar.forEach(productoRepository::save);
 
         Pedido saved = pedidoRepository.save(pedido);
+        if (cuponCalculation != null) {
+            cuponService.markAsUsed(cuponCalculation.asignacion(), saved);
+        }
         return pedidoMapper.toResponseDto(saved);
     }
 

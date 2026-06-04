@@ -31,6 +31,34 @@
               </div>
             </div>
           }
+
+          @if (isLoggedIn) {
+            <div class="coupon-box">
+              <label for="couponCode">Cupon de descuento</label>
+              <div class="coupon-row">
+                <input
+                  id="couponCode"
+                  type="text"
+                  placeholder="Codigo numerico"
+                  [(ngModel)]="couponCode"
+                  (ngModelChange)="onCouponCodeChange()"
+                  [disabled]="isApplyingCoupon || isCheckingOut">
+                <button type="button" (click)="applyCoupon()" [disabled]="isApplyingCoupon || isCheckingOut || !couponCode.trim()">
+                  {{ isApplyingCoupon ? 'Validando...' : 'Aplicar' }}
+                </button>
+              </div>
+
+              @if (appliedCoupon) {
+                <div class="coupon-applied">
+                  <div>
+                    <strong>Cupon {{ appliedCoupon.codigo }}</strong>
+                    <span>Vigente hasta {{ appliedCoupon.fechaHasta }}</span>
+                  </div>
+                  <button type="button" (click)="removeCoupon()">Quitar</button>
+                </div>
+              }
+            </div>
+          }
         }
       }
 
@@ -39,6 +67,11 @@
           <div class="confirm-icon">&#10003;</div>
           <h3>Confirmar Pedido</h3>
           <p>Productos validados correctamente.</p>
+          @if (appliedCoupon) {
+            <p>Subtotal: <strong>${{ appliedCoupon.subtotal | number:'1.2-2' }}</strong></p>
+            <p>Descuento: <strong>-${{ appliedCoupon.descuento | number:'1.2-2' }}</strong></p>
+            <p>Cupon: <strong>{{ appliedCoupon.codigo }}</strong></p>
+          }
           <p class="confirm-total">Total: <strong>${{ confirmedTotal | number:'1.2-2' }}</strong></p>
           <p class="confirm-payment">Forma de pago: <strong>Efectivo</strong></p>
           <p class="confirm-address">El pedido se enviara al domicilio registrado en tu perfil.</p>
@@ -58,12 +91,16 @@
       @if (checkoutErrorMessage) {
         <p class="cart-message cart-message-error">{{ checkoutErrorMessage }}</p>
       }
+
+      @if (checkoutMessage) {
+        <p class="cart-message cart-message-success">{{ checkoutMessage }}</p>
+      }
     </div>
 
     <div class="cart-footer">
       <div class="total-section">
-        <span>Total:</span>
-        <span class="total-price">${{ total | number:'1.2-2' }}</span>
+        <span>{{ appliedCoupon ? 'Total con descuento:' : 'Total:' }}</span>
+        <span class="total-price">${{ finalTotal | number:'1.2-2' }}</span>
       </div>
 
       @if (step === 'cart') {

@@ -41,7 +41,7 @@ class PedidoControllerTest {
         1L, 1L, "Juan", "Perez", "j@t.com",
         LocalDateTime.of(2024, 1, 1, 10, 0), null,
         SituacionPedido.RESERVADO, null, "EFECTIVO",
-        BigDecimal.valueOf(500),
+        BigDecimal.valueOf(500), BigDecimal.valueOf(500), BigDecimal.ZERO, null,
         new DomicilioEnvioDto("Argentina", "BA", "CABA", "Calle", "123", null, null),
         List.of()
     );
@@ -81,7 +81,7 @@ class PedidoControllerTest {
         mockMvc.perform(post("/api/pedidos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(
-                    new PedidoCreateRequest(1L, List.of(new PedidoItemRequest(1L, 2)), null)
+                    new PedidoCreateRequest(1L, List.of(new PedidoItemRequest(1L, 2)), null, null)
                 )))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.idPedido").value(1));

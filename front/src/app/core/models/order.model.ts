@@ -31,6 +31,9 @@ export interface Pedido {
   motivoCancelacion?: string;
   formaPago: string;
   total: number;
+  subtotal?: number;
+  descuento?: number;
+  codigoCupon?: string;
   domicilioEnvio: DomicilioEnvio;
   detalles: PedidoDetalle[];
 }
@@ -39,6 +42,7 @@ export interface PedidoCreateRequest {
   clienteId: number;
   items: PedidoItemRequest[];
   formaPago?: string;
+  codigoCupon?: string;
 }
 
 export interface PedidoItemRequest {

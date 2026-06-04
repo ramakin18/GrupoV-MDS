@@ -7,6 +7,7 @@ import { OrderListComponent } from "./features/orders/components/order-list.comp
 import { PendingDeliveryComponent } from "./features/orders/components/pending-delivery.component";
 import { KitListComponent } from "./features/kits/components/kit-list.component";
 import { BestSellersReportComponent } from "./features/reports/components/best-sellers-report.component";
+import { CouponManagerComponent } from "./features/coupons/components/coupon-manager.component";
 import { AuthGuard } from "./core/services/auth.guard";
 import { AdminGuard } from "./core/services/admin.guard";
 
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: "orders", component: OrderListComponent, canActivate: [AdminGuard] },
   { path: "orders/pendientes", component: PendingDeliveryComponent, canActivate: [AdminGuard] },
   { path: "kits", component: KitListComponent, canActivate: [AdminGuard] },
+  { path: "coupons", component: CouponManagerComponent, canActivate: [AdminGuard] },
   { path: "reports/best-sellers", component: BestSellersReportComponent, canActivate: [AdminGuard] },
   { path: "register", component: ClientRegistrationComponent },
   { path: "login", component: ClientLoginComponent },

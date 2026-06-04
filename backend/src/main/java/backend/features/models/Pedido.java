@@ -41,6 +41,18 @@ public class Pedido {
     @PositiveOrZero
     private BigDecimal total;
 
+    @PositiveOrZero
+    @Builder.Default
+    private BigDecimal subtotal = BigDecimal.ZERO;
+
+    @PositiveOrZero
+    @Builder.Default
+    private BigDecimal descuento = BigDecimal.ZERO;
+
+    @ManyToOne
+    @JoinColumn(name = "cupon_id")
+    private Cupon cupon;
+
     @NotNull
     @Builder.Default
     private String formaPago = "EFECTIVO";

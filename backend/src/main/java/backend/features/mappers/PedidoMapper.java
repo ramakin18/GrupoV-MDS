@@ -7,6 +7,7 @@ import backend.features.models.Pedido;
 import backend.features.models.PedidoDetalle;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -27,6 +28,9 @@ public class PedidoMapper {
             ? pedido.getDetalles().stream().map(this::toDetalleDto).toList()
             : List.of();
 
+        BigDecimal subtotal = pedido.getSubtotal() != null ? pedido.getSubtotal() : pedido.getTotal();
+        BigDecimal descuento = pedido.getDescuento() != null ? pedido.getDescuento() : BigDecimal.ZERO;
+
         return new PedidoResponseDTO(
             pedido.getIdPedido(),
             pedido.getCliente().getId(),
@@ -39,6 +43,9 @@ public class PedidoMapper {
             pedido.getMotivoCancelacion(),
             pedido.getFormaPago(),
             pedido.getTotal(),
+            subtotal,
+            descuento,
+            pedido.getCupon() != null ? pedido.getCupon().getCodigo() : null,
             domicilio,
             detalles
         );

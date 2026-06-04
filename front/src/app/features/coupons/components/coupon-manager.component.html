@@ -1,0 +1,162 @@
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h1>Cupones de descuento</h1>
+      <p class="subtitle">Genera ofertas para clientes seleccionados</p>
+    </div>
+    <a routerLink="/" class="btn-back">Volver al inicio</a>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <section class="panel">
+    <div class="section-header">
+      <h2>Nuevo cupon</h2>
+      <p>El codigo se genera automaticamente y no se repite.</p>
+    </div>
+
+    <form [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="coupon-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="tipoDescuento">Tipo de descuento</label>
+          <select id="tipoDescuento" formControlName="tipoDescuento">
+            <option value="PORCENTAJE">Porcentaje</option>
+            <option value="MONTO_FIJO">Monto fijo</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="valor">{{ tipoDescuento === 'PORCENTAJE' ? 'Porcentaje' : 'Monto' }}</label>
+          <div class="input-with-prefix">
+            <span>{{ tipoDescuento === 'PORCENTAJE' ? '%' : '$' }}</span>
+            <input id="valor" type="number" step="0.01" min="0.01" formControlName="valor">
+          </div>
+          @if (hasFieldError('valor')) {
+            <small class="field-error">{{ getFieldError('valor') }}</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="fechaDesde">Fecha desde</label>
+          <input id="fechaDesde" type="text" placeholder="dd/mm/aaaa" formControlName="fechaDesde">
+          @if (hasFieldError('fechaDesde')) {
+            <small class="field-error">{{ getFieldError('fechaDesde') }}</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="fechaHasta">Fecha hasta</label>
+          <input id="fechaHasta" type="text" placeholder="dd/mm/aaaa" formControlName="fechaHasta">
+          @if (hasFieldError('fechaHasta')) {
+            <small class="field-error">{{ getFieldError('fechaHasta') }}</small>
+          }
+        </div>
+      </div>
+
+      <div class="selection-grid">
+        <div class="selection-panel">
+          <div class="selection-header">
+            <div>
+              <h3>Clientes</h3>
+              <p>{{ selectedClientIds.size }} seleccionado(s)</p>
+            </div>
+            <div class="selection-actions">
+              <button type="button" (click)="selectAllClients()">Todos</button>
+              <button type="button" (click)="clearClientSelection()">Limpiar</button>
+            </div>
+          </div>
+
+          <div class="check-list">
+            @if (isLoading) {
+              <p class="muted">Cargando clientes...</p>
+            } @else {
+              @for (client of clients; track client.id) {
+                <label class="check-row">
+                  <input
+                    type="checkbox"
+                    [checked]="client.id ? selectedClientIds.has(client.id) : false"
+                    (change)="toggleClient(client.id, $any($event.target).checked)">
+                  <span>{{ client.nombre }} {{ client.apellido }}</span>
+                  <small>{{ client.email }}</small>
+                </label>
+              } @empty {
+                <p class="muted">No hay clientes disponibles.</p>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="selection-panel">
+          <div class="selection-header">
+            <div>
+              <h3>Productos abarcados</h3>
+              <p>{{ selectedProductIds.size ? selectedProductIds.size + ' seleccionado(s)' : 'Todos los productos' }}</p>
+            </div>
+            <div class="selection-actions">
+              <button type="button" (click)="clearProductSelection()">Todos</button>
+            </div>
+          </div>
+
+          <div class="check-list">
+            @if (isLoading) {
+              <p class="muted">Cargando productos...</p>
+            } @else {
+              @for (product of products; track product.idProducto) {
+                <label class="check-row">
+                  <input
+                    type="checkbox"
+                    [checked]="product.idProducto ? selectedProductIds.has(product.idProducto) : false"
+                    (change)="toggleProduct(product.idProducto, $any($event.target).checked)">
+                  <span>{{ product.nombreProducto }}</span>
+                  <small>Stock {{ product.stockDisponible }}</small>
+                </label>
+              } @empty {
+                <p class="muted">No hay productos disponibles.</p>
+              }
+            }
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting || isLoading">
+        {{ isSubmitting ? 'Generando...' : 'Generar cupon' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="section-header">
+      <h2>Cupones generados</h2>
+      <p>{{ coupons.length }} cupon(es)</p>
+    </div>
+
+    @if (isLoading) {
+      <div class="empty-state">Cargando cupones...</div>
+    } @else {
+      <div class="coupon-list">
+        @for (coupon of coupons; track coupon.idCupon) {
+          <article class="coupon-card">
+            <div>
+              <p class="coupon-code">{{ coupon.codigo }}</p>
+              <p class="muted">Vigencia: {{ coupon.fechaDesde }} al {{ coupon.fechaHasta }}</p>
+              <p class="muted">Productos: {{ productScope(coupon) }}</p>
+            </div>
+            <div class="coupon-meta">
+              <strong>{{ discountDescription(coupon) }}</strong>
+              <span>{{ coupon.clientes.length }} destinatario(s)</span>
+              <span>{{ usedCount(coupon) }} usado(s)</span>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">Todavia no hay cupones generados.</div>
+        }
+      </div>
+    }
+  </section>
+</div>

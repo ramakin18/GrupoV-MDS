@@ -43,6 +43,15 @@ public record PedidoResponseDTO(
     @Schema(description = "Total del pedido", example = "4500.00")
     BigDecimal total,
 
+    @Schema(description = "Subtotal antes de aplicar descuentos", example = "5000.00")
+    BigDecimal subtotal,
+
+    @Schema(description = "Descuento aplicado", example = "500.00")
+    BigDecimal descuento,
+
+    @Schema(description = "Codigo de cupon aplicado", example = "12345678")
+    String codigoCupon,
+
     @Schema(description = "Dirección de envío")
     DomicilioEnvioDto domicilioEnvio,
 

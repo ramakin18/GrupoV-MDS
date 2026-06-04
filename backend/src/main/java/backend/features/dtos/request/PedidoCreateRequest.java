@@ -19,6 +19,9 @@ public record PedidoCreateRequest(
     List<@Valid PedidoItemRequest> items,
 
     @Schema(description = "Forma de pago", example = "EFECTIVO")
-    String formaPago
+    String formaPago,
+
+    @Schema(description = "Codigo de cupon a aplicar", example = "12345678")
+    String codigoCupon
 
 ) {}
