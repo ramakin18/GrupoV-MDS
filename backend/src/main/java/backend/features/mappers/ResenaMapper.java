@@ -4,7 +4,9 @@ package backend.features.mappers;
 import backend.features.dtos.request.ResenaCreateRequestDto;
 import backend.features.dtos.response.ResenaResponseDto;
 import backend.features.models.Resena;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ResenaMapper {
     public Resena toModel(ResenaCreateRequestDto request) {
         return Resena.builder()
