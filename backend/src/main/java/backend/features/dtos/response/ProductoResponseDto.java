@@ -1,8 +1,8 @@
 package backend.features.dtos.response;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.math.BigDecimal;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Respuesta con datos de un producto")
 public record ProductoResponseDto(
@@ -29,5 +29,11 @@ public record ProductoResponseDto(
         boolean borrado,
 
         @Schema(description = "URL de la imagen del producto", example = "https://res.cloudinary.com/...")
-        String imagenUrl
+        String imagenUrl,
+
+        @Schema(description = "Promedio de calificación", example = "4.5")
+        Double promedioPuntuacion,
+
+        @Schema(description = "Cantidad de reseñas", example = "12")
+        Integer cantidadResenas
 ) {}
