@@ -15,4 +15,6 @@ export interface CatalogItem {
   imagenUrl?: string;
   productos?: CatalogProductItem[];
   imagenesCollage?: string[];
+  promedioPuntuacion?: number;
+  cantidadResenas?: number;
 }

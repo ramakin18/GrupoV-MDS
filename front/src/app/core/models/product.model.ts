@@ -10,9 +10,11 @@ export interface Product {
   stockMinimo: number;
   borrado?: boolean;
   imagenUrl?: string;
+  promedioPuntuacion?: number;
+  cantidadResenas?: number;
 }
 
-export type ProductCreateDto = Omit<Product, 'idProducto' | 'imagenUrl'>;
+export type ProductCreateDto = Omit<Product, 'idProducto' | 'imagenUrl' | 'promedioPuntuacion' | 'cantidadResenas'>;
 
 export interface ProductRow extends Product {
   original: Product;
