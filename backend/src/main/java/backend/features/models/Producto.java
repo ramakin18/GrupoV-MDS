@@ -2,7 +2,8 @@ package backend.features.models;
 
 import java.math.BigDecimal;
 
-import jakarta.persistence.Column;
+import org.hibernate.annotations.ColumnDefault;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,7 +15,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.ColumnDefault;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -58,6 +58,15 @@ public class Producto {
 
     @Builder.Default
     private boolean borrado = false;
+
+    // A partir de aqui añadimos campos de reseña
+    @ColumnDefault("0.0")
+    @Builder.Default
+    private Double promedioPuntuacion = 0.0;
+
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer cantidadResenas = 0;
 
     public void markAsDeleted() {
         this.borrado = true;
