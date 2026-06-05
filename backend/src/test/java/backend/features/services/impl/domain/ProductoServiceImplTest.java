@@ -1,5 +1,27 @@
 package backend.features.services.impl.domain;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
+
 import backend.exceptions.DuplicateResourceException;
 import backend.exceptions.ResourceNotFoundException;
 import backend.exceptions.ValidationException;
@@ -11,24 +33,6 @@ import backend.features.models.ProductoEstadoFiltro;
 import backend.features.models.ProductoViewRole;
 import backend.features.repositories.IKitRepository;
 import backend.features.repositories.IProductoRepository;
-import backend.features.repositories.specs.ProductoSpecifications;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceImplTest {
@@ -72,8 +76,10 @@ class ProductoServiceImplTest {
         when(productoRepository.existsByNombreProductoIgnoreCase("Producto Test")).thenReturn(false);
         when(productoMapper.toModel(validRequest)).thenReturn(existingProduct);
         when(productoRepository.save(any(Producto.class))).thenReturn(existingProduct);
+        
+        // parametros añadidos
         when(productoMapper.toResponseDto(any(Producto.class))).thenReturn(
-            new ProductoResponseDto(1L, "Producto Test", "Descripcion", BigDecimal.valueOf(100), 10, 5, false, null)
+            new ProductoResponseDto(1L, "Producto Test", "Descripcion", BigDecimal.valueOf(100), 10, 5, false, null, 0.0, 0)
         );
 
         ProductoResponseDto result = service.create(validRequest, null);
@@ -96,8 +102,10 @@ class ProductoServiceImplTest {
     @Test
     void getAll_conRolAdmin_shouldIncludeInactivos() {
         when(productoRepository.findAll(any(Specification.class))).thenReturn(List.of(existingProduct));
+        
+        // AÑADIDOS: 0.0, 0
         when(productoMapper.toResponseDtoList(any())).thenReturn(List.of(
-            new ProductoResponseDto(1L, "Existente", "Original", BigDecimal.valueOf(50), 20, 3, false, null)
+            new ProductoResponseDto(1L, "Existente", "Original", BigDecimal.valueOf(50), 20, 3, false, null, 0.0, 0)
         ));
 
         List<ProductoResponseDto> result = service.getAll(null, null, null, null,
@@ -109,8 +117,10 @@ class ProductoServiceImplTest {
     @Test
     void getAll_conRolUsuario_shouldForceActivo() {
         when(productoRepository.findAll(any(Specification.class))).thenReturn(List.of(existingProduct));
+        
+        // parametros añadidos
         when(productoMapper.toResponseDtoList(any())).thenReturn(List.of(
-            new ProductoResponseDto(1L, "Existente", "Original", BigDecimal.valueOf(50), 20, 3, false, null)
+            new ProductoResponseDto(1L, "Existente", "Original", BigDecimal.valueOf(50), 20, 3, false, null, 0.0, 0)
         ));
 
         List<ProductoResponseDto> result = service.getAll(null, null, null, null,
@@ -134,8 +144,10 @@ class ProductoServiceImplTest {
     @Test
     void getById_conIdValido_shouldReturn() {
         when(productoRepository.findByIdProductoAndBorradoFalse(1L)).thenReturn(Optional.of(existingProduct));
+        
+        // parametros añadidos
         when(productoMapper.toResponseDto(existingProduct)).thenReturn(
-            new ProductoResponseDto(1L, "Existente", "Original", BigDecimal.valueOf(50), 20, 3, false, null)
+            new ProductoResponseDto(1L, "Existente", "Original", BigDecimal.valueOf(50), 20, 3, false, null, 0.0, 0)
         );
 
         ProductoResponseDto result = service.getById(1L);
@@ -159,8 +171,10 @@ class ProductoServiceImplTest {
         when(productoRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
         when(productoRepository.existsByNombreProductoIgnoreCaseAndIdProductoNot("NuevoNombre", 1L)).thenReturn(false);
         when(productoRepository.save(any(Producto.class))).thenReturn(existingProduct);
+        
+        // parametros añadidos
         when(productoMapper.toResponseDto(any(Producto.class))).thenReturn(
-            new ProductoResponseDto(1L, "NuevoNombre", "NuevaDesc", BigDecimal.valueOf(200), 30, 5, false, null)
+            new ProductoResponseDto(1L, "NuevoNombre", "NuevaDesc", BigDecimal.valueOf(200), 30, 5, false, null, 0.0, 0)
         );
 
         ProductoResponseDto result = service.update(1L, updateReq);
@@ -205,8 +219,10 @@ class ProductoServiceImplTest {
         when(productoRepository.existsByNombreProductoIgnoreCaseAndIdProductoNot("Existente", 1L)).thenReturn(false);
         when(kitRepository.existsByProductos_Producto_IdProductoAndActivoTrue(1L)).thenReturn(false);
         when(productoRepository.save(any(Producto.class))).thenReturn(existingProduct);
+        
+        // parametros añadidos
         when(productoMapper.toResponseDto(any(Producto.class))).thenReturn(
-            new ProductoResponseDto(1L, "Existente", "Desc", BigDecimal.valueOf(50), 20, 3, true, null)
+            new ProductoResponseDto(1L, "Existente", "Desc", BigDecimal.valueOf(50), 20, 3, true, null, 0.0, 0)
         );
 
         ProductoResponseDto result = service.update(1L, updateReq);
