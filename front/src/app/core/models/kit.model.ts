@@ -12,6 +12,8 @@ export interface Kit {
   stock: number;
   activo: boolean;
   productos: KitProductoItem[];
+  promedioPuntuacion?: number;
+  cantidadResenas?: number;
 }
 
 export interface KitCreateRequest {

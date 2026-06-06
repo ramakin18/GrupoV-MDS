@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { finalize, timeout } from 'rxjs';
 import { ProductoMasVendido, ReportApiService } from '../services/report-api.service';
 
 @Component({
   selector: 'app-best-sellers-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './best-sellers-report.component.html',
   styleUrls: ['./best-sellers-report.component.css']
 })
@@ -40,7 +41,10 @@ export class BestSellersReportComponent implements OnInit {
   anios = [2024, 2025, 2026];
   dias = Array.from({ length: 31 }, (_, index) => index + 1);
 
-  constructor(private readonly reportService: ReportApiService) {}
+  constructor(
+    private readonly reportService: ReportApiService,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadReport();
@@ -77,16 +81,21 @@ export class BestSellersReportComponent implements OnInit {
     this.reportService.getProductosMasVendidos(this.appliedMes, this.appliedAnio, this.appliedDia)
       .pipe(
         timeout(15000),
-        finalize(() => this.loading = false)
+        finalize(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        })
       )
       .subscribe({
         next: data => {
           this.reportData = Array.isArray(data) ? data : [];
+          this.cdr.markForCheck();
         },
         error: err => {
           this.reportData = [];
           this.error = err?.error?.message || 'No se pudo generar el reporte.';
           console.error(err);
+          this.cdr.markForCheck();
         }
       });
   }

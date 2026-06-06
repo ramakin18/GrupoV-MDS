@@ -1,7 +1,9 @@
 package backend.features.services.impl.domain;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +14,12 @@ import backend.features.dtos.request.ResenaCreateRequestDto;
 import backend.features.dtos.response.ResenaResponseDto;
 import backend.features.mappers.ResenaMapper;
 import backend.features.models.Cliente;
+import backend.features.models.Kit;
 import backend.features.models.Producto;
 import backend.features.models.Resena;
 import backend.features.models.SituacionPedido;
 import backend.features.repositories.ClienteRepository;
+import backend.features.repositories.IKitRepository;
 import backend.features.repositories.IProductoRepository;
 import backend.features.repositories.PedidoDetalleRepository;
 import backend.features.repositories.specs.IResenaRepository;
@@ -29,48 +33,90 @@ public class ResenaServiceImpl implements IResenaService {
     private final IResenaRepository resenaRepository;
     private final ClienteRepository clienteRepository;
     private final IProductoRepository productoRepository;
+    private final IKitRepository kitRepository;
     private final PedidoDetalleRepository pedidoDetalleRepository;
     private final ResenaMapper resenaMapper;
 
     @Override
     @Transactional
     public ResenaResponseDto create(ResenaCreateRequestDto request) {
-        // Prevención de NullPointerExceptions
-        if (request.getUsuario() == null || request.getProducto() == null) {
-            throw new ValidationException("El usuario y el producto son obligatorios.");
+        if (request.getProductoId() == null && request.getKitId() == null) {
+            throw new ValidationException("Debe especificar un producto o un kit.");
         }
 
-        Cliente cliente = clienteRepository.findById(request.getUsuario().getId())
+        Cliente cliente = clienteRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado"));
 
-        Producto producto = productoRepository.findById(request.getProducto().getIdProducto())
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+        Producto producto = null;
+        Kit kit = null;
 
-        if (producto.isBorrado()) {
-            throw new ValidationException("No se pueden dejar reseñas para productos inactivos.");
+        if (request.getProductoId() != null) {
+            producto = productoRepository.findById(request.getProductoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+
+            if (producto.isBorrado()) {
+                throw new ValidationException("No se pueden dejar reseñas para productos inactivos.");
+            }
+
+            boolean comproYRecibio = pedidoDetalleRepository.hasClienteCompradoYEntregado(
+                    cliente.getId(), producto.getIdProducto(), SituacionPedido.ENTREGADO);
+
+            if (!comproYRecibio) {
+                throw new ValidationException(
+                        "Solo puedes reseñar productos de pedidos que ya te han sido ENTREGADOS.");
+            }
+
+            if (resenaRepository.existsByUsuario_IdAndProducto_IdProductoAndEliminadoFalse(
+                    cliente.getId(), producto.getIdProducto())) {
+                throw new ValidationException("Ya reseñaste este producto anteriormente.");
+            }
         }
 
-        boolean comproYRecibio = pedidoDetalleRepository.hasClienteCompradoYEntregado(
-                cliente.getId(), producto.getIdProducto(), SituacionPedido.ENTREGADO);
-        
-        if (!comproYRecibio) {
-            throw new ValidationException("Solo puedes reseñar productos de pedidos que ya te han sido ENTREGADOS.");
+        if (request.getKitId() != null) {
+            kit = kitRepository.findById(request.getKitId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Kit no encontrado"));
+
+            if (!kit.isActivo()) {
+                throw new ValidationException("No se pueden dejar reseñas para kits inactivos.");
+            }
+
+            List<Long> productoIds = kit.getProductos().stream()
+                    .map(kp -> kp.getProducto().getIdProducto())
+                    .toList();
+
+            if (!productoIds.isEmpty()) {
+                boolean comproYRecibio = pedidoDetalleRepository.hasClienteCompradoTodosLosProductos(
+                        cliente.getId(), productoIds, productoIds.size(), SituacionPedido.ENTREGADO);
+
+                if (!comproYRecibio) {
+                    throw new ValidationException(
+                            "Solo puedes reseñar kits de pedidos que ya te han sido ENTREGADOS.");
+                }
+            }
+
+            if (resenaRepository.existsByUsuario_IdAndKit_IdKitAndEliminadoFalse(
+                    cliente.getId(), kit.getIdKit())) {
+                throw new ValidationException("Ya reseñaste este kit anteriormente.");
+            }
         }
 
-        if (resenaRepository.existsByUsuario_IdAndProducto_IdProducto(cliente.getId(), producto.getIdProducto())) {
-            throw new ValidationException("Ya reseñaste este producto anteriormente.");
+        Resena resena = resenaMapper.toModel(request);
+        resena.setUsuario(cliente);
+        resena.setProducto(producto);
+        resena.setKit(kit);
+        resena.setFechaCreacion(LocalDateTime.now());
+        resena.setEliminado(false);
+
+        Resena saved = resenaRepository.save(resena);
+
+        resenaRepository.flush();
+        if (producto != null) {
+            recalcularEstadisticasProducto(producto);
+        }
+        if (kit != null) {
+            recalcularEstadisticasKit(kit);
         }
 
-        Resena reseña = resenaMapper.toModel(request);
-        reseña.setUsuario(cliente);
-        reseña.setProducto(producto);
-        reseña.setFechaCreacion(LocalDateTime.now());
-
-        Resena saved = resenaRepository.save(reseña);
-        
-        resenaRepository.flush(); 
-        recalcularEstadisticasProducto(producto);
-        
         return resenaMapper.toResponseDto(saved);
     }
 
@@ -80,40 +126,71 @@ public class ResenaServiceImpl implements IResenaService {
         Resena resena = resenaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada"));
 
+        if (resena.getEliminado() != null && resena.getEliminado()) {
+            throw new ValidationException("No puedes editar una reseña eliminada.");
+        }
+
         if (!resena.getUsuario().getId().equals(usuarioId)) {
             throw new ValidationException("No puedes editar una reseña que no es tuya.");
         }
 
         resena.setPuntuacion(request.getPuntuacion());
         resena.setDescripcion(request.getDescripcion());
-        
+
         Resena saved = resenaRepository.save(resena);
-        
+
         resenaRepository.flush();
-        recalcularEstadisticasProducto(resena.getProducto());
-        
+        if (resena.getProducto() != null) {
+            recalcularEstadisticasProducto(resena.getProducto());
+        }
+        if (resena.getKit() != null) {
+            recalcularEstadisticasKit(resena.getKit());
+        }
+
         return resenaMapper.toResponseDto(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResenaResponseDto> getAll() {
-        return resenaRepository.findAll().stream().map(resenaMapper::toResponseDto).toList();
+    public List<ResenaResponseDto> getAll(boolean adminView) {
+        List<Resena> resenas;
+        if (adminView) {
+            resenas = resenaRepository.findAll();
+        } else {
+            resenas = resenaRepository.findByEliminadoFalse();
+        }
+        return resenas.stream()
+                .sorted(Comparator.comparing(Resena::getFechaCreacion).reversed())
+                .map(resenaMapper::toResponseDto)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public ResenaResponseDto getById(Long id) {
-        Resena reseña = resenaRepository.findById(id)
+        Resena resena = resenaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada con id: " + id));
-        return resenaMapper.toResponseDto(reseña);
+        return resenaMapper.toResponseDto(resena);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ResenaResponseDto> getByProductoId(Long productoId) {
-        return resenaRepository.findByProducto_IdProducto(productoId)
-                .stream().map(resenaMapper::toResponseDto).toList();
+        return resenaRepository.findByProducto_IdProductoAndEliminadoFalse(productoId)
+                .stream()
+                .sorted(Comparator.comparing(Resena::getFechaCreacion).reversed())
+                .map(resenaMapper::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResenaResponseDto> getByKitId(Long kitId) {
+        return resenaRepository.findByKit_IdKitAndEliminadoFalse(kitId)
+                .stream()
+                .sorted(Comparator.comparing(Resena::getFechaCreacion).reversed())
+                .map(resenaMapper::toResponseDto)
+                .toList();
     }
 
     @Override
@@ -121,12 +198,17 @@ public class ResenaServiceImpl implements IResenaService {
     public void deleteByAdmin(Long id) {
         Resena resena = resenaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada"));
-        Producto producto = resena.getProducto();
-        
-        resenaRepository.delete(resena);
-        
+
+        resena.setEliminado(true);
+        resenaRepository.save(resena);
+
         resenaRepository.flush();
-        recalcularEstadisticasProducto(producto);
+        if (resena.getProducto() != null) {
+            recalcularEstadisticasProducto(resena.getProducto());
+        }
+        if (resena.getKit() != null) {
+            recalcularEstadisticasKit(resena.getKit());
+        }
     }
 
     @Override
@@ -134,30 +216,62 @@ public class ResenaServiceImpl implements IResenaService {
     public void deleteByCliente(Long id, Long usuarioId) {
         Resena resena = resenaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada"));
-                
+
         if (!resena.getUsuario().getId().equals(usuarioId)) {
             throw new ValidationException("No puedes eliminar una reseña que no es tuya.");
         }
-        Producto producto = resena.getProducto();
-        
-        resenaRepository.delete(resena);
-        
-        // Forzamos el borrado real en BD antes de consultar
+
+        resena.setEliminado(true);
+        resenaRepository.save(resena);
+
         resenaRepository.flush();
-        recalcularEstadisticasProducto(producto);
+        if (resena.getProducto() != null) {
+            recalcularEstadisticasProducto(resena.getProducto());
+        }
+        if (resena.getKit() != null) {
+            recalcularEstadisticasKit(resena.getKit());
+        }
     }
 
-    // metodo de ayuda, para recalclar el producto
-    private void recalcularEstadisticasProducto(Producto producto) {
-        List<Resena> resenas = resenaRepository.findByProducto_IdProducto(producto.getIdProducto());
-        if (resenas.isEmpty()) {
-            producto.setCantidadResenas(0);
-            producto.setPromedioPuntuacion(0.0);
-        } else {
-            producto.setCantidadResenas(resenas.size());
-            double prom = resenas.stream().mapToInt(Resena::getPuntuacion).average().orElse(0.0);
-            producto.setPromedioPuntuacion(Math.round(prom * 10.0) / 10.0);
+    @Override
+    @Transactional
+    public ResenaResponseDto restore(Long id) {
+        Resena resena = resenaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada con id: " + id));
+
+        if (resena.getEliminado() == null || !resena.getEliminado()) {
+            throw new ValidationException("La reseña no está eliminada.");
         }
+
+        resena.setEliminado(false);
+        Resena saved = resenaRepository.save(resena);
+
+        resenaRepository.flush();
+        if (resena.getProducto() != null) {
+            recalcularEstadisticasProducto(resena.getProducto());
+        }
+        if (resena.getKit() != null) {
+            recalcularEstadisticasKit(resena.getKit());
+        }
+
+        return resenaMapper.toResponseDto(saved);
+    }
+
+    private void recalcularEstadisticasProducto(Producto producto) {
+        long count = resenaRepository.countByProducto_IdProductoAndEliminadoFalse(producto.getIdProducto());
+        Double avg = resenaRepository.avgPuntuacionByProductoId(producto.getIdProducto());
+
+        producto.setCantidadResenas((int) count);
+        producto.setPromedioPuntuacion(Math.round(avg * 10.0) / 10.0);
         productoRepository.save(producto);
+    }
+
+    private void recalcularEstadisticasKit(Kit kit) {
+        long count = resenaRepository.countByKit_IdKitAndEliminadoFalse(kit.getIdKit());
+        Double avg = resenaRepository.avgPuntuacionByKitId(kit.getIdKit());
+
+        kit.setCantidadResenas((int) count);
+        kit.setPromedioPuntuacion(Math.round(avg * 10.0) / 10.0);
+        kitRepository.save(kit);
     }
 }

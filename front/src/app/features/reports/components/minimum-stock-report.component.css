@@ -1,3 +1,15 @@
+.back-link {
+  display: inline-block;
+  margin: 24px 0 0 24px;
+  color: var(--color-primary-light);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: opacity var(--transition-fast);
+}
+
+.back-link:hover { opacity: 0.8; }
+
 :host {
   display: block;
   min-height: 100vh;

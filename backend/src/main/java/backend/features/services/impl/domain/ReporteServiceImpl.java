@@ -36,7 +36,9 @@ public class ReporteServiceImpl implements IReporteService {
     @Transactional(readOnly = true)
     public List<ProductoMasVendidoResponseDto> getProductosMasVendidos(Integer mes, Integer anio, Integer dia) {
         RangoFechas rango = calcularRangoFechas(mes, anio, dia);
-        return pedidoDetalleRepository.findProductosMasVendidos(rango.desde(), rango.hasta());
+        LocalDateTime desde = rango.desde() != null ? rango.desde() : LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime hasta = rango.hasta() != null ? rango.hasta() : LocalDateTime.of(2099, 12, 31, 23, 59, 59);
+        return pedidoDetalleRepository.findProductosMasVendidos(desde, hasta);
     }
 
     @Override

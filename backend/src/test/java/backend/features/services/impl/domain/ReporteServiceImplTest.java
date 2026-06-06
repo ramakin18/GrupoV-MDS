@@ -118,8 +118,8 @@ class ReporteServiceImplTest {
         ArgumentCaptor<LocalDateTime> desde = ArgumentCaptor.forClass(LocalDateTime.class);
         ArgumentCaptor<LocalDateTime> hasta = ArgumentCaptor.forClass(LocalDateTime.class);
         verify(pedidoDetalleRepository).findProductosMasVendidos(desde.capture(), hasta.capture());
-        assertNull(desde.getValue());
-        assertNull(hasta.getValue());
+        assertEquals(LocalDateTime.of(2000, 1, 1, 0, 0), desde.getValue());
+        assertEquals(LocalDateTime.of(2099, 12, 31, 23, 59, 59), hasta.getValue());
     }
 
     @Test

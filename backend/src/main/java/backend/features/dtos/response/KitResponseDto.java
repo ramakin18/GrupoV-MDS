@@ -27,7 +27,13 @@ public record KitResponseDto(
     boolean activo,
 
     @Schema(description = "Productos que componen el kit")
-    List<KitProductoResponse> productos
+    List<KitProductoResponse> productos,
+
+    @Schema(description = "Puntuacion promedio del kit", example = "4.2")
+    Double promedioPuntuacion,
+
+    @Schema(description = "Cantidad de reseñas", example = "15")
+    Integer cantidadResenas
 ) {
     @Schema(description = "Producto dentro de un kit")
     public record KitProductoResponse(

@@ -28,4 +28,13 @@ public class ResenaResponseDto {
 
     @Schema(description = "Usuario que realizo la reseña")
     private String nombreUsuario;
+
+    @Schema(description = "Indica si la reseña fue eliminada (soft-delete)", example = "false")
+    private boolean eliminado;
+
+    @Schema(description = "ID del producto asociado")
+    private Long productoId;
+
+    @Schema(description = "ID del kit asociado (opcional)")
+    private Long kitId;
 }

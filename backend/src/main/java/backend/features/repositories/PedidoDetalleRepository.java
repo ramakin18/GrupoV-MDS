@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import backend.features.models.PedidoDetalle;
 import backend.features.models.SituacionPedido;
+import backend.features.dtos.response.ProductoMasVendidoResponseDto;
 
 @Repository
 public interface PedidoDetalleRepository extends JpaRepository<PedidoDetalle, Long> {
@@ -18,8 +20,8 @@ public interface PedidoDetalleRepository extends JpaRepository<PedidoDetalle, Lo
            "FROM PedidoDetalle pd " +
            "WHERE pd.pedido.situacion = 'ENTREGADO' " +
            "AND pd.producto IS NOT NULL " +
-           "AND (pd.pedido.fecha >= COALESCE(:desde, pd.pedido.fecha)) " +
-           "AND (pd.pedido.fecha < COALESCE(:hasta, pd.pedido.fecha)) " +
+           "AND (pd.pedido.fecha >= :desde) " +
+           "AND (pd.pedido.fecha < :hasta) " +
            "GROUP BY pd.producto.idProducto, pd.producto.nombreProducto " +
            "ORDER BY SUM(pd.cantidad) DESC")
     List<ProductoMasVendidoResponseDto> findProductosMasVendidos(
@@ -34,6 +36,17 @@ public interface PedidoDetalleRepository extends JpaRepository<PedidoDetalle, Lo
     boolean hasClienteCompradoYEntregado(
             @Param("clienteId") Long clienteId, 
             @Param("productoId") Long productoId, 
+            @Param("situacion") SituacionPedido situacion
+    );
+
+    @Query("SELECT COUNT(DISTINCT pd.producto.idProducto) = :totalProductos FROM PedidoDetalle pd " +
+           "WHERE pd.pedido.cliente.id = :clienteId " +
+           "AND pd.producto.idProducto IN :productoIds " +
+           "AND pd.pedido.situacion = :situacion")
+    boolean hasClienteCompradoTodosLosProductos(
+            @Param("clienteId") Long clienteId, 
+            @Param("productoIds") List<Long> productoIds,
+            @Param("totalProductos") long totalProductos,
             @Param("situacion") SituacionPedido situacion
     );
 }

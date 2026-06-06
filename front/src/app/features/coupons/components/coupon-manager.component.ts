@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { Subject, takeUntil, timeout } from 'rxjs';
 import { Client } from '@core/models/client.model';
 import { Coupon, TipoDescuento } from '@core/models/coupon.model';
 import { Product } from '@core/models/product.model';
@@ -18,17 +18,22 @@ import { CouponApiService } from '../services/coupon-api.service';
   templateUrl: './coupon-manager.component.html',
   styleUrls: ['./coupon-manager.component.css']
 })
-export class CouponManagerComponent implements OnInit {
+export class CouponManagerComponent implements OnInit, OnDestroy {
   clients: Client[] = [];
   products: Product[] = [];
   coupons: Coupon[] = [];
   selectedClientIds = new Set<number>();
   selectedProductIds = new Set<number>();
-  isLoading = false;
+  loadingClients = false;
+  loadingProducts = false;
+  loadingCoupons = false;
   isSubmitting = false;
   successMessage = '';
   errorMessage = '';
+
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroy$ = new Subject<void>();
 
   couponForm = this.fb.group({
     tipoDescuento: ['PORCENTAJE' as TipoDescuento, Validators.required],
@@ -54,31 +59,73 @@ export class CouponManagerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadClients();
+    this.loadProducts();
+    this.loadCoupons();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get tipoDescuento(): TipoDescuento {
     return this.couponForm.get('tipoDescuento')?.value as TipoDescuento;
   }
 
-  loadData(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    forkJoin({
-      clients: this.clientService.getAll(),
-      products: this.productService.getAll('ADMIN'),
-      coupons: this.couponService.getAll()
-    }).subscribe({
-      next: ({ clients, products, coupons }) => {
-        this.clients = clients.filter(client => client.rol !== 'ADMIN');
-        this.products = products;
-        this.coupons = coupons;
-        this.isLoading = false;
+  private loadClients(): void {
+    this.loadingClients = true;
+    this.clientService.getAll().pipe(
+      timeout(15000),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (clients) => {
+        this.clients = clients.filter(c => c.rol !== 'ADMIN');
+        this.loadingClients = false;
+        this.cdr.markForCheck();
       },
-      error: (error: unknown) => {
-        this.errorMessage = this.getErrorMessage(error);
-        this.isLoading = false;
+      error: () => {
+        this.errorMessage = 'Error al cargar clientes';
+        this.loadingClients = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadProducts(): void {
+    this.loadingProducts = true;
+    this.productService.getAll('ADMIN').pipe(
+      timeout(15000),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (products) => {
+        this.products = products;
+        this.loadingProducts = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Error al cargar productos';
+        this.loadingProducts = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadCoupons(): void {
+    this.loadingCoupons = true;
+    this.couponService.getAll().pipe(
+      timeout(15000),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (coupons) => {
+        this.coupons = coupons;
+        this.loadingCoupons = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Error al cargar cupones';
+        this.loadingCoupons = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -117,7 +164,7 @@ export class CouponManagerComponent implements OnInit {
     }
 
     if (this.selectedClientIds.size === 0) {
-      this.errorMessage = 'Selecciona al menos un cliente.';
+      this.errorMessage = 'Seleccioná al menos un cliente.';
       return;
     }
 
@@ -131,9 +178,9 @@ export class CouponManagerComponent implements OnInit {
       valor: Number(raw.valor),
       fechaDesde: raw.fechaDesde ?? '',
       fechaHasta: raw.fechaHasta ?? ''
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (coupon) => {
-        this.successMessage = `Cupon ${coupon.codigo} generado y notificado a ${coupon.mailsEnviados} cliente(s).`;
+        this.successMessage = `Cupón ${coupon.codigo} generado y notificado a ${coupon.mailsEnviados} cliente(s).`;
         this.coupons = [coupon, ...this.coupons];
         this.couponForm.reset({
           tipoDescuento: 'PORCENTAJE',
@@ -144,10 +191,12 @@ export class CouponManagerComponent implements OnInit {
         this.selectedClientIds.clear();
         this.selectedProductIds.clear();
         this.isSubmitting = false;
+        this.cdr.markForCheck();
       },
       error: (error: unknown) => {
         this.errorMessage = this.getErrorMessage(error);
         this.isSubmitting = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -163,10 +212,10 @@ export class CouponManagerComponent implements OnInit {
     if (field.hasError('required')) return 'Campo requerido.';
     if (field.hasError('min')) return 'Debe ser mayor a cero.';
     if (field.hasError('pattern') && fieldName.startsWith('fecha')) {
-      return 'Usa formato dd/mm/aaaa.';
+      return 'Usá formato dd/mm/aaaa.';
     }
-    if (field.hasError('pattern')) return 'Usa hasta dos decimales.';
-    return 'Valor invalido.';
+    if (field.hasError('pattern')) return 'Usá hasta dos decimales.';
+    return 'Valor inválido.';
   }
 
   discountDescription(coupon: Coupon): string {
@@ -179,11 +228,19 @@ export class CouponManagerComponent implements OnInit {
     if (!coupon.productos || coupon.productos.length === 0) {
       return 'Todos los productos';
     }
-    return coupon.productos.map(product => product.nombreProducto).join(', ');
+    return coupon.productos.map(p => p.nombreProducto).join(', ');
   }
 
   usedCount(coupon: Coupon): number {
-    return coupon.clientes.filter(client => client.usado).length;
+    return coupon.clientes.filter(c => c.usado).length;
+  }
+
+  totalCount(coupon: Coupon): number {
+    return coupon.clientes.length;
+  }
+
+  deleteCoupon(coupon: Coupon): void {
+    this.coupons = this.coupons.filter(c => c.idCupon !== coupon.idCupon);
   }
 
   private getErrorMessage(error: unknown): string {

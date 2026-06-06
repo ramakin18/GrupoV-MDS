@@ -27,7 +27,7 @@ export class ClientRegistrationComponent implements OnInit {
     this.registrationForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
       apellido: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, this.validEmailDomain()]],
       contrasena: ['', [Validators.required, Validators.minLength(8)]],
       domicilio: this.fb.group({
         pais: ['', [Validators.required, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
@@ -98,12 +98,21 @@ export class ClientRegistrationComponent implements OnInit {
     return !!(field && field.invalid && field.touched);
   }
 
+  private validEmailDomain(): import('@angular/forms').ValidatorFn {
+    return (control) => {
+      const email = control.value;
+      if (!email) return null;
+      const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      return regex.test(email) ? null : { invalidEmailDomain: true };
+    };
+  }
+
   getFieldError(fieldName: string): string {
     const field = this.registrationForm.get(fieldName);
     if (!field || !field.errors) return '';
 
     if (field.errors['required']) return 'Este campo es requerido';
-    if (field.errors['email']) return 'Email inválido';
+    if (field.errors['email'] || field.errors['invalidEmailDomain']) return 'Email inválido';
     if (field.errors['minlength']) {
       return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
     }

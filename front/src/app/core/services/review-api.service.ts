@@ -10,12 +10,24 @@ export class ReviewApiService {
 
   constructor(private http: HttpClient) {}
 
+  getAll(admin: boolean = false): Observable<Review[]> {
+    return this.http.get<Review[]>(`${this.apiUrl}?admin=${admin}`);
+  }
+
   getByProducto(productoId: number): Observable<Review[]> {
     return this.http.get<Review[]>(`${this.apiUrl}/producto/${productoId}`);
   }
 
+  getByKit(kitId: number): Observable<Review[]> {
+    return this.http.get<Review[]>(`${this.apiUrl}/kit/${kitId}`);
+  }
+
   create(request: ReviewCreateDto): Observable<Review> {
     return this.http.post<Review>(this.apiUrl, request);
+  }
+
+  update(id: number, usuarioId: number, request: ReviewCreateDto): Observable<Review> {
+    return this.http.put<Review>(`${this.apiUrl}/${id}/cliente/${usuarioId}`, request);
   }
 
   deleteByCliente(id: number, usuarioId: number): Observable<void> {
@@ -24,5 +36,9 @@ export class ReviewApiService {
 
   deleteByAdmin(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}/admin`);
+  }
+
+  restore(id: number): Observable<Review> {
+    return this.http.put<Review>(`${this.apiUrl}/${id}/restore`, {});
   }
 }

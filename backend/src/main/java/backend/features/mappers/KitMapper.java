@@ -23,7 +23,9 @@ public class KitMapper {
             kit.getPrecio(),
             kit.getStock(),
             kit.isActivo(),
-            productos
+            productos,
+            kit.getPromedioPuntuacion(),
+            kit.getCantidadResenas()
         );
     }
 

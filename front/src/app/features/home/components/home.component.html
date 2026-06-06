@@ -16,11 +16,34 @@
           <a routerLink="/products/admin" class="btn-outline">Panel Admin</a>
           <a routerLink="/kits" class="btn-outline">Kits</a>
           <a routerLink="/coupons" class="btn-outline">Cupones</a>
-          <a routerLink="/orders" class="btn-outline">Pedidos</a>
-          <a routerLink="/orders/pendientes" class="btn-outline">Pendientes</a>
-          <a routerLink="/reports/best-sellers" class="btn-outline">Más Vendidos</a>
-          <a routerLink="/reports/minimum-stock" class="btn-outline">Stock Mínimo</a>
-          <a routerLink="/reports/best-sellers" class="btn-outline">Reportes</a>
+          <div class="dropdown">
+            <button class="btn-outline dropdown-toggle" (click)="toggleOrdersDropdown()">
+              Pedidos
+              <svg class="dropdown-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            @if (showOrdersDropdown) {
+              <div class="dropdown-menu">
+                <a routerLink="/orders" class="dropdown-item">Listar Pedidos</a>
+                <a routerLink="/orders/pendientes" class="dropdown-item">Pedidos Pendientes</a>
+              </div>
+            }
+          </div>
+          <div class="dropdown">
+            <button class="btn-outline dropdown-toggle" (click)="toggleReportsDropdown()">
+              Reportes
+              <svg class="dropdown-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            @if (showReportsDropdown) {
+              <div class="dropdown-menu">
+                <a routerLink="/reports/best-sellers" class="dropdown-item">M&aacute;s Vendidos</a>
+                <a routerLink="/reports/minimum-stock" class="dropdown-item">Stock M&iacute;nimo</a>
+              </div>
+            }
+          </div>
         }
         <button class="btn-ghost" (click)="logout()">Cerrar sesion</button>
       } @else {
@@ -194,14 +217,19 @@
         </div>
         <div class="modal-details">
           <h2 class="modal-product-name">{{ selectedItem.nombre }}</h2>
-          
-          @if (selectedItem.type === 'product') {
-            <div class="modal-rating" style="margin-bottom: 8px;">
-              <span style="color: #fbbf24; font-size: 1.2rem;">★</span>
-              <strong>{{ selectedItem.promedioPuntuacion || 0 }}</strong>
-              <span class="text-muted">({{ selectedItem.cantidadResenas || 0 }} reseñas)</span>
-            </div>
-          }
+
+          <!-- Stars display -->
+          <div class="modal-rating">
+            @if ((selectedItem.cantidadResenas || 0) > 0) {
+              @for (s of [1,2,3,4,5]; track s) {
+                <span class="star-icon" [class.filled]="s <= (selectedItem.promedioPuntuacion || 0)">&#9733;</span>
+              }
+              <strong style="margin-left: 6px;">{{ selectedItem.promedioPuntuacion || 0 }}</strong>
+              <span class="text-muted">({{ selectedItem.cantidadResenas }} reseñas)</span>
+            } @else {
+              <span class="text-muted">Sin reseñas</span>
+            }
+          </div>
 
           @if (!isOutOfStock(selectedItem)) {
             <p class="modal-stock-label stock-ok">Stock disponible</p>
@@ -267,64 +295,83 @@
             }
           }
 
-          @if (selectedItem.type === 'product') {
-            <div class="reviews-section" style="margin-top: 24px;">
-              <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 16px;">Reseñas</h3>
-              
-              <div class="reviews-list">
-                @if (reviews.length > 0) {
-                  @for (r of reviews; track r.id) {
-                    <div class="review-item" style="margin-bottom: 16px; padding: 12px; background: var(--color-surface-hover); border-radius: 8px;">
-                      
-                      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                        
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                          <strong style="line-height: 1; font-size: 0.95rem;">{{ r.nombreUsuario }}</strong>
-                          <span style="color: #fbbf24; font-size: 0.9rem; letter-spacing: 1px;">{{ getStars(r.puntuacion) }}</span>
+          <!-- Reviews section for both products and kits -->
+          <div class="reviews-section">
+            <h3 class="reviews-title">Reseñas</h3>
+
+            <div class="reviews-list">
+              @if (reviews.length > 0) {
+                @for (r of reviews; track r.id) {
+                  <div class="review-item" [class.review-deleted]="r.eliminado">
+                    <div class="review-header">
+                      <div class="review-user-info">
+                        <strong class="review-user-name">{{ r.nombreUsuario }}</strong>
+                        <div class="review-stars-display">
+                          @for (s of [1,2,3,4,5]; track s) {
+                            <span class="star-icon star-small" [class.filled]="s <= r.puntuacion">&#9733;</span>
+                          }
                         </div>
-                        
-                        @if (isAdmin || (authService.currentUser?.nombre === r.nombreUsuario)) {
-                          <button (click)="deleteReview(r)" 
-                                  title="Eliminar reseña"
-                                  style="background: transparent; border: none; color: var(--color-error); cursor: pointer; padding: 0; margin: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s ease;"
-                                  onmouseover="this.style.transform='scale(1.1)'"
-                                  onmouseout="this.style.transform='scale(1)'">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      </div>
+                      <div class="review-actions">
+                        @if (r.eliminado) {
+                          <span class="deleted-badge">Eliminada</span>
+                          @if (isAdmin) {
+                            <button class="btn-restore" (click)="restoreReview(r)" title="Restaurar reseña">
+                              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                              </svg>
+                            </button>
+                          }
+                        }
+                        @if (!r.eliminado && (isAdmin || (authService.currentUser?.nombre === r.nombreUsuario))) {
+                          <button class="btn-delete-review" (click)="deleteReview(r)" title="Eliminar reseña">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <polyline points="3 6 5 6 21 6"></polyline>
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             </svg>
                           </button>
                         }
                       </div>
-
-                      <p style="margin: 4px 0; font-size: 0.9rem; color: var(--color-text-secondary); line-height: 1.4;">{{ r.descripcion }}</p>
-                      <small style="color: var(--color-text-muted); display: block; margin-top: 6px;">{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</small>
                     </div>
-                  }
-                } @else {
-                  <p style="color: var(--color-text-muted); font-size: 0.9rem; font-style: italic;">Sin reseñas todavía. ¡Sé el primero en opinar!</p>
-                }
-              </div>
-    
-              @if (isLoggedIn) {
-                <div class="review-form" style="margin-top: 24px; padding: 16px; background: var(--color-surface-hover); border-radius: 8px;">
-                  <h4 style="margin: 0 0 12px;">Dejar una reseña</h4>
-                  @if (errorResena) {
-                    <div class="alert alert-error" style="padding: 8px; margin-bottom: 12px;">{{ errorResena }}</div>
-                  }
-                  
-                  <div style="display:flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                    <label style="font-weight: 600; color: var(--color-text-secondary);">Puntuación (1-5):</label>
-                    <input type="number" min="1" max="5" [(ngModel)]="nuevaResenaPuntuacion" style="width: 70px; padding: 6px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text);">
+                    <p class="review-desc">{{ r.descripcion }}</p>
+                    <small class="review-date">{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</small>
                   </div>
-                  
-                  <textarea [(ngModel)]="nuevaResenaDescripcion" maxlength="500" placeholder="Escribe tu opinión (opcional)" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); resize: vertical; min-height: 80px; margin-bottom: 12px; font-family: inherit;"></textarea>
-                  
-                  <button class="btn-primary btn-sm" (click)="submitReview()">Publicar reseña</button>
-                </div>
+                }
+              } @else {
+                <p class="no-reviews">Sin reseñas todavía. ¡Sé el primero en opinar!</p>
               }
             </div>
-          }
+
+            @if (isLoggedIn) {
+              <div class="review-form">
+                <h4 class="review-form-title">Dejar una reseña</h4>
+                @if (errorResena) {
+                  <div class="alert alert-error">{{ errorResena }}</div>
+                }
+
+                <!-- Star picker -->
+                <div class="star-picker">
+                  <label class="star-picker-label">Puntuación:</label>
+                  <div class="star-picker-stars">
+                    @for (s of [1,2,3,4,5]; track s) {
+                      <span class="star-picker-star"
+                            [class.filled]="s <= (hoveredStar || selectedStar)"
+                            (mouseenter)="hoveredStar = s"
+                            (mouseleave)="hoveredStar = 0"
+                            (click)="selectedStar = s">&#9733;</span>
+                    }
+                  </div>
+                </div>
+
+                <textarea [(ngModel)]="nuevaResenaDescripcion" maxlength="500"
+                  placeholder="Escribe tu opinión (opcional)"
+                  class="review-textarea"></textarea>
+
+                <button class="btn-primary btn-sm" (click)="submitReview()">Publicar reseña</button>
+              </div>
+            }
+          </div>
 
         </div>
       </div>

@@ -8,9 +8,11 @@ import backend.features.dtos.response.ResenaResponseDto;
 public interface IResenaService {
     ResenaResponseDto create(ResenaCreateRequestDto request);
     ResenaResponseDto update(Long id, ResenaCreateRequestDto request, Long usuarioId);
-    List<ResenaResponseDto> getAll();
+    List<ResenaResponseDto> getAll(boolean adminView);
     ResenaResponseDto getById(Long id);
     List<ResenaResponseDto> getByProductoId(Long productoId);
+    List<ResenaResponseDto> getByKitId(Long kitId);
     void deleteByCliente(Long id, Long usuarioId);
     void deleteByAdmin(Long id);
+    ResenaResponseDto restore(Long id);
 }

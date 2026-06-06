@@ -4,11 +4,15 @@ export interface Review {
     descripcion: string;
     fechaCreacion: string;
     nombreUsuario: string;
+    eliminado: boolean;
+    productoId?: number;
+    kitId?: number;
 }
 
 export interface ReviewCreateDto {
     puntuacion: number;
     descripcion: string;
-    usuario: { id: number };
-    producto: { idProducto: number };
+    usuarioId: number;
+    productoId?: number;
+    kitId?: number;
 }

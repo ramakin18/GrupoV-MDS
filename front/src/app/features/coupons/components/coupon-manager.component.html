@@ -1,57 +1,88 @@
-<div class="page-container">
+<div class="coupons-page">
   <header class="page-header">
-    <div>
-      <h1>Cupones de descuento</h1>
-      <p class="subtitle">Genera ofertas para clientes seleccionados</p>
+    <div class="header-content">
+      <a routerLink="/" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5m7-7-7 7 7 7"/>
+        </svg>
+        Volver
+      </a>
+      <div class="header-title">
+        <div class="header-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="4"/>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+            <path d="M12 6v2m0 8v2"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Cupones de descuento</h1>
+          <p class="header-subtitle">Generá y gestioná ofertas para tus clientes</p>
+        </div>
+      </div>
     </div>
-    <a routerLink="/" class="btn-back">Volver al inicio</a>
   </header>
 
   @if (successMessage) {
-    <div class="alert alert-success">{{ successMessage }}</div>
+    <div class="toast toast-success">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      {{ successMessage }}
+    </div>
   }
 
   @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+    <div class="toast toast-error">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      {{ errorMessage }}
+    </div>
   }
 
-  <section class="panel">
-    <div class="section-header">
-      <h2>Nuevo cupon</h2>
-      <p>El codigo se genera automaticamente y no se repite.</p>
+  <section class="card create-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="card-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Nuevo cupón</h2>
+          <p class="card-desc">El código se genera automáticamente</p>
+        </div>
+      </div>
     </div>
 
     <form [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="coupon-form">
-      <div class="form-grid">
-        <div class="form-field">
+      <div class="form-row">
+        <div class="form-group">
           <label for="tipoDescuento">Tipo de descuento</label>
-          <select id="tipoDescuento" formControlName="tipoDescuento">
-            <option value="PORCENTAJE">Porcentaje</option>
-            <option value="MONTO_FIJO">Monto fijo</option>
-          </select>
+          <div class="select-wrapper">
+            <select id="tipoDescuento" formControlName="tipoDescuento">
+              <option value="PORCENTAJE">Porcentaje (%)</option>
+              <option value="MONTO_FIJO">Monto fijo ($)</option>
+            </select>
+            <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
-
-        <div class="form-field">
-          <label for="valor">{{ tipoDescuento === 'PORCENTAJE' ? 'Porcentaje' : 'Monto' }}</label>
-          <div class="input-with-prefix">
-            <span>{{ tipoDescuento === 'PORCENTAJE' ? '%' : '$' }}</span>
-            <input id="valor" type="number" step="0.01" min="0.01" formControlName="valor">
+        <div class="form-group">
+          <label for="valor">{{ tipoDescuento === 'PORCENTAJE' ? 'Valor del descuento' : 'Monto a descontar' }}</label>
+          <div class="input-group">
+            <span class="input-prefix">{{ tipoDescuento === 'PORCENTAJE' ? '%' : '$' }}</span>
+            <input id="valor" type="number" step="0.01" min="0.01" formControlName="valor" placeholder="0.00">
           </div>
           @if (hasFieldError('valor')) {
             <small class="field-error">{{ getFieldError('valor') }}</small>
           }
         </div>
-
-        <div class="form-field">
-          <label for="fechaDesde">Fecha desde</label>
+        <div class="form-group">
+          <label for="fechaDesde">Válido desde</label>
           <input id="fechaDesde" type="text" placeholder="dd/mm/aaaa" formControlName="fechaDesde">
           @if (hasFieldError('fechaDesde')) {
             <small class="field-error">{{ getFieldError('fechaDesde') }}</small>
           }
         </div>
-
-        <div class="form-field">
-          <label for="fechaHasta">Fecha hasta</label>
+        <div class="form-group">
+          <label for="fechaHasta">Válido hasta</label>
           <input id="fechaHasta" type="text" placeholder="dd/mm/aaaa" formControlName="fechaHasta">
           @if (hasFieldError('fechaHasta')) {
             <small class="field-error">{{ getFieldError('fechaHasta') }}</small>
@@ -59,102 +90,155 @@
         </div>
       </div>
 
-      <div class="selection-grid">
-        <div class="selection-panel">
-          <div class="selection-header">
-            <div>
-              <h3>Clientes</h3>
-              <p>{{ selectedClientIds.size }} seleccionado(s)</p>
-            </div>
-            <div class="selection-actions">
-              <button type="button" (click)="selectAllClients()">Todos</button>
-              <button type="button" (click)="clearClientSelection()">Limpiar</button>
-            </div>
+      <div class="selection-section">
+        <div class="selection-column">
+          <div class="selection-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Clientes</span>
+            <span class="selection-count">{{ selectedClientIds.size }}</span>
           </div>
-
-          <div class="check-list">
-            @if (isLoading) {
-              <p class="muted">Cargando clientes...</p>
+          <div class="selection-actions">
+            <button type="button" class="btn-tag btn-tag-primary" (click)="selectAllClients()">Todos</button>
+            <button type="button" class="btn-tag" (click)="clearClientSelection()">Limpiar</button>
+          </div>
+          <div class="selection-box">
+            @if (loadingClients) {
+              <div class="loading-list"><div class="spinner-sm"></div> Cargando clientes...</div>
             } @else {
               @for (client of clients; track client.id) {
-                <label class="check-row">
-                  <input
-                    type="checkbox"
-                    [checked]="client.id ? selectedClientIds.has(client.id) : false"
-                    (change)="toggleClient(client.id, $any($event.target).checked)">
-                  <span>{{ client.nombre }} {{ client.apellido }}</span>
-                  <small>{{ client.email }}</small>
+                <label class="selection-item" [class.selected]="client.id ? selectedClientIds.has(client.id) : false">
+                  <input type="checkbox" [checked]="client.id ? selectedClientIds.has(client.id) : false" (change)="toggleClient(client.id, $any($event.target).checked)">
+                  <div class="item-avatar">{{ client.nombre.charAt(0) }}{{ client.apellido.charAt(0) }}</div>
+                  <div class="item-info">
+                    <span class="item-name">{{ client.nombre }} {{ client.apellido }}</span>
+                    <span class="item-email">{{ client.email }}</span>
+                  </div>
                 </label>
               } @empty {
-                <p class="muted">No hay clientes disponibles.</p>
+                <div class="empty-box">No hay clientes disponibles.</div>
               }
             }
           </div>
         </div>
-
-        <div class="selection-panel">
-          <div class="selection-header">
-            <div>
-              <h3>Productos abarcados</h3>
-              <p>{{ selectedProductIds.size ? selectedProductIds.size + ' seleccionado(s)' : 'Todos los productos' }}</p>
-            </div>
-            <div class="selection-actions">
-              <button type="button" (click)="clearProductSelection()">Todos</button>
-            </div>
+        <div class="selection-column">
+          <div class="selection-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span>Productos</span>
+            <span class="selection-count" [class.empty]="selectedProductIds.size === 0">{{ selectedProductIds.size || 'Todos' }}</span>
           </div>
-
-          <div class="check-list">
-            @if (isLoading) {
-              <p class="muted">Cargando productos...</p>
+          <div class="selection-actions">
+            <button type="button" class="btn-tag" (click)="clearProductSelection()">Limpiar</button>
+          </div>
+          <div class="selection-box">
+            @if (loadingProducts) {
+              <div class="loading-list"><div class="spinner-sm"></div> Cargando productos...</div>
             } @else {
               @for (product of products; track product.idProducto) {
-                <label class="check-row">
-                  <input
-                    type="checkbox"
-                    [checked]="product.idProducto ? selectedProductIds.has(product.idProducto) : false"
-                    (change)="toggleProduct(product.idProducto, $any($event.target).checked)">
-                  <span>{{ product.nombreProducto }}</span>
-                  <small>Stock {{ product.stockDisponible }}</small>
+                <label class="selection-item" [class.selected]="product.idProducto ? selectedProductIds.has(product.idProducto) : false">
+                  <input type="checkbox" [checked]="product.idProducto ? selectedProductIds.has(product.idProducto) : false" (change)="toggleProduct(product.idProducto, $any($event.target).checked)">
+                  <div class="item-avatar item-product">{{ product.nombreProducto.charAt(0) }}</div>
+                  <div class="item-info">
+                    <span class="item-name">{{ product.nombreProducto }}</span>
+                    <span class="item-email">Stock: {{ product.stockDisponible }}</span>
+                  </div>
                 </label>
               } @empty {
-                <p class="muted">No hay productos disponibles.</p>
+                <div class="empty-box">No hay productos disponibles.</div>
               }
             }
           </div>
         </div>
       </div>
 
-      <button type="submit" class="btn-primary" [disabled]="isSubmitting || isLoading">
-        {{ isSubmitting ? 'Generando...' : 'Generar cupon' }}
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting || loadingClients || loadingProducts || loadingCoupons">
+        @if (isSubmitting) {
+          <div class="spinner-sm"></div>
+          Generando...
+        } @else {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="4"/>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+            <path d="M12 6v2m0 8v2"/>
+          </svg>
+          Generar cupón
+        }
       </button>
     </form>
   </section>
 
-  <section class="panel">
-    <div class="section-header">
-      <h2>Cupones generados</h2>
-      <p>{{ coupons.length }} cupon(es)</p>
+  <section class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="card-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="4"/>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+            <path d="M12 6v2m0 8v2"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Cupones generados</h2>
+          <p class="card-desc">{{ coupons.length }} cupón(es) activos</p>
+        </div>
+      </div>
     </div>
 
-    @if (isLoading) {
-      <div class="empty-state">Cargando cupones...</div>
+    @if (loadingCoupons) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando cupones...</p>
+      </div>
     } @else {
-      <div class="coupon-list">
+      <div class="coupon-grid">
         @for (coupon of coupons; track coupon.idCupon) {
           <article class="coupon-card">
-            <div>
-              <p class="coupon-code">{{ coupon.codigo }}</p>
-              <p class="muted">Vigencia: {{ coupon.fechaDesde }} al {{ coupon.fechaHasta }}</p>
-              <p class="muted">Productos: {{ productScope(coupon) }}</p>
+            <div class="coupon-top">
+              <div class="coupon-brand">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="20" rx="4"/>
+                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                  <path d="M12 6v2m0 8v2"/>
+                </svg>
+              </div>
+              <span class="coupon-code">{{ coupon.codigo }}</span>
+              <div class="coupon-actions">
+                <button type="button" class="btn-icon" title="Eliminar cupón" (click)="deleteCoupon(coupon)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
             </div>
-            <div class="coupon-meta">
-              <strong>{{ discountDescription(coupon) }}</strong>
-              <span>{{ coupon.clientes.length }} destinatario(s)</span>
-              <span>{{ usedCount(coupon) }} usado(s)</span>
+            <div class="coupon-value">{{ discountDescription(coupon) }}</div>
+            <div class="coupon-details">
+              <div class="coupon-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>{{ coupon.fechaDesde }} → {{ coupon.fechaHasta }}</span>
+              </div>
+              <div class="coupon-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <span>{{ usedCount(coupon) }}/{{ totalCount(coupon) }} usado(s)</span>
+              </div>
+              <div class="coupon-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                <span>{{ productScope(coupon) }}</span>
+              </div>
+            </div>
+            <div class="coupon-usage">
+              @if (usedCount(coupon) > 0) {
+                <div class="usage-bar-track">
+                  <div class="usage-bar-fill" [style.width.%]="(usedCount(coupon) / totalCount(coupon)) * 100"></div>
+                </div>
+              }
             </div>
           </article>
         } @empty {
-          <div class="empty-state">Todavia no hay cupones generados.</div>
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="2" width="20" height="20" rx="4"/>
+              <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+              <path d="M12 6v2m0 8v2"/>
+            </svg>
+            <p>Todavía no hay cupones generados</p>
+          </div>
         }
       </div>
     }

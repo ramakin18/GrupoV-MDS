@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, AfterViewInit, Inject } from '@angular/core';
+import { Component, ChangeDetectorRef, AfterViewInit, Inject, HostListener } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +26,8 @@ import { ReviewApiService } from '../../../core/services/review-api.service';
 export class HomeComponent implements AfterViewInit {
   title = 'BodyPaint - Pintura Corporal';
   mostrarModalCarrito = false;
+  showReportsDropdown = false;
+  showOrdersDropdown = false;
 
   catalogItems: CatalogItem[] = [];
   isLoading = true;
@@ -36,11 +38,15 @@ export class HomeComponent implements AfterViewInit {
   quickViewMessage = '';
   quickViewMessageType: 'success' | 'error' = 'success';
 
-  // Reseñas 
+  // Reseñas
   reviews: Review[] = [];
-  nuevaResenaPuntuacion = 5;
   nuevaResenaDescripcion = '';
   errorResena = '';
+  hoveredStar = 0;
+  selectedStar = 5;
+
+  // Admin review management
+  showDeletedReviews = false;
 
   private _products: Product[] = [];
   private _kits: Kit[] = [];
@@ -86,7 +92,7 @@ export class HomeComponent implements AfterViewInit {
       next: ({ products, kits }) => {
         this._products = products.filter(p => !p.borrado);
         this._kits = kits.filter(k => k.activo && k.stock > 0);
-        
+
         const productItems = this._products.map(p => this.toCatalogItem(p));
         const kitItems = this._kits.map(k => {
           const item = this.toCatalogItem(k);
@@ -99,14 +105,14 @@ export class HomeComponent implements AfterViewInit {
               imagenUrl: prod?.imagenUrl
             };
           }) || [];
-          
+
           item.imagenesCollage = k.productos
             ?.map(kp => this._products.find(p => p.idProducto === kp.idProducto)?.imagenUrl)
             .filter((url): url is string => !!url) || [];
-            
+
           return item;
         });
-        
+
         this.catalogItems = [...productItems, ...kitItems];
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -141,7 +147,7 @@ export class HomeComponent implements AfterViewInit {
         cantidadResenas: p.cantidadResenas ?? 0
       };
     }
-    
+
     const k = source as Kit;
     return {
       type: 'kit',
@@ -154,7 +160,9 @@ export class HomeComponent implements AfterViewInit {
         idProducto: p.idProducto,
         nombreProducto: p.nombreProducto,
         cantidad: p.cantidad
-      })) || []
+      })) || [],
+      promedioPuntuacion: k.promedioPuntuacion ?? 0,
+      cantidadResenas: k.cantidadResenas ?? 0
     };
   }
 
@@ -167,11 +175,10 @@ export class HomeComponent implements AfterViewInit {
     return item.stock <= 0;
   }
 
-  // Alternativa segura a .repeat() para cualquier versión de TypeScript
-  getStars(rating: number | undefined | null): string {
+  renderStars(rating: number | undefined | null): { filled: number; empty: number } {
     const validRating = Math.round(Number(rating) || 0);
-    const clampedRating = Math.max(0, Math.min(5, validRating));
-    return Array(clampedRating + 1).join('★');
+    const clamped = Math.max(0, Math.min(5, validRating));
+    return { filled: clamped, empty: 5 - clamped };
   }
 
   openQuickView(item: CatalogItem): void {
@@ -180,20 +187,46 @@ export class HomeComponent implements AfterViewInit {
     this.quickViewQuantity = 1;
     this.quickViewMessage = '';
     this.errorResena = '';
+    this.selectedStar = 5;
+    this.hoveredStar = 0;
     this.showQuickView = true;
+    this.loadReviews(item);
+  }
 
-    if (item.type === 'product') {
-      this.reviewService.getByProducto(item.id).subscribe({
-        next: (res) => {
-          this.reviews = res || [];
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.reviews = [];
-          this.cdr.detectChanges();
-        }
-      });
+  private loadReviews(item: CatalogItem): void {
+    const obs = item.type === 'product'
+      ? this.reviewService.getByProducto(item.id)
+      : this.reviewService.getByKit(item.id);
+
+    obs.subscribe({
+      next: (res) => {
+        this.reviews = res || [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.reviews = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown')) {
+      this.showReportsDropdown = false;
+      this.showOrdersDropdown = false;
     }
+  }
+
+  toggleReportsDropdown(): void {
+    this.showReportsDropdown = !this.showReportsDropdown;
+    this.showOrdersDropdown = false;
+  }
+
+  toggleOrdersDropdown(): void {
+    this.showOrdersDropdown = !this.showOrdersDropdown;
+    this.showReportsDropdown = false;
   }
 
   closeQuickView(): void {
@@ -201,15 +234,13 @@ export class HomeComponent implements AfterViewInit {
     this.selectedItem = null;
     this.quickViewMessage = '';
     this.reviews = [];
+    this.showDeletedReviews = false;
   }
 
   submitReview(): void {
-    // Guardamos el item seleccionado en una constante para evitar que TypeScript 
-    // se queje de que puede ser nulo dentro del callback asíncrono.
     const currentItem = this.selectedItem;
-    
-    if (!currentItem || this.nuevaResenaPuntuacion < 1 || this.nuevaResenaPuntuacion > 5) return;
-    
+    if (!currentItem || this.selectedStar < 1 || this.selectedStar > 5) return;
+
     const user = this.authService.currentUser;
     if (!user || user.id === undefined) {
       this.errorResena = 'Error: no se pudo verificar tu sesión.';
@@ -217,30 +248,31 @@ export class HomeComponent implements AfterViewInit {
     }
 
     const dto: ReviewCreateDto = {
-      puntuacion: this.nuevaResenaPuntuacion,
+      puntuacion: this.selectedStar,
       descripcion: this.nuevaResenaDescripcion.trim(),
-      usuario: { id: user.id },
-      producto: { idProducto: currentItem.id }
+      usuarioId: user.id,
+      ...(currentItem.type === 'product'
+        ? { productoId: currentItem.id }
+        : { kitId: currentItem.id })
     };
 
     this.reviewService.create(dto).subscribe({
       next: (res) => {
         this.reviews.push(res);
         this.nuevaResenaDescripcion = '';
-        this.nuevaResenaPuntuacion = 5;
+        this.selectedStar = 5;
         this.errorResena = '';
-        
-        // Recálculo local seguro
+
         const count = currentItem.cantidadResenas || 0;
         const prom = currentItem.promedioPuntuacion || 0;
         const totalScore = (prom * count) + res.puntuacion;
         currentItem.cantidadResenas = count + 1;
         currentItem.promedioPuntuacion = Math.round((totalScore / currentItem.cantidadResenas) * 10) / 10;
-        
+
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorResena = err.error?.message || 'No puedes reseñar este producto.';
+        this.errorResena = err.error?.message || 'Error al publicar la reseña.';
         this.cdr.detectChanges();
       }
     });
@@ -252,21 +284,18 @@ export class HomeComponent implements AfterViewInit {
     const user = this.authService.currentUser;
     if (!user || user.id === undefined) return;
 
-    // Si es ADMIN llama al endpoint de admin, sino al de cliente
-    const request$ = this.isAdmin 
+    const request$ = this.isAdmin
       ? this.reviewService.deleteByAdmin(review.id)
       : this.reviewService.deleteByCliente(review.id, user.id);
 
     request$.subscribe({
       next: () => {
-        // 1. Quitamos la reseña de la lista visual
         this.reviews = this.reviews.filter(r => r.id !== review.id);
-        
-        // 2. Recalculamos el promedio y cantidad localmente
+
         if (this.selectedItem) {
           const count = this.selectedItem.cantidadResenas || 0;
           const prom = this.selectedItem.promedioPuntuacion || 0;
-          
+
           if (count <= 1) {
             this.selectedItem.cantidadResenas = 0;
             this.selectedItem.promedioPuntuacion = 0;
@@ -280,6 +309,26 @@ export class HomeComponent implements AfterViewInit {
       },
       error: (err) => {
         alert(err.error?.message || 'Error al eliminar la reseña');
+      }
+    });
+  }
+
+  restoreReview(review: Review): void {
+    if (!confirm('¿Restaurar esta reseña?')) return;
+
+    this.reviewService.restore(review.id).subscribe({
+      next: (res) => {
+        const idx = this.reviews.findIndex(r => r.id === review.id);
+        if (idx !== -1) {
+          this.reviews[idx] = res;
+        }
+        if (this.selectedItem) {
+          this.loadReviews(this.selectedItem);
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Error al restaurar la reseña');
       }
     });
   }
@@ -298,7 +347,7 @@ export class HomeComponent implements AfterViewInit {
       const product = this._products.find(p => p.idProducto === this.selectedItem!.id);
       if (!product) return;
       let result = this.cartService.addProduct(product);
-      
+
       if (result.success) {
         for (let i = 1; i < this.quickViewQuantity; i++) {
           result = this.cartService.increaseQuantity(product.idProducto!);
@@ -313,7 +362,7 @@ export class HomeComponent implements AfterViewInit {
     } else {
       const kit = this._kits.find(k => k.idKit === this.selectedItem!.id);
       if (!kit) return;
-      
+
       let allAdded = true;
       for (const kp of kit.productos) {
         const product = this._products.find(p => p.idProducto === kp.idProducto);
@@ -324,7 +373,7 @@ export class HomeComponent implements AfterViewInit {
           }
         }
       }
-      
+
       if (allAdded) {
         this.quickViewMessage = 'Kit agregado al carrito';
         this.quickViewMessageType = 'success';

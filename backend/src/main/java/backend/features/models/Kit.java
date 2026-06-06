@@ -43,4 +43,10 @@ public class Kit {
 
     @OneToMany(mappedBy = "kit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<KitProducto> productos;
+
+    @Builder.Default
+    private Double promedioPuntuacion = 0.0;
+
+    @Builder.Default
+    private Integer cantidadResenas = 0;
 }

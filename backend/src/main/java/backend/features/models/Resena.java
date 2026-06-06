@@ -45,4 +45,12 @@ public class Resena {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
+    @ManyToOne
+    @JoinColumn(name = "kit_id")
+    private Kit kit;
+
+    @Builder.Default
+    @jakarta.persistence.Column(columnDefinition = "boolean default false")
+    private Boolean eliminado = false;
+
 }
