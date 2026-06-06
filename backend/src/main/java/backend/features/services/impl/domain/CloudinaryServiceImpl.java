@@ -21,7 +21,12 @@ public class CloudinaryServiceImpl {
         if (file == null || file.isEmpty()) {
             return null;
         }
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+
+        // Le señalamos a cloudinary que detecte automáticamente el tipo y asigne
+        // formato
+        Map<String, Object> params = ObjectUtils.asMap("resource_type", "auto");
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
         return uploadResult.get("secure_url").toString();
     }
 }

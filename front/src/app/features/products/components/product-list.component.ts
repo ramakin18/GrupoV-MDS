@@ -260,7 +260,7 @@ export class ProductListComponent {
     });
     
     formData.append('producto', productoBlob);
-    formData.append('imagen', this.selectedFile as Blob);
+    formData.append('imagen', this.selectedFile, this.selectedFile.name);
 
     this.productService.create(formData).subscribe({
       next: () => {
