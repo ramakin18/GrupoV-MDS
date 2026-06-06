@@ -31,7 +31,9 @@ public class ProductoMapper {
                 model.getStockDisponible(),
                 model.getStockMinimo(),
                 model.isBorrado(),
-                model.getImagenUrl()
+                model.getImagenUrl(),
+                model.getPromedioPuntuacion(),
+                model.getCantidadResenas()
         );
     }
 

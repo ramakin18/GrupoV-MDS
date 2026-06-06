@@ -1,24 +1,29 @@
 package backend.features.controllers;
 
-import backend.features.dtos.request.ProductoCreateReqDto;
-import backend.features.dtos.response.ProductoResponseDto;
-import backend.features.services.interfaces.domain.IProductoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import backend.features.dtos.request.ProductoCreateReqDto;
+import backend.features.dtos.response.ProductoResponseDto;
+import backend.features.services.interfaces.domain.IProductoService;
 
 @WebMvcTest(ProductoController.class)
 class ProductoControllerTest {
@@ -32,8 +37,9 @@ class ProductoControllerTest {
     @MockitoBean
     private IProductoService productoService;
 
+    // AÑADIDOS LOS DOS NUEVOS PARÁMETROS: 0.0 (promedio), 0 (cantidad)
     private final ProductoResponseDto dto = new ProductoResponseDto(
-        1L, "Test", "Desc", BigDecimal.valueOf(100), 10, 5, false, null
+        1L, "Test", "Desc", BigDecimal.valueOf(100), 10, 5, false, null, 0.0, 0
     );
 
     @Test

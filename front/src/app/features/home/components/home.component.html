@@ -20,6 +20,7 @@
           <a routerLink="/orders/pendientes" class="btn-outline">Pendientes</a>
           <a routerLink="/reports/best-sellers" class="btn-outline">Más Vendidos</a>
           <a routerLink="/reports/minimum-stock" class="btn-outline">Stock Mínimo</a>
+          <a routerLink="/reports/best-sellers" class="btn-outline">Reportes</a>
         }
         <button class="btn-ghost" (click)="logout()">Cerrar sesion</button>
       } @else {
@@ -142,15 +143,6 @@
               }
             </div>
           </div>
-        } @empty {
-          <div class="empty-catalog">
-            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4M12 16h.01"/>
-            </svg>
-            <p>No hay productos disponibles en este momento</p>
-            <button class="btn-retry" (click)="loadCatalog()">Reintentar</button>
-          </div>
         }
       </div>
     }
@@ -202,6 +194,15 @@
         </div>
         <div class="modal-details">
           <h2 class="modal-product-name">{{ selectedItem.nombre }}</h2>
+          
+          @if (selectedItem.type === 'product') {
+            <div class="modal-rating" style="margin-bottom: 8px;">
+              <span style="color: #fbbf24; font-size: 1.2rem;">★</span>
+              <strong>{{ selectedItem.promedioPuntuacion || 0 }}</strong>
+              <span class="text-muted">({{ selectedItem.cantidadResenas || 0 }} reseñas)</span>
+            </div>
+          }
+
           @if (!isOutOfStock(selectedItem)) {
             <p class="modal-stock-label stock-ok">Stock disponible</p>
           } @else {
@@ -265,6 +266,66 @@
               </button>
             }
           }
+
+          @if (selectedItem.type === 'product') {
+            <div class="reviews-section" style="margin-top: 24px;">
+              <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 16px;">Reseñas</h3>
+              
+              <div class="reviews-list">
+                @if (reviews.length > 0) {
+                  @for (r of reviews; track r.id) {
+                    <div class="review-item" style="margin-bottom: 16px; padding: 12px; background: var(--color-surface-hover); border-radius: 8px;">
+                      
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <strong style="line-height: 1; font-size: 0.95rem;">{{ r.nombreUsuario }}</strong>
+                          <span style="color: #fbbf24; font-size: 0.9rem; letter-spacing: 1px;">{{ getStars(r.puntuacion) }}</span>
+                        </div>
+                        
+                        @if (isAdmin || (authService.currentUser?.nombre === r.nombreUsuario)) {
+                          <button (click)="deleteReview(r)" 
+                                  title="Eliminar reseña"
+                                  style="background: transparent; border: none; color: var(--color-error); cursor: pointer; padding: 0; margin: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s ease;"
+                                  onmouseover="this.style.transform='scale(1.1)'"
+                                  onmouseout="this.style.transform='scale(1)'">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                          </button>
+                        }
+                      </div>
+
+                      <p style="margin: 4px 0; font-size: 0.9rem; color: var(--color-text-secondary); line-height: 1.4;">{{ r.descripcion }}</p>
+                      <small style="color: var(--color-text-muted); display: block; margin-top: 6px;">{{ r.fechaCreacion | date:'dd/MM/yyyy' }}</small>
+                    </div>
+                  }
+                } @else {
+                  <p style="color: var(--color-text-muted); font-size: 0.9rem; font-style: italic;">Sin reseñas todavía. ¡Sé el primero en opinar!</p>
+                }
+              </div>
+    
+              @if (isLoggedIn) {
+                <div class="review-form" style="margin-top: 24px; padding: 16px; background: var(--color-surface-hover); border-radius: 8px;">
+                  <h4 style="margin: 0 0 12px;">Dejar una reseña</h4>
+                  @if (errorResena) {
+                    <div class="alert alert-error" style="padding: 8px; margin-bottom: 12px;">{{ errorResena }}</div>
+                  }
+                  
+                  <div style="display:flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                    <label style="font-weight: 600; color: var(--color-text-secondary);">Puntuación (1-5):</label>
+                    <input type="number" min="1" max="5" [(ngModel)]="nuevaResenaPuntuacion" style="width: 70px; padding: 6px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text);">
+                  </div>
+                  
+                  <textarea [(ngModel)]="nuevaResenaDescripcion" maxlength="500" placeholder="Escribe tu opinión (opcional)" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); resize: vertical; min-height: 80px; margin-bottom: 12px; font-family: inherit;"></textarea>
+                  
+                  <button class="btn-primary btn-sm" (click)="submitReview()">Publicar reseña</button>
+                </div>
+              }
+            </div>
+          }
+
         </div>
       </div>
     </div>
@@ -282,7 +343,6 @@
   </button>
 }
 
-<app-modal-carrito
-  *ngIf="mostrarModalCarrito"
-  (cerrar)="cerrarModalCarrito()">
-</app-modal-carrito>
+@if (mostrarModalCarrito) {
+  <app-modal-carrito (cerrar)="cerrarModalCarrito()"></app-modal-carrito>
+}
