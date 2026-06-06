@@ -75,6 +75,8 @@ GrupoV-MDS/
 │   │   │   │   ├── PedidoController.java
 │   │   │   │   ├── ClienteController.java
 │   │   │   │   ├── KitController.java
+│   │   │   │   ├── ResenaController.java
+│   │   │   │   ├── ReporteController.java
 │   │   │   │   └── GlobalExceptionHandler.java
 │   │   │   ├── dtos/
 │   │   │   │   ├── DomicilioEnvioDto.java
@@ -89,15 +91,18 @@ GrupoV-MDS/
 │   │   │   │   │   ├── PedidoItemRequest.java
 │   │   │   │   │   ├── PedidoCancelRequest.java
 │   │   │   │   │   ├── PedidoSituacionUpdateRequestDto.java
-│   │   │   │   │   └── KitCreateRequest.java
+│   │   │   │   │   ├── KitCreateRequest.java
+│   │   │   │   │   └── ResenaCreateRequestDto.java
 │   │   │   │   └── response/               # DTOs de salida
+│   │   │   │       ├── ResenaResponseDto.java
 │   │   │   │       ├── ProductoResponseDto.java
 │   │   │   │       ├── CarritoResponseDto.java
 │   │   │   │       ├── CarritoItemResponseDto.java
 │   │   │   │       ├── ClienteResponseDto.java
 │   │   │   │       ├── PedidoResponseDTO.java
 │   │   │   │       ├── PedidoDetalleResponseDTO.java
-│   │   │   │       └── KitResponseDto.java
+│   │   │   │   └── KitResponseDto.java
+│   │   │   │   └── ReporteResponse.java
 │   │   │   ├── models/                     # Entidades JPA
 │   │   │   │   ├── Producto.java
 │   │   │   │   ├── Cliente.java
@@ -105,6 +110,7 @@ GrupoV-MDS/
 │   │   │   │   ├── PedidoDetalle.java
 │   │   │   │   ├── Kit.java
 │   │   │   │   ├── KitProducto.java
+│   │   │   │   ├── Resena.java
 │   │   │   │   ├── SituacionPedido.java (enum)
 │   │   │   │   ├── ProductoEstadoFiltro.java (enum)
 │   │   │   │   └── ProductoViewRole.java (enum)
@@ -112,7 +118,8 @@ GrupoV-MDS/
 │   │   │   │   ├── ProductoMapper.java
 │   │   │   │   ├── PedidoMapper.java
 │   │   │   │   ├── ClienteMapper.java
-│   │   │   │   └── KitMapper.java
+│   │   │   │   ├── KitMapper.java
+│   │   │   │   └── ResenaMapper.java
 │   │   │   ├── services/
 │   │   │   │   ├── interfaces/
 │   │   │   │   │   └── domain/             # Contratos de servicio
@@ -122,8 +129,11 @@ GrupoV-MDS/
 │   │   │   │   │       ├── ICarritoService.java
 │   │   │   │   │       ├── IPedidoService.java
 │   │   │   │   │       ├── IClienteService.java
-│   │   │   │   │       └── IKitService.java
+│   │   │   │   │   ├── IKitService.java
+│   │   │   │   │   ├── IResenaService.java
+│   │   │   │   │   └── IReporteService.java
 │   │   │   │   └── impl/domain/            # Implementaciones
+│   │   │   │       ├── ResenaServiceImpl.java
 │   │   │   │       ├── ProductoServiceImpl.java
 │   │   │   │       ├── ProductoCreateService.java
 │   │   │   │       ├── ProductoListService.java
@@ -131,7 +141,8 @@ GrupoV-MDS/
 │   │   │   │       ├── PedidoServiceImpl.java
 │   │   │   │       ├── ClienteServiceImpl.java
 │   │   │   │       ├── KitServiceImpl.java
-│   │   │   │       └── CloudinaryServiceImpl.java
+│   │   │   │       ├── CloudinaryServiceImpl.java
+│   │   │   │       └── ReporteServiceImpl.java
 │   │   │   └── repositories/
 │   │   │       ├── IProductoRepository.java
 │   │   │       ├── IKitRepository.java
@@ -139,6 +150,8 @@ GrupoV-MDS/
 │   │   │       ├── PedidoDetalleRepository.java
 │   │   │       ├── ClienteRepository.java
 │   │   │       └── specs/
+│   │   │           ├── IResenaRepository.java
+│   │   │           └── ProductoSpecifications.java
 │   │   │           └── ProductoSpecifications.java
 │   │   └── exceptions/
 │   │       ├── DuplicateResourceException.java
@@ -346,7 +359,7 @@ La API REST está documentada con **SpringDoc OpenAPI 3** (Swagger UI).
 
 ### ¿Qué incluye la documentación?
 
-- **Tags** por recurso: Productos, Carrito, Pedidos, Clientes, Kits
+- **Tags** por recurso: Productos, Carrito, Pedidos, Clientes, Kits, Reseñas
 - **`@Operation`** con descripciones en español para cada endpoint
 - **`@ApiResponses`** con códigos HTTP (200, 201, 400, 401, 404, 409, 500)
 - **`@Parameter`** con descripciones para query params y path vars
@@ -399,6 +412,17 @@ La API REST está documentada con **SpringDoc OpenAPI 3** (Swagger UI).
 | `PUT` | `/api/clientes/{id}` | Actualizar cliente |
 | `PUT` | `/api/clientes/{id}/domicilio` | Actualizar solo el domicilio |
 | `DELETE` | `/api/clientes/{id}` | Eliminar cliente |
+
+### Reseñas — `/api/resenas`
+
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/resenas` | Listar reseñas (`?productoId=&admin=true`) | No |
+| `GET` | `/api/resenas/kit/{id}` | Listar reseñas de un kit | No |
+| `POST` | `/api/resenas` | Crear reseña (producto o kit) | No |
+| `PUT` | `/api/resenas/{id}` | Actualizar reseña existente | No |
+| `DELETE` | `/api/resenas/{id}` | Soft-delete de reseña | No |
+| `PUT` | `/api/resenas/{id}/restore` | Restaurar reseña eliminada (admin) | No |
 
 ### Kits — `/api/kits`
 
@@ -485,6 +509,21 @@ shared/     → Componentes reutilizables
 - Control de stock (no permitir desactivar kit con producto inactivo)
 - Filtro de kits activos para el catálogo
 - Precio y stock propios del kit
+- Puntuación promedio y cantidad de reseñas por kit
+
+### Sistema de Reseñas
+- Reseñas para productos y kits con calificación de 1 a 5 estrellas
+- Validación de compra: solo clientes que hayan comprado el producto/kit pueden reseñar
+- Soft-delete de reseñas con restauración por administradores
+- Vista admin: muestra reseñas eliminadas con opción de restaurar
+- Vista normal: solo muestra reseñas activas, ordenadas de más reciente a más antigua
+- Cálculo automático de puntuación promedio al crear/eliminar/restaurar reseñas
+- Interfaz con selector visual de estrellas (hover + click)
+- Prevención de reseñas duplicadas por cliente+producto o cliente+kit
+
+### Reportes
+- Vista de productos más vendidos y con stock mínimo
+- Gestión de cupones de descuento
 
 ---
 
