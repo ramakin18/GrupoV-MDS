@@ -334,10 +334,31 @@ export class HomeComponent implements AfterViewInit {
   }
 
   addToCart(item: CatalogItem): void {
-    if (!this.isLoggedIn || item.type !== 'product') return;
-    const product = this._products.find(p => p.idProducto === item.id);
-    if (!product) return;
-    this.cartService.addProduct(product);
+    if (!this.isLoggedIn) return;
+
+    if (item.type === 'product') {
+      const product = this._products.find(p => p.idProducto === item.id);
+      if (!product) return;
+      const result = this.cartService.addProduct(product);
+      if (result.success) {
+        this.quickViewMessage = 'Producto agregado al carrito';
+        this.quickViewMessageType = 'success';
+      }
+      return;
+    }
+
+    if (item.type === 'kit') {
+      const kit = this._kits.find(k => k.idKit === item.id);
+      if (!kit) return;
+      const result = this.cartService.addKit(kit);
+      if (result.success) {
+        this.quickViewMessage = 'Kit agregado al carrito';
+        this.quickViewMessageType = 'success';
+      } else {
+        this.quickViewMessage = result.message || 'Error al agregar el kit';
+        this.quickViewMessageType = 'error';
+      }
+    }
   }
 
   addToCartFromQuickView(): void {
@@ -362,23 +383,13 @@ export class HomeComponent implements AfterViewInit {
     } else {
       const kit = this._kits.find(k => k.idKit === this.selectedItem!.id);
       if (!kit) return;
+      const result = this.cartService.addKit(kit);
 
-      let allAdded = true;
-      for (const kp of kit.productos) {
-        const product = this._products.find(p => p.idProducto === kp.idProducto);
-        if (product) {
-          for (let i = 0; i < kp.cantidad; i++) {
-            const res = this.cartService.addProduct(product);
-            if (!res.success) allAdded = false;
-          }
-        }
-      }
-
-      if (allAdded) {
+      if (result.success) {
         this.quickViewMessage = 'Kit agregado al carrito';
         this.quickViewMessageType = 'success';
       } else {
-        this.quickViewMessage = 'Algunos productos del kit no tienen stock suficiente.';
+        this.quickViewMessage = result.message || 'Error al agregar el kit';
         this.quickViewMessageType = 'error';
       }
     }

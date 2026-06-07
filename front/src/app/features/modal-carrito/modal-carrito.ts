@@ -151,15 +151,15 @@ export class ModalCarritoComponent {
       return;
     }
 
-    const stockValidation = this.cartService.validateStock();
-    if (!stockValidation.success) {
-      this.checkoutErrorMessage = stockValidation.message || 'Hay productos sin stock suficiente.';
+    const expandedItems = this.cartService.expandKits(this.cartItems);
+    if (expandedItems.length === 0) {
+      this.checkoutErrorMessage = 'El carrito esta vacio.';
       return;
     }
 
     this.isCheckingOut = true;
 
-    this.cartService.validateCartWithBackend().subscribe({
+    this.cartService.validateCartWithBackend(expandedItems).subscribe({
       next: (response) => {
         const code = this.couponCode.trim();
         if (!code) {
@@ -191,11 +191,14 @@ export class ModalCarritoComponent {
       return;
     }
 
+    const expandedItems = this.cartService.expandKits(this.cartItems);
+
     this.orderService.create({
       clienteId: user.id,
-      items: this.cartItems.map(item => ({
+      items: expandedItems.map(item => ({
         idProducto: item.idProducto,
-        cantidad: item.cantidad
+        cantidad: item.cantidad,
+        ...(item.precioUnitario != null ? { precioUnitario: item.precioUnitario } : {})
       })),
       formaPago: 'EFECTIVO',
       codigoCupon: this.appliedCoupon?.codigo

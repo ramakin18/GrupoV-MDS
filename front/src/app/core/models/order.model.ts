@@ -48,6 +48,7 @@ export interface PedidoCreateRequest {
 export interface PedidoItemRequest {
   idProducto: number;
   cantidad: number;
+  precioUnitario?: number;
 }
 
 export interface PedidoCancelRequest {

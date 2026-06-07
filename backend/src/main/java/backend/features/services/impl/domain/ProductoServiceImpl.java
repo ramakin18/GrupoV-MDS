@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import backend.exceptions.DuplicateResourceException;
@@ -12,6 +13,8 @@ import backend.exceptions.ResourceNotFoundException;
 import backend.features.dtos.request.ProductoCreateReqDto;
 import backend.features.dtos.response.ProductoResponseDto;
 import backend.features.mappers.ProductoMapper;
+import backend.features.models.Kit;
+import backend.features.models.KitProducto;
 import backend.features.models.Producto;
 import backend.features.models.ProductoEstadoFiltro;
 import backend.features.models.ProductoViewRole;
@@ -88,6 +91,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
 
     @Override
+    @Transactional
     public ProductoResponseDto update(Long id, ProductoCreateReqDto request) {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con id: " + id));
@@ -95,6 +99,8 @@ public class ProductoServiceImpl implements IProductoService {
         if (productoRepository.existsByNombreProductoIgnoreCaseAndIdProductoNot(request.nombreProducto(), id)) {
             throw new DuplicateResourceException("El nombre ya está en uso por otro producto.");
         }
+
+        boolean stockChanged = !producto.getStockDisponible().equals(request.stockDisponible());
 
         producto.setNombreProducto(request.nombreProducto());
         producto.setDescripcion(request.descripcion());
@@ -111,6 +117,25 @@ public class ProductoServiceImpl implements IProductoService {
         }
 
         Producto updated = productoRepository.save(producto);
+
+        if (stockChanged) {
+            List<Kit> kitsConProducto = kitRepository.findByProductos_Producto_IdProducto(id);
+            for (Kit kit : kitsConProducto) {
+                int nuevoStock = kit.getProductos().stream()
+                    .mapToInt(kp -> {
+                        Producto p = kp.getProducto();
+                        if (p.isBorrado() || p.getStockDisponible() == null || p.getStockDisponible() <= 0) {
+                            return 0;
+                        }
+                        return p.getStockDisponible() / kp.getCantidad();
+                    })
+                    .min()
+                    .orElse(0);
+                kit.setStock(nuevoStock);
+                kitRepository.save(kit);
+            }
+        }
+
         return productoMapper.toResponseDto(updated);
     }
 

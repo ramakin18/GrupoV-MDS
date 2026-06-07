@@ -5,6 +5,7 @@ import { Pedido, PedidoCreateRequest, SituacionPedido } from '../models/order.mo
 export interface IOrderService {
   getAll(estado?: string): Observable<Pedido[]>;
   getById(id: number): Observable<Pedido>;
+  getByClienteId(clienteId: number): Observable<Pedido[]>;
   getPendingDelivery(): Observable<Pedido[]>;
   create(request: PedidoCreateRequest): Observable<Pedido>;
   updateSituacion(id: number, situacion: SituacionPedido): Observable<Pedido>;

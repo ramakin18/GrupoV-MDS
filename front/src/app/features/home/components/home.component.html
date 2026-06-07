@@ -45,6 +45,7 @@
             }
           </div>
         }
+        <a routerLink="/mis-pedidos" class="btn-outline">Mis Pedidos</a>
         <button class="btn-ghost" (click)="logout()">Cerrar sesion</button>
       } @else {
         <a routerLink="/login" class="btn-outline">Iniciar sesion</a>
@@ -154,10 +155,8 @@
             }
             <div class="product-actions">
               @if (isLoggedIn) {
-                @if (item.type === 'product' && !isOutOfStock(item)) {
+                @if (!isOutOfStock(item)) {
                   <button class="btn-add-cart" (click)="addToCart(item)">Agregar al carrito</button>
-                } @else if (item.type === 'kit' && !isOutOfStock(item)) {
-                  <button class="btn-add-cart btn-add-cart-kit" (click)="openQuickView(item)">Ver Kit</button>
                 } @else {
                   <button class="btn-add-cart" disabled>Sin stock</button>
                 }

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -22,5 +24,8 @@ public class CarritoItemRequestDto{
         @Min(value = 1, message = "La cantidad debe ser mayor a 0")
         @Schema(description = "Cantidad del producto", example = "2")
         private Integer cantidad;
+
+        @Schema(description = "Precio unitario (opcional, para kits con precio personalizado)")
+        private BigDecimal precioUnitario;
 
 }

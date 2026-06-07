@@ -9,6 +9,7 @@ import { KitListComponent } from "./features/kits/components/kit-list.component"
 import { BestSellersReportComponent } from "./features/reports/components/best-sellers-report.component";
 import { MinimumStockReportComponent } from "./features/reports/components/minimum-stock-report.component";
 import { CouponManagerComponent } from "./features/coupons/components/coupon-manager.component";
+import { OrderHistoryComponent } from "./features/orders/components/order-history.component";
 import { AuthGuard } from "./core/services/auth.guard";
 import { AdminGuard } from "./core/services/admin.guard";
 
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: "coupons", component: CouponManagerComponent, canActivate: [AdminGuard] },
   { path: "reports/best-sellers", component: BestSellersReportComponent, canActivate: [AdminGuard] },
   { path: "reports/minimum-stock", component: MinimumStockReportComponent, canActivate: [AdminGuard] },
+  { path: "mis-pedidos", component: OrderHistoryComponent, canActivate: [AuthGuard] },
   { path: "register", component: ClientRegistrationComponent },
   { path: "login", component: ClientLoginComponent },
   { path: "**", redirectTo: "" }

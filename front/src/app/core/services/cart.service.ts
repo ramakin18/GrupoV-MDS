@@ -2,11 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
+import { Kit } from '../models/kit.model';
 import {
   CartItem,
   CartOperationResult,
+  CartValidationItemRequest,
   CartValidationRequest,
-  CartValidationResponse
+  CartValidationResponse,
+  KitProductReference
 } from '../models/cart-item.model';
 import { environment } from '@environments/environment';
 
@@ -178,6 +181,88 @@ export class CartService {
     };
   }
 
+  // Agrega un kit completo como un solo item con su precio personalizado
+  addKit(kit: Kit): CartOperationResult {
+    if (!kit.idKit) {
+      return { success: false, message: 'El kit no tiene un ID valido.' };
+    }
+
+    if (!kit.activo) {
+      return { success: false, message: 'El kit no esta disponible.' };
+    }
+
+    if (kit.stock <= 0) {
+      return { success: false, message: 'No hay stock disponible para este kit.' };
+    }
+
+    const existingItem = this.items.find(item => item.kitId === kit.idKit && item.tipo === 'kit');
+
+    if (existingItem) {
+      if (existingItem.cantidad >= (kit.stock ?? 0)) {
+        return { success: false, message: 'No hay mas stock disponible para este kit.' };
+      }
+      this.items = this.items.map(item =>
+        item.kitId === kit.idKit && item.tipo === 'kit'
+          ? { ...item, cantidad: item.cantidad + 1 }
+          : item
+      );
+      this.saveToLocalStorage();
+      return { success: true, message: 'Kit agregado al carrito.' };
+    }
+
+    const kitProductos: KitProductReference[] = (kit.productos || []).map(kp => ({
+      idProducto: kp.idProducto,
+      cantidad: kp.cantidad
+    }));
+
+    this.items = [
+      ...this.items,
+      {
+        idProducto: 0,
+        nombreProducto: kit.nombre,
+        precio: kit.precio,
+        cantidad: 1,
+        stockDisponible: kit.stock ?? 0,
+        tipo: 'kit',
+        kitId: kit.idKit,
+        kitProductos
+      }
+    ];
+    this.saveToLocalStorage();
+
+    return { success: true, message: 'Kit agregado al carrito.' };
+  }
+
+  // Expande items tipo kit a sus productos individuales para crear el pedido
+  expandKits(items: CartItem[]): { idProducto: number; cantidad: number; precioUnitario?: number }[] {
+    const result: { idProducto: number; cantidad: number; precioUnitario?: number }[] = [];
+
+    for (const item of items) {
+      const kitProductos = item.kitProductos;
+      if (item.tipo === 'kit' && kitProductos) {
+        const totalKitCantidad = kitProductos.reduce((sum, p) => sum + p.cantidad, 0);
+
+        for (const kp of kitProductos) {
+          const precioUnitario = item.precio / totalKitCantidad;
+          for (let i = 0; i < item.cantidad; i++) {
+            result.push({
+              idProducto: kp.idProducto,
+              cantidad: kp.cantidad,
+              precioUnitario
+            });
+          }
+        }
+      } else {
+        result.push({
+          idProducto: item.idProducto,
+          cantidad: item.cantidad
+        });
+      }
+    }
+
+    return result;
+  }
+
   // Calcula el importe total del carrito.
   getTotal(): number {
     return this.items.reduce((total, item) => total + item.precio * item.cantidad, 0);
@@ -210,13 +295,19 @@ export class CartService {
     };
   }
 
-  // Envia solo idProducto y cantidad al backend para validar contra la base real.
-  validateCartWithBackend(): Observable<CartValidationResponse> {
+  // Envia items al backend para validar stock y calcular total.
+  validateCartWithBackend(expandedItems?: CartValidationItemRequest[]): Observable<CartValidationResponse> {
     const request: CartValidationRequest = {
-      items: this.items.map(item => ({
-        idProducto: item.idProducto,
-        cantidad: item.cantidad
-      }))
+      items: expandedItems
+        ? expandedItems.map(item => ({
+            idProducto: item.idProducto,
+            cantidad: item.cantidad,
+            ...(item.precioUnitario != null ? { precioUnitario: item.precioUnitario } : {})
+          }))
+        : this.items.map(item => ({
+            idProducto: item.idProducto,
+            cantidad: item.cantidad
+          }))
     };
 
     return this.http.post<CartValidationResponse>(`${this.apiUrl}/validar`, request);

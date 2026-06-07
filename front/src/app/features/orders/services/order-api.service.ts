@@ -23,6 +23,10 @@ export class OrderApiService implements IOrderService {
     return this.http.get<Pedido>(`${this.apiUrl}/${id}`);
   }
 
+  getByClienteId(clienteId: number): Observable<Pedido[]> {
+    return this.http.get<Pedido[]>(`${this.apiUrl}/cliente/${clienteId}`);
+  }
+
   getPendingDelivery(): Observable<Pedido[]> {
     return this.http.get<Pedido[]>(`${this.apiUrl}/pendientes`);
   }

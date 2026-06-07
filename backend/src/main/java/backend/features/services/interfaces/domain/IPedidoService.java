@@ -12,6 +12,8 @@ public interface IPedidoService {
 
     PedidoResponseDTO getById(Long id);
 
+    List<PedidoResponseDTO> getByClienteId(Long clienteId);
+
     List<PedidoResponseDTO> getPendingDelivery();
 
     PedidoResponseDTO create(PedidoCreateRequest request);

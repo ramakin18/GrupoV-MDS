@@ -15,4 +15,5 @@ public interface IKitRepository extends JpaRepository<Kit, Long> {
     Optional<Kit> findByIdKitAndActivoTrue(Long idKit);
     List<Kit> findByActivoTrueOrderByNombreAsc();
     boolean existsByProductos_Producto_IdProductoAndActivoTrue(Long idProducto);
+    List<Kit> findByProductos_Producto_IdProducto(Long idProducto);
 }

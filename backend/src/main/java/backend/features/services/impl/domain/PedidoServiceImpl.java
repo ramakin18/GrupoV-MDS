@@ -51,6 +51,12 @@ public class PedidoServiceImpl implements IPedidoService {
     }
 
     @Override
+    public List<PedidoResponseDTO> getByClienteId(Long clienteId) {
+        return pedidoMapper.toResponseDtoList(
+            pedidoRepository.findByClienteIdOrderByFechaDesc(clienteId));
+    }
+
+    @Override
     public List<PedidoResponseDTO> getPendingDelivery() {
         List<SituacionPedido> pendientes = List.of(SituacionPedido.RESERVADO, SituacionPedido.PENDIENTE);
         return pedidoMapper.toResponseDtoList(
@@ -78,13 +84,14 @@ public class PedidoServiceImpl implements IPedidoService {
                     + ". Stock disponible: " + producto.getStockDisponible());
             }
 
-            BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(item.cantidad()));
+            BigDecimal precioUnitario = item.precioUnitario() != null ? item.precioUnitario() : producto.getPrecio();
+            BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(item.cantidad()));
             total = total.add(subtotal);
 
             PedidoDetalle detalle = PedidoDetalle.builder()
                 .producto(producto)
                 .cantidad(item.cantidad())
-                .precioUnitario(producto.getPrecio())
+                .precioUnitario(precioUnitario)
                 .subtotal(subtotal)
                 .build();
 
@@ -184,6 +191,13 @@ public class PedidoServiceImpl implements IPedidoService {
         pedido.setSituacion(SituacionPedido.CANCELADO);
         pedido.setMotivoCancelacion(motivo);
         pedido.setFechaActualizacion(LocalDateTime.now());
+
+        for (PedidoDetalle detalle : pedido.getDetalles()) {
+            Producto producto = detalle.getProducto();
+            producto.setStockDisponible(producto.getStockDisponible() + detalle.getCantidad());
+            productoRepository.save(producto);
+        }
+
         Pedido saved = pedidoRepository.save(pedido);
         return pedidoMapper.toResponseDto(saved);
     }

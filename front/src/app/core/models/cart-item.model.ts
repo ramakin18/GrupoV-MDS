@@ -1,9 +1,17 @@
+export interface KitProductReference {
+  idProducto: number;
+  cantidad: number;
+}
+
 export interface CartItem {
   idProducto: number;
   nombreProducto: string;
   precio: number;
   cantidad: number;
   stockDisponible: number;
+  tipo?: 'product' | 'kit';
+  kitId?: number;
+  kitProductos?: KitProductReference[];
 }
 export interface CartOperationResult {
   success: boolean;
@@ -13,6 +21,7 @@ export interface CartOperationResult {
 export interface CartValidationItemRequest {
   idProducto: number;
   cantidad: number;
+  precioUnitario?: number;
 }
 
 export interface CartValidationRequest {

@@ -32,7 +32,7 @@ class KitControllerTest {
     private IKitService kitService;
 
     private final KitResponseDto dto = new KitResponseDto(
-        1L, "Kit Test", "Desc", BigDecimal.valueOf(500), 3, true, List.of()
+        1L, "Kit Test", "Desc", BigDecimal.valueOf(500), 3, true, List.of(), 4.5, 10
     );
 
     @Test

@@ -40,6 +40,13 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.getAll(estado));
     }
 
+    @GetMapping("/cliente/{clienteId}")
+    @Operation(summary = "Obtener pedidos por cliente",
+        description = "Obtiene todos los pedidos de un cliente específico, ordenados por fecha descendente")
+    public ResponseEntity<List<PedidoResponseDTO>> getByClienteId(@PathVariable Long clienteId) {
+        return ResponseEntity.ok(pedidoService.getByClienteId(clienteId));
+    }
+
     @GetMapping("/pendientes")
     @Operation(summary = "Pedidos pendientes de entrega", description = "Obtiene los pedidos pendientes de entrega")
     @ApiResponses({

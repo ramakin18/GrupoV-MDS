@@ -12,7 +12,7 @@
             <p>El carrito esta vacio.</p>
           </div>
         } @else {
-          @for (item of cartItems; track item.idProducto) {
+          @for (item of cartItems; track item.tipo + '-' + (item.kitId ?? item.idProducto)) {
             <div class="cart-item">
               <div class="item-info">
                 <div>
@@ -98,10 +98,12 @@
     </div>
 
     <div class="cart-footer">
-      <div class="total-section">
-        <span>{{ appliedCoupon ? 'Total con descuento:' : 'Total:' }}</span>
-        <span class="total-price">${{ finalTotal | number:'1.2-2' }}</span>
-      </div>
+      @if (step !== 'success') {
+        <div class="total-section">
+          <span>{{ appliedCoupon ? 'Total con descuento:' : 'Total:' }}</span>
+          <span class="total-price">${{ finalTotal | number:'1.2-2' }}</span>
+        </div>
+      }
 
       @if (step === 'cart') {
         <button type="button" class="btn-checkout" [disabled]="cartItems.length === 0 || isCheckingOut" (click)="checkout()">

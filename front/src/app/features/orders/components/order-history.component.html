@@ -1,0 +1,140 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Mis Pedidos</h1>
+      <p class="subtitle">Historial de todas tus compras</p>
+    </div>
+    <a routerLink="/" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Volver al inicio
+    </a>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <section class="table-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Lista de Pedidos</h2>
+        <p class="section-description">{{ orders.length }} pedido{{ orders.length !== 1 ? 's' : '' }} encontrado{{ orders.length !== 1 ? 's' : '' }}</p>
+      </div>
+    </div>
+
+    @if (isLoading && orders.length === 0) {
+      <div class="loading-state" aria-live="polite">
+        <div class="spinner spinner-lg"></div>
+        <p>Cargando tus pedidos...</p>
+      </div>
+    } @else {
+      @if (orders.length === 0) {
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <p class="empty-message">No tienes pedidos todavía</p>
+          <p class="empty-hint">Explora nuestro catálogo y realiza tu primera compra.</p>
+          <a routerLink="/" class="btn-primary">Ir al catálogo</a>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Pedido #</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Productos</th>
+                <th scope="col">Total</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of orders; track order.idPedido) {
+                <tr>
+                  <td class="text-muted">#{{ order.idPedido }}</td>
+                  <td class="text-nowrap">{{ order.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    <div class="productos-list">
+                      @for (detalle of order.detalles; track detalle.id) {
+                        <span class="producto-item">{{ detalle.nombreProducto }} x{{ detalle.cantidad }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td class="text-numeric">${{ order.total | number:'1.2-2' }}</td>
+                  <td>
+                    <span class="badge"
+                      [class.badge-warning]="order.situacion === 'RESERVADO' || order.situacion === 'PENDIENTE'"
+                      [class.badge-info]="order.situacion === 'LISTO'"
+                      [class.badge-success]="order.situacion === 'ENTREGADO'"
+                      [class.badge-danger]="order.situacion === 'CANCELADO'">
+                      {{ getStatusLabel(order.situacion) }}
+                    </span>
+                    @if (order.situacion === 'CANCELADO' && order.motivoCancelacion) {
+                      <div class="cancel-reason">
+                        <strong>Motivo:</strong> {{ order.motivoCancelacion }}
+                      </div>
+                    }
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline" type="button"
+                      [class.expanded]="order.idPedido === expandedOrderId"
+                      (click)="toggleDetalle(order.idPedido)">
+                      {{ order.idPedido === expandedOrderId ? 'Ocultar' : 'Ver' }}
+                    </button>
+                  </td>
+                </tr>
+                @if (order.idPedido === expandedOrderId) {
+                  <tr class="detail-row">
+                    <td colspan="6">
+                      <div class="order-detail">
+                        <div class="detail-grid">
+                          <div class="detail-section">
+                            <h4>Información del Pedido</h4>
+                            <p><strong>Forma de pago:</strong> {{ order.formaPago }}</p>
+                            @if (order.subtotal != null) {
+                              <p><strong>Subtotal:</strong> ${{ order.subtotal | number:'1.2-2' }}</p>
+                            }
+                            @if (order.descuento && order.descuento > 0) {
+                              <p><strong>Descuento:</strong> -${{ order.descuento | number:'1.2-2' }}</p>
+                            }
+                            @if (order.codigoCupon) {
+                              <p><strong>Cupón:</strong> {{ order.codigoCupon }}</p>
+                            }
+                            <p><strong>Total:</strong> ${{ order.total | number:'1.2-2' }}</p>
+                          </div>
+                          <div class="detail-section">
+                            <h4>Dirección de Envío</h4>
+                            <p>{{ order.domicilioEnvio.calle }} {{ order.domicilioEnvio.numero }}</p>
+                            @if (order.domicilioEnvio.piso) {
+                              <p>Piso {{ order.domicilioEnvio.piso }}{{ order.domicilioEnvio.departamento ? ', Depto. ' + order.domicilioEnvio.departamento : '' }}</p>
+                            }
+                            <p>{{ order.domicilioEnvio.localidad }}, {{ order.domicilioEnvio.provincia }}</p>
+                            <p>{{ order.domicilioEnvio.pais }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+</div>

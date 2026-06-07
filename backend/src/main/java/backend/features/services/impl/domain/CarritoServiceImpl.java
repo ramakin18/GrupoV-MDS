@@ -38,13 +38,16 @@ public class CarritoServiceImpl implements ICarritoService {
                 );
             }
 
-            BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(item.getCantidad()));
+            BigDecimal precioUnitario = item.getPrecioUnitario() != null
+                    ? item.getPrecioUnitario()
+                    : producto.getPrecio();
+            BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(item.getCantidad()));
             total = total.add(subtotal);
 
             responseItems.add(new CarritoItemResponseDto(
                     producto.getIdProducto(),
                     producto.getNombreProducto(),
-                    producto.getPrecio(),
+                    precioUnitario,
                     item.getCantidad(),
                     subtotal
             ));
