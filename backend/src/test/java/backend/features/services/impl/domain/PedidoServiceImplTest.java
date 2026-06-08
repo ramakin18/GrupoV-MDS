@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,14 +59,14 @@ class PedidoServiceImplTest {
         pedido = Pedido.builder()
             .idPedido(1L).cliente(cliente).fecha(LocalDateTime.now())
             .situacion(SituacionPedido.RESERVADO).total(BigDecimal.valueOf(200))
-            .formaPago("EFECTIVO").build();
+            .formaPago("EFECTIVO").detalles(List.of()).build();
     }
 
     /* ================== CREATE ================== */
 
     @Test
     void create_conProductosConStock_shouldDescontarStock() {
-        PedidoItemRequest item = new PedidoItemRequest(1L, 2);
+        PedidoItemRequest item = new PedidoItemRequest(1L, 2, null);
         PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
@@ -82,7 +83,7 @@ class PedidoServiceImplTest {
 
     @Test
     void create_conClienteInexistente_shouldThrow() {
-        PedidoItemRequest item = new PedidoItemRequest(1L, 1);
+        PedidoItemRequest item = new PedidoItemRequest(1L, 1,new BigDecimal("15.50"));
         PedidoCreateRequest request = new PedidoCreateRequest(99L, List.of(item), null, null);
 
         when(clienteRepository.findById(99L)).thenReturn(Optional.empty());
@@ -92,7 +93,7 @@ class PedidoServiceImplTest {
 
     @Test
     void create_conProductoInexistente_shouldThrow() {
-        PedidoItemRequest item = new PedidoItemRequest(99L, 1);
+        PedidoItemRequest item = new PedidoItemRequest(99L, 1, null);
         PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
@@ -104,7 +105,7 @@ class PedidoServiceImplTest {
 
     @Test
     void create_conStockInsuficiente_shouldThrow() {
-        PedidoItemRequest item = new PedidoItemRequest(1L, 99);
+        PedidoItemRequest item = new PedidoItemRequest(1L, 99, null);
         PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
@@ -116,7 +117,7 @@ class PedidoServiceImplTest {
 
     @Test
     void create_debeCrearEnEstadoReservado() {
-        PedidoItemRequest item = new PedidoItemRequest(1L, 2);
+        PedidoItemRequest item = new PedidoItemRequest(1L, 2, null);
         PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
@@ -131,7 +132,7 @@ class PedidoServiceImplTest {
 
     @Test
     void create_formaPagoDebeSerEfectivo() {
-        PedidoItemRequest item = new PedidoItemRequest(1L, 2);
+        PedidoItemRequest item = new PedidoItemRequest(1L, 2, null);
         PedidoCreateRequest request = new PedidoCreateRequest(1L, List.of(item), null, null);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));

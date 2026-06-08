@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -130,7 +131,7 @@ class CuponServiceImplTest {
             new backend.features.dtos.request.CuponAplicacionRequest(
                 1L,
                 "12345678",
-                List.of(new PedidoItemRequest(1L, 1))
+                List.of(new PedidoItemRequest(1L, 1,null))
             )
         );
 
@@ -146,7 +147,7 @@ class CuponServiceImplTest {
         when(cuponClienteRepository.findByCuponCodigoAndClienteId("12345678", 2L)).thenReturn(Optional.empty());
 
         assertThrows(ValidationException.class, () ->
-            service.validateForOrder(2L, "12345678", List.of(new PedidoItemRequest(1L, 1))));
+            service.validateForOrder(2L, "12345678", List.of(new PedidoItemRequest(1L, 1,null))));
     }
 
     @Test
@@ -160,7 +161,7 @@ class CuponServiceImplTest {
         when(cuponClienteRepository.findByCuponCodigoAndClienteId("12345678", 1L)).thenReturn(Optional.of(asignacion));
 
         assertThrows(ValidationException.class, () ->
-            service.validateForOrder(1L, "12345678", List.of(new PedidoItemRequest(1L, 1))));
+            service.validateForOrder(1L, "12345678", List.of(new PedidoItemRequest(1L, 1,null))));
     }
 
     @Test
@@ -172,7 +173,7 @@ class CuponServiceImplTest {
         when(cuponClienteRepository.findByCuponCodigoAndClienteId("12345678", 1L)).thenReturn(Optional.of(asignacion));
 
         assertThrows(ValidationException.class, () ->
-            service.validateForOrder(1L, "12345678", List.of(new PedidoItemRequest(1L, 1))));
+            service.validateForOrder(1L, "12345678", List.of(new PedidoItemRequest(1L, 1,null))));
     }
 
     @Test
@@ -185,7 +186,7 @@ class CuponServiceImplTest {
         when(productoRepository.findByIdProductoAndBorradoFalse(1L)).thenReturn(Optional.of(producto));
 
         assertThrows(ValidationException.class, () ->
-            service.validateForOrder(1L, "12345678", List.of(new PedidoItemRequest(1L, 1))));
+            service.validateForOrder(1L, "12345678", List.of(new PedidoItemRequest(1L, 1,null))));
     }
 
     private Cupon validCoupon(TipoDescuento tipo, BigDecimal valor) {

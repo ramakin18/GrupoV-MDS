@@ -38,22 +38,21 @@ class PedidoControllerTest {
     private IPedidoService pedidoService;
 
     private final PedidoResponseDTO dto = new PedidoResponseDTO(
-        1L, 1L, "Juan", "Perez", "j@t.com",
-        LocalDateTime.of(2024, 1, 1, 10, 0), null,
-        SituacionPedido.RESERVADO, null, "EFECTIVO",
-        BigDecimal.valueOf(500), BigDecimal.valueOf(500), BigDecimal.ZERO, null,
-        new DomicilioEnvioDto("Argentina", "BA", "CABA", "Calle", "123", null, null),
-        List.of()
-    );
+            1L, 1L, "Juan", "Perez", "j@t.com",
+            LocalDateTime.of(2024, 1, 1, 10, 0), null,
+            SituacionPedido.RESERVADO, null, "EFECTIVO",
+            BigDecimal.valueOf(500), BigDecimal.valueOf(500), BigDecimal.ZERO, null,
+            new DomicilioEnvioDto("Argentina", "BA", "CABA", "Calle", "123", null, null),
+            List.of());
 
     @Test
     void getAll_shouldReturnList() throws Exception {
         when(pedidoService.getAll(any())).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/pedidos"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].nombreCliente").value("Juan"))
-            .andExpect(jsonPath("$[0].situacion").value("RESERVADO"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombreCliente").value("Juan"))
+                .andExpect(jsonPath("$[0].situacion").value("RESERVADO"));
     }
 
     @Test
@@ -61,8 +60,8 @@ class PedidoControllerTest {
         when(pedidoService.getPendingDelivery()).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/pedidos/pendientes"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].situacion").value("RESERVADO"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].situacion").value("RESERVADO"));
     }
 
     @Test
@@ -70,8 +69,8 @@ class PedidoControllerTest {
         when(pedidoService.getById(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/pedidos/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.nombreCliente").value("Juan"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombreCliente").value("Juan"));
     }
 
     @Test
@@ -81,10 +80,9 @@ class PedidoControllerTest {
         mockMvc.perform(post("/api/pedidos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(
-                    new PedidoCreateRequest(1L, List.of(new PedidoItemRequest(1L, 2)), null, null)
-                )))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.idPedido").value(1));
+                        new PedidoCreateRequest(1L, List.of(new PedidoItemRequest(1L, 2, new BigDecimal("500"))), null, null))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.idPedido").value(1));
     }
 
     @Test
@@ -94,9 +92,8 @@ class PedidoControllerTest {
         mockMvc.perform(put("/api/pedidos/1/situacion")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(
-                    new PedidoSituacionUpdateRequestDto(SituacionPedido.ENTREGADO)
-                )))
-            .andExpect(status().isOk());
+                        new PedidoSituacionUpdateRequestDto(SituacionPedido.ENTREGADO))))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -106,8 +103,7 @@ class PedidoControllerTest {
         mockMvc.perform(put("/api/pedidos/1/cancelar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(
-                    new PedidoCancelRequest("Cliente cancelo")
-                )))
-            .andExpect(status().isOk());
+                        new PedidoCancelRequest("Cliente cancelo"))))
+                .andExpect(status().isOk());
     }
 }

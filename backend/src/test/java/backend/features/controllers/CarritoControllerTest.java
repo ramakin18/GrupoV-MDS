@@ -40,7 +40,7 @@ class CarritoControllerTest {
         mockMvc.perform(post("/api/carrito/validar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(
-                    new CarritoValidateRequestDto(List.of(new CarritoItemRequestDto(1L, 2)))
+                    new CarritoValidateRequestDto(List.of(new CarritoItemRequestDto(1L, 2,null)))
                 )))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.total").value(500));
@@ -54,7 +54,7 @@ class CarritoControllerTest {
         mockMvc.perform(post("/api/carrito/validar")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(
-                    new CarritoValidateRequestDto(List.of(new CarritoItemRequestDto(1L, 2)))
+                    new CarritoValidateRequestDto(List.of(new CarritoItemRequestDto(1L, 2,null)))
                 )))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.total").value(0));
